@@ -1,0 +1,16 @@
+[versions]
+agp = "8.11.1"
+ezxhelper = "3.0.1"
+kotlin = "2.2.0"
+xposed-api = "82"
+
+[libraries]
+xposed-api = { module = "de.robv.android.xposed:api", version.ref = "xposed-api" }
+ezxhelper-android-utils = { module = "io.github.kyuubiran.ezxhelper:android-utils", version.ref = "ezxhelper" }
+ezxhelper-core = { module = "io.github.kyuubiran.ezxhelper:core", version.ref = "ezxhelper" }
+ezxhelper-xposed-api = { module = "io.github.kyuubiran.ezxhelper:xposed-api-82", version.ref = "ezxhelper" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+
