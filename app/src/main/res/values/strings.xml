@@ -1,4 +1,16 @@
 <resources>
-    <string name="app_name">EzXHelper</string>
-    <string name="xposed_desc">EzHelper sample app</string>
+    <string name="app_name">onHit</string>
+    <string name="xposed_desc">Trigger system-trusted NFC events without a physical tag.</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="btn_choice_ndef_file">Choice a NDEF File</string>
+
+    <string name="quick_start">
+        Trigger system-trusted NFC events without a physical tag by Xposed.
+
+        Usage:
+        1\. Activate this module in Xposed Manager.
+        2\. Restart NFC service with:
+           su -c \"pkill -f com.android.nfc\"
+        3\. Click the \'Select File\' button to use.
+    </string>
 </resources>
