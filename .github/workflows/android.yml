@@ -34,13 +34,20 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Build Debug and Release
-      run: ./gradlew assembleDebug assembleRelease
+    - name: Build Debug
+      run: ./gradlew assembleDebug
 
-    - name: Upload APKs
+    - name: Build Release
+      run: ./gradlew assembleRelease
+
+    - name: Upload Debug APK
       uses: actions/upload-artifact@v4
       with:
-        name: onhit-apks
-        path: |
-          app/build/outputs/apk/debug/app-debug.apk
-          app/build/outputs/apk/release/app-release.apk
+        name: onHit-debug
+        path: app/build/outputs/apk/debug/*
+
+    - name: Upload Release APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: onHit-release
+        path: app/build/outputs/apk/release/*
