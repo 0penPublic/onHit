@@ -13,7 +13,6 @@ navigation-ui-ktx = "2.9.6"
 xposed-api = { group = "de.robv.android.xposed", name = "api", version.ref = "xposed-api" }
 ezxhelper = { group = "com.github.kyuubiran", name = "EzXHelper", version = "2.2.1" }
 ezxhelper-xposed-api = { module = "io.github.kyuubiran.ezxhelper:xposed-api-82", version = "3.0.1" }
-androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }

@@ -1,4 +1,4 @@
-import org.gradle.kotlin.dsl.withType
+import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
@@ -15,13 +15,13 @@ android {
         applicationId = "mba.vm.onhit"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
+        versionCode = getGitCommitCount()
         versionName = "1.0"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -31,9 +31,14 @@ android {
     }
 
     buildFeatures {
-        aidl = true
         viewBinding = true
         buildConfig = true
+    }
+    applicationVariants.all {
+        outputs.all {
+            (this as BaseVariantOutputImpl).outputFileName =
+                "onHit-$versionName-$versionCode-$name.apk"
+        }
     }
 }
 
@@ -41,6 +46,12 @@ tasks.withType<KotlinJvmCompile>().configureEach {
     compilerOptions {
         jvmTarget = JvmTarget.JVM_21
     }
+}
+
+fun getGitCommitCount(): Int {
+    return providers.exec {
+        commandLine("git", "rev-list", "--count", "HEAD")
+    }.standardOutput.asText.get().trim().toInt()
 }
 
 dependencies {
@@ -52,6 +63,4 @@ dependencies {
     compileOnly(libs.xposed.api)
     implementation(libs.ezxhelper)
     implementation(libs.ezxhelper.xposed.api)
-
-    implementation(libs.androidx.compose.material3)
 }
