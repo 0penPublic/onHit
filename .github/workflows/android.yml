@@ -23,6 +23,7 @@ jobs:
       run: |
         if [ ! -z "${{ secrets.KEYSTORE }}" ]; then
           {
+            echo "" >> gradle.properties
             echo KEYSTORE_PASSWORD='${{ secrets.KEYSTORE_PASSWORD }}'
             echo KEY_ALIAS='onHit'
             echo KEY_PASSWORD='${{ secrets.KEY_PASSWORD }}'
