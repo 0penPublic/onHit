@@ -24,7 +24,7 @@ android {
             val keystoreFile = rootProject.file(project.findProperty("KEYSTORE_FILE") ?: "key.jks")
             if (keystoreFile.exists()) {
                 storeFile = keystoreFile
-                storePassword = project.findProperty("KEY_STORE_PASSWORD")?.toString()
+                storePassword = project.findProperty("KEYSTORE_PASSWORD")?.toString()
                 keyAlias = project.findProperty("KEY_ALIAS")?.toString()
                 keyPassword = project.findProperty("KEY_PASSWORD")?.toString()
             }

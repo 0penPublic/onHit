@@ -37,6 +37,7 @@ class FragmentNdefFilePicker : Fragment() {
             val sp: SharedPreferences =
                 requireContext().getSharedPreferences(BuildConfig.APPLICATION_ID, MODE_PRIVATE)
             sp.edit { putString(Constant.SHARED_PREFERENCES_CHOSEN_FOLDER, uri.toString()) }
+            refreshFileList(uri)
         }
 
     override fun onCreateView(
