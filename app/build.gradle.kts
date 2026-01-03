@@ -19,9 +19,32 @@ android {
         versionName = "1.0"
     }
 
+    signingConfigs {
+        create("onHitSignConfig") {
+            val keystoreFile = rootProject.file(project.findProperty("KEYSTORE_FILE") ?: "key.jks")
+            if (keystoreFile.exists()) {
+                storeFile = keystoreFile
+                storePassword = project.findProperty("KEY_STORE_PASSWORD")?.toString()
+                keyAlias = project.findProperty("KEY_ALIAS")?.toString()
+                keyPassword = project.findProperty("KEY_PASSWORD")?.toString()
+            }
+        }
+    }
+
     buildTypes {
+        getByName("debug") {
+            signingConfigs.getByName("onHitSignConfig").storeFile?.let { storeFile ->
+                if (storeFile.exists()) signingConfig = signingConfigs.getByName("onHitSignConfig")
+            } ?: run {
+                signingConfigs.getByName("debug")
+            }
+        }
+
         release {
             isMinifyEnabled = true
+            signingConfigs.getByName("onHitSignConfig").storeFile?.let { storeFile ->
+                if (storeFile.exists()) signingConfig = signingConfigs.getByName("onHitSignConfig")
+            }
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -60,6 +83,9 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.recyclerview)
+    implementation(libs.androidx.swiperefreshlayout)
+    implementation(libs.androidx.documentfile)
     compileOnly(libs.xposed.api)
     implementation(libs.ezxhelper)
     implementation(libs.ezxhelper.xposed.api)
