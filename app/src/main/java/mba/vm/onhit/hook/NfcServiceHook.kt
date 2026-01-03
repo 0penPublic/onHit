@@ -14,13 +14,15 @@ import mba.vm.onhit.BuildConfig
 import mba.vm.onhit.Constant
 import mba.vm.onhit.core.TagTechnology
 import mba.vm.onhit.hook.boardcast.TagEmulatorBroadcastReceiver
+import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 
 
 object NfcServiceHook : BaseHook() {
-    private var nfcService: Any? = null
+    private var nfcServiceHandler: Any? = null
     private var nfcClassLoader: ClassLoader? = null
-    private var nfcServiceClazz: Class<*>? = null
+    private var dispatchTagEndpoint: Method? = null
+    private var tagEndpointInterface: Class<*>? = null
 
     override val name: String = this::class.simpleName!!
 
@@ -31,10 +33,13 @@ object NfcServiceHook : BaseHook() {
         classLoader?.let {
             nfcClassLoader = classLoader
         } ?: run {
-            log("[ onHit ] nfcClassLoader is null")
+            log("nfcClassLoader is null")
         }
-        val nfcServiceClassName = "com.android.nfc.NfcService"
-        nfcServiceClazz = findClass(nfcServiceClassName, classLoader)
+        dispatchTagEndpoint = findClass(
+            $$"com.android.nfc.NfcService$NfcServiceHandler",
+            classLoader
+        ).methodFinder().filterByName("dispatchTagEndpoint").first()
+        tagEndpointInterface = findClass($$"com.android.nfc.DeviceHost$TagEndpoint", nfcClassLoader)
         findClass("com.android.nfc.NfcApplication", classLoader)
             .methodFinder()
             .filterByName("onCreate")
@@ -43,9 +48,10 @@ object NfcServiceHook : BaseHook() {
                 after { params ->
                     val app = params.thisObject as? Application
                     app?.let {
-                        nfcService = app.objectHelper().getObjectOrNull("mNfcService") ?: run {
-                            log("[ onHit ] Cannot get NFC Service now")
+                        val nfcService = app.objectHelper().getObjectOrNull("mNfcService") ?: run {
+                            log("Cannot get NFC Service now")
                         }
+                        nfcServiceHandler = nfcService.objectHelper().getObjectOrNull("mHandler")
                         ContextCompat.registerReceiver(
                             app,
                             TagEmulatorBroadcastReceiver(),
@@ -63,17 +69,15 @@ object NfcServiceHook : BaseHook() {
         uid: ByteArray,
         ndef: NdefMessage?
     ) {
-        val service = nfcService ?: run {
-            log("[NFCServiceHook] service not ready")
+        nfcServiceHandler ?: run {
+            log("NFC Service Handler is null")
             return
         }
-        val clazz = nfcServiceClazz ?: return
         val cl = nfcClassLoader ?: return
         val tag = buildFakeTag(uid, ndef, cl)
-        clazz.methodFinder()
-            .filterByName("onRemoteEndpointDiscovered")
-            .first()
-            .invoke(service, tag)
+        dispatchTagEndpoint?.invoke(nfcServiceHandler, tag, null) ?: run {
+            log("dispatchTagEndpoint is null")
+        }
     }
 
     private fun buildFakeTag(
@@ -81,7 +85,6 @@ object NfcServiceHook : BaseHook() {
         ndef: NdefMessage?,
         nfcClassLoader: ClassLoader?
     ): Any {
-        val tagEndpointInterface = findClass($$"com.android.nfc.DeviceHost$TagEndpoint", nfcClassLoader)
         return Proxy.newProxyInstance(nfcClassLoader, arrayOf(tagEndpointInterface)) { _, method, _ ->
             when (method.name) {
                 "getUid" -> uid
