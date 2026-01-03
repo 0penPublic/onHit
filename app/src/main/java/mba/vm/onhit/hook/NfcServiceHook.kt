@@ -6,12 +6,11 @@ import android.nfc.NdefMessage
 import android.os.Bundle
 import androidx.core.content.ContextCompat
 import com.github.kyuubiran.ezxhelper.ObjectHelper.Companion.objectHelper
-import com.github.kyuubiran.ezxhelper.ParamTypes
-import com.github.kyuubiran.ezxhelper.Params
 import com.github.kyuubiran.ezxhelper.finders.MethodFinder.`-Static`.methodFinder
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers.findClass
 import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createHook
+import mba.vm.onhit.BuildConfig
 import mba.vm.onhit.Constant
 import mba.vm.onhit.core.TagTechnology
 import mba.vm.onhit.hook.boardcast.TagEmulatorBroadcastReceiver
@@ -25,12 +24,14 @@ object NfcServiceHook : BaseHook() {
 
     override val name: String = this::class.simpleName!!
 
+    fun log(text: String) = if (BuildConfig.DEBUG) XposedBridge.log("[ onHit ] [ $name ] $text") else Unit
+
 
     override fun init(classLoader: ClassLoader?) {
         classLoader?.let {
             nfcClassLoader = classLoader
         } ?: run {
-            XposedBridge.log("[ onHit ] nfcClassLoader is null")
+            log("[ onHit ] nfcClassLoader is null")
         }
         val nfcServiceClassName = "com.android.nfc.NfcService"
         nfcServiceClazz = findClass(nfcServiceClassName, classLoader)
@@ -43,7 +44,7 @@ object NfcServiceHook : BaseHook() {
                     val app = params.thisObject as? Application
                     app?.let {
                         nfcService = app.objectHelper().getObjectOrNull("mNfcService") ?: run {
-                            XposedBridge.log("[ onHit ] Cannot get NFC Service now")
+                            log("[ onHit ] Cannot get NFC Service now")
                         }
                         ContextCompat.registerReceiver(
                             app,
@@ -56,26 +57,6 @@ object NfcServiceHook : BaseHook() {
                     }
                 }
             }
-        nfcServiceClazz?.let { clazz ->
-            val sendMessageMethod = clazz.methodFinder().filterByName("sendMessage").first()
-            sendMessageMethod.createHook {
-                before { params ->
-                    val what = params.args[0] ?: return@before
-                    val obj = params.args[1] ?: return@before
-                    if (what != 0) return@before
-                    val uid: ByteArray? = obj.objectHelper().invokeMethod(
-                        methodName = "getUid",
-                        returnType = ByteArray::class.java,
-                        paramTypes = ParamTypes(emptyArray()),
-                        params = Params(emptyArray())
-                    ) as? ByteArray
-                    uid?.let {
-                        val uidHex = it.joinToString(":") { b -> "%02X".format(b) }
-                        XposedBridge.log("[ onHit ] UID=$uidHex")
-                    }
-                }
-            }
-        }
     }
 
     fun dispatchFakeTag(
@@ -83,7 +64,7 @@ object NfcServiceHook : BaseHook() {
         ndef: NdefMessage?
     ) {
         val service = nfcService ?: run {
-            XposedBridge.log("[NFCServiceHook] service not ready")
+            log("[NFCServiceHook] service not ready")
             return
         }
         val clazz = nfcServiceClazz ?: return
@@ -95,7 +76,7 @@ object NfcServiceHook : BaseHook() {
             .invoke(service, tag)
     }
 
-    fun buildFakeTag(
+    private fun buildFakeTag(
         uid: ByteArray,
         ndef: NdefMessage?,
         nfcClassLoader: ClassLoader?
@@ -109,32 +90,19 @@ object NfcServiceHook : BaseHook() {
                 "readNdef" -> ndef?.toByteArray() ?: byteArrayOf()
                 "connect" -> true
                 "disconnect" -> true
-                "reconnect" -> true
                 "transceive" -> byteArrayOf()
-                "getConnectedTechnology" -> 0
-                "startPresenceChecking" -> {
-                    null
-                }
+                "getConnectedTechnology" -> TagTechnology.NDEF.flag
                 "getTechList" -> TagTechnology.arrayOfTagTechnology(
-                    TagTechnology.NFC_A,
                     TagTechnology.NDEF,
-                    TagTechnology.MIFARE_ULTRALIGHT
                 )
                 "getTechExtras" -> {
-                    val aBundle = Bundle().apply {
-                        putShort("sak", 0x00.toShort())
-                        putByteArray("atqa", byteArrayOf(0x44, 0x00))
-                    }
                     val ndefBundle = Bundle().apply {
                         putParcelable("ndefmsg", ndef)
                         putInt("ndefmaxlength", Int.MAX_VALUE)
                         putInt("ndefcardstate", 1)
                         putInt("ndeftype", 4)
                     }
-                    val uBundle = Bundle().apply {
-                        putBoolean("is_ultralight_c", false)
-                    }
-                    arrayOf(aBundle, ndefBundle, uBundle)
+                    arrayOf(ndefBundle)
                 }
                 "getHandle" -> 0
                 "isPresent" -> true
