@@ -1,14 +1,17 @@
+package mba.vm.onhit.ui.adapter
+
 import android.annotation.SuppressLint
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import mba.vm.onhit.R
 import mba.vm.onhit.ui.FragmentNdefFilePicker
-import mba.vm.onhit.ui.adapter.NdefViewHolder
 
 class NdefFileAdapter(
     private val items: List<FragmentNdefFilePicker.NdefFileItem>,
-    private val onItemClick: (FragmentNdefFilePicker.NdefFileItem) -> Unit
+    private val onItemClick: (FragmentNdefFilePicker.NdefFileItem) -> Unit,
+    private val onItemLongClick: (FragmentNdefFilePicker.NdefFileItem) -> Unit
 )
     : RecyclerView.Adapter<NdefViewHolder>() {
 
@@ -18,18 +21,32 @@ class NdefFileAdapter(
         return NdefViewHolder(view)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: NdefViewHolder, position: Int) {
         val item = items[position]
         holder.title.text = item.name
         val size = item.size
-        val dateStr = android.text.format.DateFormat.format("yyyy-MM-dd HH:mm:ss", item.lastModified)
-        @SuppressLint("SetTextI18n")
-        holder.subtitle.text = "$size bytes | $dateStr"
+        val dateStr = DateFormat.format("yyyy-MM-dd HH:mm:ss", item.lastModified)
+        holder.subtitle.text = if (item.isDirectory) {
+            "$dateStr"
+        } else {
+            "$size bytes | $dateStr"
+        }
+        if (item.isDirectory) {
+            holder.icon.setImageResource(R.drawable.baseline_folder_24)
+        }
         holder.itemView.setOnClickListener {
             val position = holder.absoluteAdapterPosition
             if (position != RecyclerView.NO_POSITION) {
                 onItemClick(items[position])
             }
+        }
+        holder.itemView.setOnLongClickListener {
+            val position = holder.absoluteAdapterPosition
+            if (position != RecyclerView.NO_POSITION) {
+                onItemLongClick(items[position])
+            }
+            return@setOnLongClickListener true
         }
     }
     override fun getItemCount() = items.size
