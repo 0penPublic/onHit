@@ -13,4 +13,9 @@
            su -c \"pkill -f com.android.nfc\"
         3\. Click the \'Select File\' button to use.
     </string>
+    <string name="setting">Setting</string>
+    <string name="add_ndef_record">Add a ndef record</string>
+    <string name="search">Search NDEF Record</string>
+    <string name="saving_ndef_prompt">Please place the tag that needs to save the NDEF file in the phone\'s card reader area.</string>
+    <string name="ndef_filename_input_hint">Enter the filename</string>
 </resources>

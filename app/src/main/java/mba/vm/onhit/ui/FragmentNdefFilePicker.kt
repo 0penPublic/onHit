@@ -1,6 +1,7 @@
 package mba.vm.onhit.ui
 
-import NdefFileAdapter
+import android.app.AlertDialog
+import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.content.SharedPreferences
@@ -20,6 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import mba.vm.onhit.BuildConfig
 import mba.vm.onhit.Constant
 import mba.vm.onhit.databinding.FragmentNdefFilePickerBinding
+import mba.vm.onhit.ui.adapter.NdefFileAdapter
 import java.security.SecureRandom
 
 
@@ -37,8 +39,23 @@ class FragmentNdefFilePicker : Fragment() {
             val sp: SharedPreferences =
                 requireContext().getSharedPreferences(BuildConfig.APPLICATION_ID, MODE_PRIVATE)
             sp.edit { putString(Constant.SHARED_PREFERENCES_CHOSEN_FOLDER, uri.toString()) }
-            refreshFileList(uri)
+            loadFileListOrRequestFolder()
         }
+
+    companion object {
+        var currentPath: String = "/"
+
+        fun getChosenFolderUri(context: Context): Uri? {
+            val sp = context.getSharedPreferences(
+                BuildConfig.APPLICATION_ID,
+                MODE_PRIVATE
+            )
+            return sp.getString(
+                Constant.SHARED_PREFERENCES_CHOSEN_FOLDER,
+                null
+            )?.let(Uri::parse)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -58,27 +75,41 @@ class FragmentNdefFilePicker : Fragment() {
     }
 
     fun loadFileListOrRequestFolder() {
-        getChosenFolderUri()?.let {
-            refreshFileList(it)
+        getChosenFolderUri(requireContext())?.let {
+            refreshFileList()
         } ?: run {
             Toast.makeText(requireContext(), "Please select a folder to store the NDEF files.", Toast.LENGTH_SHORT).show()
             openDirLauncher.launch(null)
         }
     }
 
-    fun refreshFileList(uri: Uri) {
-        val dir = DocumentFile.fromTreeUri(requireContext(), uri) ?: return
+    fun refreshFileList() {
+        val uri = getChosenFolderUri(requireContext()) ?: run { return }
+        val root = DocumentFile.fromTreeUri(requireContext(), uri) ?: return
+        val dir = if (currentPath == "/") {
+            root
+        } else {
+            currentPath.trim('/').split("/").fold(root) { parent, name ->
+                parent.findFile(name)?.takeIf { it.isDirectory } ?: return
+            }
+        }
         if (!dir.exists() || !dir.isDirectory) {
+            if (currentPath != "/") {
+                currentPath = currentPath.substringBeforeLast("/", "/")
+                refreshFileList()
+                return
+            }
             Toast.makeText(
                 requireContext(),
                 "The selected folder is unavailable. Please select another folder.",
                 Toast.LENGTH_SHORT
             ).show()
+            openDirLauncher.launch(null)
             return
         }
-        val fileList = dir.listFiles()
-        var files: List<DocumentFile> = fileList.filter { it.isFile }
-        if (fileList.isEmpty()) {
+        val fileList: List<DocumentFile> = dir.listFiles()
+            .sortedWith(compareBy<DocumentFile> { !it.isDirectory }.thenBy { it.name?.lowercase() ?: "" })
+        if (fileList.isEmpty() && currentPath == "/") {
             val file = dir.createFile(
                 "application/octet-stream",
                 "onHit_TestNDEF.ndef"
@@ -95,26 +126,82 @@ class FragmentNdefFilePicker : Fragment() {
                 .contentResolver
                 .openOutputStream(file.uri)
                 ?.use { it.write(message.toByteArray()) }
-            files = dir.listFiles().filter { it.isFile }
         }
-        val ndefFileArray = files.mapNotNull { file ->
-            val name = file.name ?: return@mapNotNull null
-            NdefFileItem(
-                name = name,
-                uri = file.uri,
-                size = file.length(),
-                lastModified = file.lastModified()
-            )
+        val ndefFileArray = buildList {
+            if (currentPath != "/") {
+                add(
+                    NdefFileItem(
+                        name = "..",
+                        uri = Uri.EMPTY,
+                        size = 0L,
+                        lastModified = 0L,
+                        isDirectory = true
+                    )
+                )
+            }
+            fileList.sortedWith(compareBy<DocumentFile> { !it.isDirectory }.thenBy { it.name?.lowercase() ?: "" })
+                .mapTo(this) { file ->
+                    val name = file.name ?: "Unknown"
+                    NdefFileItem(
+                        name = name,
+                        uri = if (file.isDirectory) Uri.EMPTY else file.uri,
+                        size = if (file.isDirectory) 0L else file.length(),
+                        lastModified = file.lastModified(),
+                        isDirectory = file.isDirectory
+                    )
+                }
         }
         binding.fileList.apply {
             layoutManager = LinearLayoutManager(requireContext())
-            adapter = NdefFileAdapter(ndefFileArray) { ndefFileItem ->
-                parseNdef(readBytesFromUri(ndefFileItem.uri))?.let {
-                    sendNdefBroadcast(it)
-                } ?: run {
-                    Toast.makeText(requireContext(), "Not a valid NDEF file", Toast.LENGTH_SHORT).show()
+            adapter = NdefFileAdapter(ndefFileArray, ::ndefFileItemOnClick, ::ndefFileItemLongClick)
+        }
+    }
+
+    fun ndefFileItemLongClick(ndefFileItem: NdefFileItem) {
+        if (!ndefFileItem.isDirectory) {
+            AlertDialog.Builder(requireContext())
+                .setTitle(android.R.string.dialog_alert_title)
+                .setMessage("Are you sure you want to delete the file \"${ndefFileItem.name}\"")
+                .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                    val doc = DocumentFile.fromSingleUri(requireContext(), ndefFileItem.uri)
+                    doc?.delete()?.let { success ->
+                        if (success) {
+                            Toast.makeText(requireContext(), "Deleted successfully", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), "Delete Failed.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    refreshFileList()
+                    dialog.dismiss()
                 }
+                .setNegativeButton(android.R.string.cancel) { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
+        }
+    }
+
+    fun ndefFileItemOnClick(ndefFileItem: NdefFileItem) {
+        if (ndefFileItem.isDirectory) {
+            currentPath = if (ndefFileItem.name == "..") {
+                currentPath.substringBeforeLast("/", "/")
+            } else {
+                "$currentPath/${ndefFileItem.name}"
             }
+            loadFileListOrRequestFolder()
+            return
+        }
+        parseNdef(readBytesFromUri(ndefFileItem.uri))?.let {
+            sendNdefBroadcast(it)
+        } ?: run {
+            Toast.makeText(requireContext(), "Not a valid NDEF file", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        getChosenFolderUri(requireContext())?.let {
+            refreshFileList()
         }
     }
 
@@ -145,21 +232,11 @@ class FragmentNdefFilePicker : Fragment() {
 
     fun parseNdef(bytes: ByteArray?): NdefMessage? = runCatching { NdefMessage(bytes) }.getOrNull()
 
-    fun getChosenFolderUri(): Uri? {
-        val sp = requireContext().getSharedPreferences(
-            BuildConfig.APPLICATION_ID,
-            MODE_PRIVATE
-        )
-        return sp.getString(
-            Constant.SHARED_PREFERENCES_CHOSEN_FOLDER,
-            null
-        )?.let(Uri::parse)
-    }
-
     data class NdefFileItem(
         val name: String,
         val uri: Uri,
         val size: Long,
-        val lastModified: Long
+        val lastModified: Long,
+        val isDirectory: Boolean
     )
 }
