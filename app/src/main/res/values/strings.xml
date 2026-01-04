@@ -1,21 +1,21 @@
 <resources>
-    <string name="app_name">onHit</string>
+    <string name="app_name" translatable="false">onHit</string>
     <string name="xposed_desc">Trigger system-trusted NFC events without a physical tag.</string>
-    <!-- Strings used for fragments for navigation -->
+
     <string name="btn_choice_ndef_file">Choice a NDEF File</string>
-
-    <string name="quick_start">
-        Trigger system-trusted NFC events without a physical tag by Xposed.
-
-        Usage:
-        1\. Activate this module in Xposed Manager.
-        2\. Restart NFC service with:
-           su -c \"pkill -f com.android.nfc\"
-        3\. Click the \'Select File\' button to use.
-    </string>
     <string name="setting">Setting</string>
     <string name="add_ndef_record">Add a ndef record</string>
-    <string name="search">Search NDEF Record</string>
+    <string name="search">Search of NDEF Record</string>
     <string name="saving_ndef_prompt">Please place the tag that needs to save the NDEF file in the phone\'s card reader area.</string>
     <string name="ndef_filename_input_hint">Enter the filename</string>
+    <string name="toast_saved_successfully">Saved successfully</string>
+    <string name="toast_tag_not_support_ndef_format">This tag does not support the NDEF format.</string>
+    <string name="toast_select_folder_saving_ndef_files">Please select a folder to store the NDEF files.</string>
+    <string name="toast_selected_folder_unavailable">The selected folder is unavailable. Please select another folder.</string>
+    <string name="toast_not_valid_ndef_file">Not a valid NDEF file</string>
+    <string name="toast_deleted_successfully">Deleted successfully</string>
+    <string name="toast_delete_failed">Not a valid NDEF file</string>
+    <string name="toast_todo">Not Implemented Yet</string>
+    <string name="ndef_text_example">Hello, There is onHit.</string>
+    <string name="delete_file_hint">Are you sure you want to delete the file "%s"?</string>
 </resources>

@@ -1,0 +1,20 @@
+<resources>
+    <string name="xposed_desc">在没有实体标签的情况下触发系统信任的 NFC 事件。</string>
+
+    <string name="btn_choice_ndef_file">选择一个 NDEF 文件</string>
+    <string name="setting">设置</string>
+    <string name="add_ndef_record">添加一个 NDEF 记录</string>
+    <string name="search">搜索 NDEF 记录</string>
+    <string name="saving_ndef_prompt">请将需要保存 NDEF 文件的标签放在手机读卡器区域。</string>
+    <string name="ndef_filename_input_hint">输入文件名</string>
+    <string name="toast_saved_successfully">保存成功</string>
+    <string name="toast_tag_not_support_ndef_format">该标签不支持 NDEF 格式。</string>
+    <string name="toast_select_folder_saving_ndef_files">请选择一个文件夹来存储 NDEF 文件。</string>
+    <string name="toast_selected_folder_unavailable">所选文件夹不可用，请选择其他文件夹。</string>
+    <string name="toast_not_valid_ndef_file">不是有效的 NDEF 文件</string>
+    <string name="toast_deleted_successfully">删除成功</string>
+    <string name="toast_delete_failed">删除失败</string>
+    <string name="toast_todo">功能尚未实现</string>
+    <string name="ndef_text_example">你好，这是 onHit。</string>
+    <string name="delete_file_hint">你确定要删除文件 "%s" 吗？</string>
+</resources>

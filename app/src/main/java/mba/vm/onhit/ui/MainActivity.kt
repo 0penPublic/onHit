@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var ndefFilePicker: FragmentNdefFilePicker
     private var dialog: AlertDialog? = null
 
-        override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment
         ndefFilePicker = (navHostFragment.childFragmentManager.primaryNavigationFragment as? FragmentNdefFilePicker)!!
         binding.settingsFab.setOnClickListener {
-            Toast.makeText(this, "TODO: Settings", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.toast_todo, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -55,11 +55,13 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.add_ndef_record -> {
-                showNfcDialog()
+                FragmentNdefFilePicker.getChosenFolderUri(this)?.let { _ ->
+                    showNfcDialog()
+                } ?: run { ndefFilePicker.loadFileListOrRequestFolder() }
                 true
             }
             R.id.search_ndef_record -> {
-                Toast.makeText(this, "TODO: search NDEF files", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.toast_todo, Toast.LENGTH_SHORT).show()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -116,7 +118,7 @@ class MainActivity : AppCompatActivity() {
                 dir?.createFile("application/octet-stream", fileName)?.let { file ->
                     contentResolver.openOutputStream(file.uri)?.use { outputStream ->
                         outputStream.write(ndefData)
-                        Toast.makeText(this, "Saved successfully", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, R.string.toast_saved_successfully, Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -141,11 +143,13 @@ class MainActivity : AppCompatActivity() {
             val ndef = Ndef.get(tag)
             ndef?.let {
                 ndef.connect()
-                showFilenameInputDialog(ndef.ndefMessage.toByteArray())
+                ndef.ndefMessage?.let {
+                    showFilenameInputDialog(it.toByteArray())
+                }
                 ndef.close()
                 disableNfcReaderMode()
             } ?: run {
-                Toast.makeText(this, "This tag does not support the NDEF format.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.toast_tag_not_support_ndef_format, Toast.LENGTH_SHORT).show()
             }
         }
     }
