@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import mba.vm.onhit.BuildConfig
 import mba.vm.onhit.Constant
+import mba.vm.onhit.R
 import mba.vm.onhit.databinding.FragmentNdefFilePickerBinding
 import mba.vm.onhit.ui.adapter.NdefFileAdapter
 import java.security.SecureRandom
@@ -78,7 +79,7 @@ class FragmentNdefFilePicker : Fragment() {
         getChosenFolderUri(requireContext())?.let {
             refreshFileList()
         } ?: run {
-            Toast.makeText(requireContext(), "Please select a folder to store the NDEF files.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), R.string.toast_select_folder_saving_ndef_files, Toast.LENGTH_SHORT).show()
             openDirLauncher.launch(null)
         }
     }
@@ -101,7 +102,7 @@ class FragmentNdefFilePicker : Fragment() {
             }
             Toast.makeText(
                 requireContext(),
-                "The selected folder is unavailable. Please select another folder.",
+                R.string.toast_selected_folder_unavailable,
                 Toast.LENGTH_SHORT
             ).show()
             openDirLauncher.launch(null)
@@ -118,7 +119,7 @@ class FragmentNdefFilePicker : Fragment() {
                 arrayOf(
                     NdefRecord.createTextRecord(
                         "en",
-                        "Hello, There is onHit"
+                        requireContext().getString(R.string.ndef_text_example)
                     )
                 )
             )
@@ -141,7 +142,7 @@ class FragmentNdefFilePicker : Fragment() {
             }
             fileList.sortedWith(compareBy<DocumentFile> { !it.isDirectory }.thenBy { it.name?.lowercase() ?: "" })
                 .mapTo(this) { file ->
-                    val name = file.name ?: "Unknown"
+                    val name = file.name ?: requireContext().getString(android.R.string.unknownName)
                     NdefFileItem(
                         name = name,
                         uri = if (file.isDirectory) Uri.EMPTY else file.uri,
@@ -161,14 +162,14 @@ class FragmentNdefFilePicker : Fragment() {
         if (!ndefFileItem.isDirectory) {
             AlertDialog.Builder(requireContext())
                 .setTitle(android.R.string.dialog_alert_title)
-                .setMessage("Are you sure you want to delete the file \"${ndefFileItem.name}\"")
+                .setMessage(getString(R.string.delete_file_hint, ndefFileItem.name))
                 .setPositiveButton(android.R.string.ok) { dialog, _ ->
                     val doc = DocumentFile.fromSingleUri(requireContext(), ndefFileItem.uri)
                     doc?.delete()?.let { success ->
                         if (success) {
-                            Toast.makeText(requireContext(), "Deleted successfully", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), R.string.toast_deleted_successfully, Toast.LENGTH_SHORT).show()
                         } else {
-                            Toast.makeText(requireContext(), "Delete Failed.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), R.string.toast_delete_failed, Toast.LENGTH_SHORT).show()
                         }
                     }
                     refreshFileList()
@@ -194,7 +195,7 @@ class FragmentNdefFilePicker : Fragment() {
         parseNdef(readBytesFromUri(ndefFileItem.uri))?.let {
             sendNdefBroadcast(it)
         } ?: run {
-            Toast.makeText(requireContext(), "Not a valid NDEF file", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), R.string.toast_not_valid_ndef_file, Toast.LENGTH_SHORT).show()
         }
     }
 
