@@ -82,10 +82,8 @@ class FragmentNdefFilePicker : Fragment() {
         getChosenFolderUri(requireContext())?.let {
             refreshFileList()
         } ?: run {
-            if (isDirLauncherOpened) return
-            isDirLauncherOpened = true
             Toast.makeText(requireContext(), R.string.toast_select_folder_saving_ndef_files, Toast.LENGTH_SHORT).show()
-            openDirLauncher.launch(null)
+            launchOpenDirOnce()
         }
     }
 
@@ -100,7 +98,6 @@ class FragmentNdefFilePicker : Fragment() {
             }
         }
         if (!dir.exists() || !dir.isDirectory) {
-            if (isDirLauncherOpened) return
             if (currentPath != "/") {
                 currentPath = currentPath.substringBeforeLast("/", "/")
                 refreshFileList()
@@ -111,8 +108,7 @@ class FragmentNdefFilePicker : Fragment() {
                 R.string.toast_selected_folder_unavailable,
                 Toast.LENGTH_SHORT
             ).show()
-            openDirLauncher.launch(null)
-            isDirLauncherOpened = true
+            launchOpenDirOnce()
             return
         }
         val fileList: List<DocumentFile> = dir.listFiles()
@@ -204,6 +200,12 @@ class FragmentNdefFilePicker : Fragment() {
         } ?: run {
             Toast.makeText(requireContext(), R.string.toast_not_valid_ndef_file, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun launchOpenDirOnce() {
+        if (isDirLauncherOpened) return
+        isDirLauncherOpened = true
+        openDirLauncher.launch(null)
     }
 
     override fun onResume() {
