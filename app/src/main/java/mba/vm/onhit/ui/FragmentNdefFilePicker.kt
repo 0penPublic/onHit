@@ -31,8 +31,11 @@ class FragmentNdefFilePicker : Fragment() {
     private var _binding: FragmentNdefFilePickerBinding? = null
     private val binding get() = _binding!!
 
+    private var isDirLauncherOpened: Boolean = false
+
     private val openDirLauncher =
         registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
+            isDirLauncherOpened = false
             uri ?: return@registerForActivityResult
             val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION
@@ -79,6 +82,8 @@ class FragmentNdefFilePicker : Fragment() {
         getChosenFolderUri(requireContext())?.let {
             refreshFileList()
         } ?: run {
+            if (isDirLauncherOpened) return
+            isDirLauncherOpened = true
             Toast.makeText(requireContext(), R.string.toast_select_folder_saving_ndef_files, Toast.LENGTH_SHORT).show()
             openDirLauncher.launch(null)
         }
@@ -95,6 +100,7 @@ class FragmentNdefFilePicker : Fragment() {
             }
         }
         if (!dir.exists() || !dir.isDirectory) {
+            if (isDirLauncherOpened) return
             if (currentPath != "/") {
                 currentPath = currentPath.substringBeforeLast("/", "/")
                 refreshFileList()
@@ -106,6 +112,7 @@ class FragmentNdefFilePicker : Fragment() {
                 Toast.LENGTH_SHORT
             ).show()
             openDirLauncher.launch(null)
+            isDirLauncherOpened = true
             return
         }
         val fileList: List<DocumentFile> = dir.listFiles()
