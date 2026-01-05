@@ -55,8 +55,8 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.add_ndef_record -> {
-                FragmentNdefFilePicker.getChosenFolderUri(this)?.let { _ ->
-                    showNfcDialog()
+                FragmentNdefFilePicker.getChosenFolderUri(this)?.let {
+                    if (dialog?.isShowing != true) showNfcDialog()
                 } ?: run { ndefFilePicker.loadFileListOrRequestFolder() }
                 true
             }
@@ -139,15 +139,11 @@ class MainActivity : AppCompatActivity() {
 
     fun processTag(tag: Tag) {
         runOnUiThread {
+            disableNfcReaderMode()
             dialog?.dismiss()
             val ndef = Ndef.get(tag)
             ndef?.let {
-                ndef.connect()
-                ndef.ndefMessage?.let {
-                    showFilenameInputDialog(it.toByteArray())
-                }
-                ndef.close()
-                disableNfcReaderMode()
+                showFilenameInputDialog(ndef.cachedNdefMessage.toByteArray())
             } ?: run {
                 Toast.makeText(this, R.string.toast_tag_not_support_ndef_format, Toast.LENGTH_SHORT).show()
             }
