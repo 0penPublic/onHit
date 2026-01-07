@@ -57,3 +57,10 @@ jobs:
       with:
         name: onHit-release
         path: app/build/outputs/apk/release/*
+
+    - name: Send To Telegram Group
+      run: |
+        export TELEGRAM_BOT_TOKEN=${{secrets.TELEGRAM_BOT_TOKEN}}
+        wget https://raw.githubusercontent.com/0penPublic/onHit/refs/heads/misc/telegram_on_hit_ci_bot.py
+        python3 -m pip install python-telegram-bot==22.5
+        python3 telegram_on_hit_ci_bot.py
