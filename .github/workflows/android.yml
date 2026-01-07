@@ -59,6 +59,7 @@ jobs:
         path: app/build/outputs/apk/release/*
 
     - name: Send To Telegram Group
+      if: ${{ ( github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' )) || github.ref_type == 'tag' }}
       run: |
         export TELEGRAM_BOT_TOKEN=${{secrets.TELEGRAM_BOT_TOKEN}}
         wget https://raw.githubusercontent.com/0penPublic/onHit/refs/heads/misc/telegram_on_hit_ci_bot.py
