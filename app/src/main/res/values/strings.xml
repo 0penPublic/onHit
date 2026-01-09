@@ -18,4 +18,12 @@
     <string name="toast_todo">Not Implemented Yet</string>
     <string name="ndef_text_example">Hello, There is onHit.</string>
     <string name="delete_file_hint">Are you sure you want to delete the file "%s"?</string>
+    
+    <string name="settings_title">Settings</string>
+    <string name="settings_enable_fixed_uid">Enable Fixed UID</string>
+    <string name="settings_hint_fixed_uid">Fixed UID (Hex)</string>
+    <string name="settings_hint_random_uid_len">Random UID Length (Number)</string>
+    <string name="settings_reselect_directory">Re-select Directory</string>
+    <string name="settings_github_repo">GitHub Repository</string>
+    <string name="settings_github_repo_summary">If you find it helpful, a star would be greatly appreciated.</string>
 </resources>
