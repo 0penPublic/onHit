@@ -1,5 +1,6 @@
 package mba.vm.onhit.core
 
+@Suppress("unused")
 enum class TagTechnology(val flag: Int) {
     NFC_A(1),
     NFC_B(2),

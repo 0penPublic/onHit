@@ -23,7 +23,6 @@ import mba.vm.onhit.Constant
 import mba.vm.onhit.R
 import mba.vm.onhit.databinding.FragmentNdefFilePickerBinding
 import mba.vm.onhit.ui.adapter.NdefFileAdapter
-import java.security.SecureRandom
 
 
 class FragmentNdefFilePicker : Fragment() {
@@ -226,15 +225,9 @@ class FragmentNdefFilePicker : Fragment() {
         _binding = null
     }
 
-    fun randomBytes(size: Int = 4): ByteArray { // emm... Just like a Mifare Classic Card... I guess?
-        val bytes = ByteArray(size)
-        SecureRandom().nextBytes(bytes)
-        return bytes
-    }
-
     private fun sendNdefBroadcast(ndef: NdefMessage) {
         val intent = Intent(Constant.BROADCAST_TAG_EMULATOR_REQUEST).apply {
-            putExtra("uid", randomBytes())
+            putExtra("uid", byteArrayOf())
             putExtra("ndef", ndef)
         }
         requireContext().sendBroadcast(intent)

@@ -87,6 +87,7 @@ dependencies {
     implementation(libs.androidx.swiperefreshlayout)
     implementation(libs.androidx.documentfile)
     compileOnly(libs.xposed.api)
-    implementation(libs.ezxhelper)
+    implementation(libs.ezxhelper.core)
     implementation(libs.ezxhelper.xposed.api)
+    implementation(libs.ezxhelper.android.utils)
 }

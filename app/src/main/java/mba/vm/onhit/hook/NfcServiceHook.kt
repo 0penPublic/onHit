@@ -5,10 +5,10 @@ import android.content.IntentFilter
 import android.nfc.NdefMessage
 import android.os.Bundle
 import androidx.core.content.ContextCompat
-import com.github.kyuubiran.ezxhelper.ObjectHelper.Companion.objectHelper
-import com.github.kyuubiran.ezxhelper.finders.MethodFinder.`-Static`.methodFinder
-import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers.findClass
+import io.github.kyuubiran.ezxhelper.android.logging.Logger
+import io.github.kyuubiran.ezxhelper.core.finder.MethodFinder
+import io.github.kyuubiran.ezxhelper.core.helper.ObjectHelper.`-Static`.objectHelper
 import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createHook
 import mba.vm.onhit.BuildConfig
 import mba.vm.onhit.Constant
@@ -19,14 +19,15 @@ import java.lang.reflect.Proxy
 
 
 object NfcServiceHook : BaseHook() {
-    private var nfcServiceHandler: Any? = null
-    private var nfcClassLoader: ClassLoader? = null
-    private var dispatchTagEndpoint: Method? = null
-    private var tagEndpointInterface: Class<*>? = null
+    private lateinit var nfcServiceHandler: Any
+    private lateinit var nfcService: Any
+    private lateinit var nfcClassLoader: ClassLoader
+    private lateinit var dispatchTagEndpoint: Method
+    private lateinit var tagEndpointInterface: Class<*>
 
     override val name: String = this::class.simpleName!!
 
-    fun log(text: String) = if (BuildConfig.DEBUG) XposedBridge.log("[ onHit ] [ $name ] $text") else Unit
+    fun log(text: String) = if (BuildConfig.DEBUG) Logger.i("[ onHit ] [ $name ] $text") else Unit
 
 
     override fun init(classLoader: ClassLoader?) {
@@ -34,24 +35,24 @@ object NfcServiceHook : BaseHook() {
             nfcClassLoader = classLoader
         } ?: run {
             log("nfcClassLoader is null")
+            return
         }
-        dispatchTagEndpoint = findClass(
-            $$"com.android.nfc.NfcService$NfcServiceHandler",
-            classLoader
-        ).methodFinder().filterByName("dispatchTagEndpoint").first()
+
         tagEndpointInterface = findClass($$"com.android.nfc.DeviceHost$TagEndpoint", nfcClassLoader)
-        findClass("com.android.nfc.NfcApplication", classLoader)
-            .methodFinder()
+        MethodFinder.fromClass("com.android.nfc.NfcApplication", nfcClassLoader)
             .filterByName("onCreate")
             .first()
             .createHook {
                 after { params ->
                     val app = params.thisObject as? Application
                     app?.let {
-                        val nfcService = app.objectHelper().getObjectOrNull("mNfcService") ?: run {
+                        nfcService = app.objectHelper().getObjectOrNull("mNfcService") ?: run {
                             log("Cannot get NFC Service now")
                         }
-                        nfcServiceHandler = nfcService.objectHelper().getObjectOrNull("mHandler")
+                        nfcServiceHandler = nfcService.objectHelper().getObjectOrNull("mHandler")!!
+                        dispatchTagEndpoint = MethodFinder.fromClass(nfcServiceHandler::class)
+                            .filterByName("dispatchTagEndpoint")
+                            .first()
                         ContextCompat.registerReceiver(
                             app,
                             TagEmulatorBroadcastReceiver(),
@@ -69,13 +70,11 @@ object NfcServiceHook : BaseHook() {
         uid: ByteArray,
         ndef: NdefMessage?
     ) {
-        nfcServiceHandler ?: run {
-            log("NFC Service Handler is null")
-            return
-        }
-        val cl = nfcClassLoader ?: return
+        val cl = nfcClassLoader
         val tag = buildFakeTag(uid, ndef, cl)
-        dispatchTagEndpoint?.invoke(nfcServiceHandler, tag, null) ?: run {
+        dispatchTagEndpoint.invoke(
+            nfcServiceHandler,
+            tag, nfcService.objectHelper().getObjectOrNull("mReaderModeParams")) ?: run {
             log("dispatchTagEndpoint is null")
         }
     }
