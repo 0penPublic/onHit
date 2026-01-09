@@ -17,4 +17,11 @@
     <string name="toast_todo">功能尚未实现</string>
     <string name="ndef_text_example">你好，这是 onHit。</string>
     <string name="delete_file_hint">你确定要删除文件 "%s" 吗？</string>
+    <string name="settings_title">设置</string>
+    <string name="settings_enable_fixed_uid">使用固定 UID</string>
+    <string name="settings_hint_fixed_uid">固定 UID (十六进制)</string>
+    <string name="settings_hint_random_uid_len">随机 UID 长度</string>
+    <string name="settings_reselect_directory">重新选择存储文件夹</string>
+    <string name="settings_github_repo">GitHub 页面</string>
+    <string name="settings_github_repo_summary">如果你觉得有帮助的话，点个 Star 我会非常感激！</string>
 </resources>

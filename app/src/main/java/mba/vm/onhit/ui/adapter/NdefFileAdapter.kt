@@ -6,12 +6,12 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import mba.vm.onhit.R
-import mba.vm.onhit.ui.FragmentNdefFilePicker
+import mba.vm.onhit.ui.NdefFileItem
 
 class NdefFileAdapter(
-    private val items: List<FragmentNdefFilePicker.NdefFileItem>,
-    private val onItemClick: (FragmentNdefFilePicker.NdefFileItem) -> Unit,
-    private val onItemLongClick: (FragmentNdefFilePicker.NdefFileItem) -> Unit
+    private val items: List<NdefFileItem>,
+    private val onItemClick: (NdefFileItem) -> Unit,
+    private val onItemLongClick: (NdefFileItem) -> Unit
 )
     : RecyclerView.Adapter<NdefViewHolder>() {
 
