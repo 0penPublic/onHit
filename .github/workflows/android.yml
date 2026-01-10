@@ -47,20 +47,6 @@ jobs:
             echo ${{ secrets.KEYSTORE }} | base64 -d > key.jks
           fi
 
-      - name: Generate debug keystore
-        if: env.USE_SECRET_KEYSTORE == 'false'
-        run: |
-          mkdir -p ~/.android
-          keytool -genkeypair \
-                  -alias androiddebugkey \
-                  -keyalg RSA \
-                  -keysize 2048 \
-                  -validity 10000 \
-                  -keystore ~/.android/debug.keystore \
-                  -storepass android \
-                  -keypass android \
-                  -dname "CN=Android Debug,O=Android,C=US"
-
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 

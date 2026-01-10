@@ -19,34 +19,34 @@ android {
         versionName = "1.0"
     }
 
+    val keystoreFile = rootProject.file(project.findProperty("KEYSTORE_FILE") ?: "key.jks")
+
     signingConfigs {
         create("onHitSignConfig") {
-            val keystoreFile = rootProject.file(project.findProperty("KEYSTORE_FILE") ?: "key.jks")
-            if (keystoreFile.exists()) {
-                storeFile = keystoreFile
-                storePassword = project.findProperty("KEYSTORE_PASSWORD")?.toString()
-                keyAlias = project.findProperty("KEY_ALIAS")?.toString()
-                keyPassword = project.findProperty("KEY_PASSWORD")?.toString()
-            } else {
-                // make it like debug signing config
-                val debugConfig = getByName("debug")
-                storeFile = debugConfig.storeFile
-                storePassword = debugConfig.storePassword
-                keyAlias = debugConfig.keyAlias
-                keyPassword = debugConfig.keyPassword
-            }
+            storeFile = keystoreFile
+            storePassword = project.findProperty("KEYSTORE_PASSWORD")?.toString()
+            keyAlias = project.findProperty("KEY_ALIAS")?.toString()
+            keyPassword = project.findProperty("KEY_PASSWORD")?.toString()
         }
     }
 
     buildTypes {
-        getByName("debug") {
-            signingConfig = signingConfigs.getByName("onHitSignConfig")
+        debug {
+            signingConfig = if (keystoreFile.exists()) {
+                signingConfigs.getByName("onHitSignConfig")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
 
         release {
+            signingConfig = if (keystoreFile.exists()) {
+                signingConfigs.getByName("onHitSignConfig")
+            } else {
+                signingConfigs.getByName("debug")
+            }
             isMinifyEnabled = true
             isShrinkResources = true
-            signingConfig = signingConfigs.getByName("onHitSignConfig")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
