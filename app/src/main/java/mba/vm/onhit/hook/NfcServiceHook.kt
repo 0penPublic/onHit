@@ -13,7 +13,7 @@ import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createHook
 import mba.vm.onhit.BuildConfig
 import mba.vm.onhit.Constant
 import mba.vm.onhit.core.TagTechnology
-import mba.vm.onhit.hook.boardcast.TagEmulatorBroadcastReceiver
+import mba.vm.onhit.hook.boardcast.NfcServiceHookBroadcastReceiver
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 
@@ -55,7 +55,7 @@ object NfcServiceHook : BaseHook() {
                             .first()
                         ContextCompat.registerReceiver(
                             app,
-                            TagEmulatorBroadcastReceiver(),
+                            NfcServiceHookBroadcastReceiver(),
                             IntentFilter().apply {
                                 addAction(Constant.BROADCAST_TAG_EMULATOR_REQUEST)
                             },

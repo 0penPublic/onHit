@@ -4,16 +4,28 @@ import android.annotation.SuppressLint
 import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import mba.vm.onhit.R
 import mba.vm.onhit.ui.NdefFileItem
 
 class NdefFileAdapter(
-    private val items: List<NdefFileItem>,
+    private var items: List<NdefFileItem>,
     private val onItemClick: (NdefFileItem) -> Unit,
     private val onItemLongClick: (NdefFileItem) -> Unit
 )
     : RecyclerView.Adapter<NdefViewHolder>() {
+
+    fun updateData(newItems: List<NdefFileItem>) {
+        val diffCallback = NdefDiffCallback(items, newItems)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+        this.items = newItems
+        diffResult.dispatchUpdatesTo(this)
+    }
+
+    fun getPosition(item: NdefFileItem): Int {
+        return items.indexOf(item)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NdefViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -34,20 +46,37 @@ class NdefFileAdapter(
         }
         if (item.isDirectory) {
             holder.icon.setImageResource(R.drawable.baseline_folder_24)
+        } else {
+            holder.icon.setImageResource(R.drawable.baseline_nfc_24)
         }
         holder.itemView.setOnClickListener {
-            val position = holder.absoluteAdapterPosition
-            if (position != RecyclerView.NO_POSITION) {
-                onItemClick(items[position])
+            val pos = holder.bindingAdapterPosition
+            if (pos != RecyclerView.NO_POSITION) {
+                onItemClick(items[pos])
             }
         }
         holder.itemView.setOnLongClickListener {
-            val position = holder.absoluteAdapterPosition
-            if (position != RecyclerView.NO_POSITION) {
-                onItemLongClick(items[position])
+            val pos = holder.bindingAdapterPosition
+            if (pos != RecyclerView.NO_POSITION) {
+                onItemLongClick(items[pos])
             }
             return@setOnLongClickListener true
         }
     }
     override fun getItemCount() = items.size
+
+    class NdefDiffCallback(
+        private val oldList: List<NdefFileItem>,
+        private val newList: List<NdefFileItem>
+    ) : DiffUtil.Callback() {
+        override fun getOldListSize(): Int = oldList.size
+        override fun getNewListSize(): Int = newList.size
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition].uri == newList[newItemPosition].uri &&
+                    oldList[oldItemPosition].name == newList[newItemPosition].name
+        }
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition] == newList[newItemPosition]
+        }
+    }
 }

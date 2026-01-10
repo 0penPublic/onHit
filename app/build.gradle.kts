@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "mba.vm.onhit"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = getGitCommitCount()
         versionName = "1.0"
@@ -27,24 +27,26 @@ android {
                 storePassword = project.findProperty("KEYSTORE_PASSWORD")?.toString()
                 keyAlias = project.findProperty("KEY_ALIAS")?.toString()
                 keyPassword = project.findProperty("KEY_PASSWORD")?.toString()
+            } else {
+                // make it like debug signing config
+                val debugConfig = getByName("debug")
+                storeFile = debugConfig.storeFile
+                storePassword = debugConfig.storePassword
+                keyAlias = debugConfig.keyAlias
+                keyPassword = debugConfig.keyPassword
             }
         }
     }
 
     buildTypes {
         getByName("debug") {
-            signingConfigs.getByName("onHitSignConfig").storeFile?.let { storeFile ->
-                if (storeFile.exists()) signingConfig = signingConfigs.getByName("onHitSignConfig")
-            } ?: run {
-                signingConfigs.getByName("debug")
-            }
+            signingConfig = signingConfigs.getByName("onHitSignConfig")
         }
 
         release {
             isMinifyEnabled = true
-            signingConfigs.getByName("onHitSignConfig").storeFile?.let { storeFile ->
-                if (storeFile.exists()) signingConfig = signingConfigs.getByName("onHitSignConfig")
-            }
+            isShrinkResources = true
+            signingConfig = signingConfigs.getByName("onHitSignConfig")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -62,6 +64,9 @@ android {
             (this as BaseVariantOutputImpl).outputFileName =
                 "onHit-$versionName-$versionCode-$name.apk"
         }
+    }
+    defaultConfig {
+        vectorDrawables.useSupportLibrary = true
     }
 }
 

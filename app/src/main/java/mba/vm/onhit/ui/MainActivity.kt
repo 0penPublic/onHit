@@ -9,8 +9,8 @@ import android.nfc.Tag
 import android.nfc.tech.Ndef
 import android.os.Bundle
 import android.text.Editable
-import android.text.TextWatcher
 import android.text.InputType
+import android.text.TextWatcher
 import android.text.format.DateFormat
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -19,38 +19,48 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.PopupMenu
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.widget.addTextChangedListener
-import androidx.documentfile.provider.DocumentFile
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.textfield.TextInputLayout
 import mba.vm.onhit.Constant
 import mba.vm.onhit.R
+import mba.vm.onhit.core.NdefFileManager
+import mba.vm.onhit.core.SettingsManager
 import mba.vm.onhit.databinding.ActivityMainBinding
+import mba.vm.onhit.utils.HexUtils
 import java.util.Date
-
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var nfcAdapter: NfcAdapter
     private lateinit var ndefFilePicker: FragmentNdefFilePicker
+    private lateinit var settingsManager: SettingsManager
+    private lateinit var ndefFileManager: NdefFileManager
     private var dialog: AlertDialog? = null
     private var hexWatcher: TextWatcher? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        settingsManager = SettingsManager(this)
+        ndefFileManager = NdefFileManager(this, settingsManager)
+        
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+        
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment
         ndefFilePicker = (navHostFragment.childFragmentManager.primaryNavigationFragment as? FragmentNdefFilePicker)!!
+        
         binding.settingsFab.setOnClickListener {
             showSettingsDialog()
         }
@@ -64,9 +74,8 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.add_ndef_record -> {
-                FragmentNdefFilePicker.getChosenFolderUri(this)?.let {
-                    if (dialog?.isShowing != true) showNfcDialog()
-                } ?: run { ndefFilePicker.loadFileListOrRequestFolder() }
+                val actionView = findViewById<View>(R.id.add_ndef_record)
+                showAddPopupMenu(actionView)
                 true
             }
             R.id.search_ndef_record -> {
@@ -77,6 +86,56 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun showAddPopupMenu(anchor: View) {
+        val popup = PopupMenu(this, anchor)
+        popup.menu.add(0, 0, 0, R.string.menu_add_folder)
+        popup.menu.add(0, 1, 1, R.string.menu_add_from_tag)
+        
+        popup.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                0 -> showCreateDirDialog()
+                1 -> showNfcDialog()
+            }
+            true
+        }
+        popup.show()
+    }
+
+    private fun showCreateDirDialog() {
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_generic_input, null)
+        val title = view.findViewById<TextView>(R.id.tv_dialog_title)
+        val input = view.findViewById<EditText>(R.id.et_dialog_input)
+        val btnCancel = view.findViewById<View>(R.id.btn_dialog_cancel)
+        val btnConfirm = view.findViewById<View>(R.id.btn_dialog_confirm)
+
+        title.text = getString(R.string.menu_add_folder)
+        input.hint = getString(R.string.hint_folder_name)
+
+        val localDialog = AlertDialog.Builder(this).setView(view).create()
+        
+        btnCancel.setOnClickListener { localDialog.dismiss() }
+        btnConfirm.setOnClickListener {
+            val dirName = input.text.toString().trim()
+            if (dirName.isNotEmpty()) {
+                val success = ndefFileManager.createDirectory(FragmentNdefFilePicker.getCurrentPath(), dirName)
+                if (success) {
+                    ndefFilePicker.refreshFileList()
+                    localDialog.dismiss()
+                } else {
+                    Toast.makeText(this, R.string.toast_create_dir_failed, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        localDialog.show()
+        localDialog.window?.apply {
+            setWindowAnimations(R.style.BottomDialogAnimation)
+            setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            setGravity(Gravity.BOTTOM)
+        }
+    }
+
     private fun enableHexGroupedInput(editText: EditText) {
         if (hexWatcher != null) return
 
@@ -84,23 +143,22 @@ class MainActivity : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                var text = s.toString().replace(" ", "").uppercase()
-                text = text.filter { it.isDigit() || it in 'A'..'F' }
-
-                val grouped = buildString {
-                    text.forEachIndexed { index, c ->
-                        if (index > 0 && index % 2 == 0) append(" ")
-                        append(c)
-                    }
+                val input = s.toString()
+                val hexOnly = HexUtils.filterHex(input).uppercase()
+                
+                val builder = StringBuilder()
+                hexOnly.forEachIndexed { index, c ->
+                    if (index > 0 && index % 2 == 0) builder.append(" ")
+                    builder.append(c)
                 }
+                val result = builder.toString()
 
-                if (grouped != s.toString()) {
-                    editText.setText(grouped)
-                    editText.setSelection(grouped.length)
+                if (result != input) {
+                    editText.setText(result)
+                    editText.setSelection(result.length)
                 }
             }
         }
-
         editText.addTextChangedListener(hexWatcher)
     }
 
@@ -110,7 +168,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showSettingsDialog() {
-        val sp = getSharedPreferences(Constant.SHARED_PREFERENCES_NAME, MODE_PRIVATE)
         val view = LayoutInflater.from(this).inflate(R.layout.dailog_settings, null)
         val checkBoxFixedUid = view.findViewById<MaterialCheckBox>(R.id.checkbox_fixed_uid)
         val layoutUidInput = view.findViewById<TextInputLayout>(R.id.layout_uid_input)
@@ -118,39 +175,36 @@ class MainActivity : AppCompatActivity() {
         val itemReselectDir = view.findViewById<View>(R.id.item_reselect_dir)
         val itemGithub = view.findViewById<View>(R.id.item_github)
 
-        var isFixed = sp.getBoolean(Constant.PREF_FIXED_UID, false)
-        checkBoxFixedUid.isChecked = isFixed
+        checkBoxFixedUid.isChecked = settingsManager.isFixedUid
         
         fun updateInputMode(fixed: Boolean) {
-            val value = if (fixed) {
+            if (fixed) {
                 layoutUidInput.hint = getString(R.string.settings_hint_fixed_uid)
                 editUidInput.inputType = InputType.TYPE_CLASS_TEXT
                 enableHexGroupedInput(editUidInput)
-                sp.getString(Constant.PREF_FIXED_UID_VALUE, "")
+                editUidInput.setText(settingsManager.fixedUidValue)
             } else {
                 layoutUidInput.hint = getString(R.string.settings_hint_random_uid_len)
                 editUidInput.inputType = InputType.TYPE_CLASS_NUMBER
                 disableHexGroupedInput(editUidInput)
-                sp.getString(Constant.PREF_RANDOM_UID_LEN, "4") // Default length 4
+                editUidInput.setText(settingsManager.randomUidLen)
             }
-            editUidInput.setText(value)
             editUidInput.setSelection(editUidInput.text.length)
         }
         
-        updateInputMode(isFixed)
+        updateInputMode(settingsManager.isFixedUid)
 
         checkBoxFixedUid.setOnCheckedChangeListener { _, isChecked ->
-            isFixed = isChecked
-            sp.edit().putBoolean(Constant.PREF_FIXED_UID, isChecked).apply()
+            settingsManager.isFixedUid = isChecked
             updateInputMode(isChecked)
         }
 
         editUidInput.addTextChangedListener {
             val text = it?.toString() ?: ""
-            if (isFixed) {
-                sp.edit().putString(Constant.PREF_FIXED_UID_VALUE, text).apply()
+            if (settingsManager.isFixedUid) {
+                settingsManager.fixedUidValue = text
             } else {
-                sp.edit().putString(Constant.PREF_RANDOM_UID_LEN, text).apply()
+                settingsManager.randomUidLen = text
             }
         }
 
@@ -186,9 +240,8 @@ class MainActivity : AppCompatActivity() {
             .create()
         
         view.findViewById<View?>(R.id.btn_dialog_cancel)!!
-            .setOnClickListener { _: View? ->
+            .setOnClickListener {
                 dialog?.dismiss()
-                disableNfcReaderMode()
             }
         dialog?.setOnDismissListener {
             disableNfcReaderMode()
@@ -197,55 +250,49 @@ class MainActivity : AppCompatActivity() {
         dialog?.window?.apply {
             setWindowAnimations(R.style.BottomDialogAnimation)
             setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
-            setLayout(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
+            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             setGravity(Gravity.BOTTOM)
         }
     }
 
     private fun showFilenameInputDialog(ndefData: ByteArray) {
-        val view: View = LayoutInflater.from(this).inflate(R.layout.dialog_save_ndef_with_name, null)
-        dialog = AlertDialog.Builder(this)
-            .setView(view)
-            .setCancelable(true)
-            .create()
-        val input = view.findViewById<EditText>(R.id.ndef_name_input)
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_generic_input, null)
+        val title = view.findViewById<TextView>(R.id.tv_dialog_title)
+        val input = view.findViewById<EditText>(R.id.et_dialog_input)
+        val btnCancel = view.findViewById<View>(R.id.btn_dialog_cancel)
+        val btnConfirm = view.findViewById<View>(R.id.btn_dialog_confirm)
+
+        title.text = getString(R.string.ndef_filename_input_hint)
         val defaultName = "${DateFormat.format("yyyy-MM-dd_HH-mm-ss", Date())}.ndef"
         input.setText(defaultName)
-        view.findViewById<View?>(R.id.btn_dialog_cancel)!!
-            .setOnClickListener { _: View ->
-                dialog?.dismiss()
+
+        val localDialog = AlertDialog.Builder(this).setView(view).create()
+        
+        btnCancel.setOnClickListener { localDialog.dismiss() }
+        btnConfirm.setOnClickListener {
+            val fileName = input.text.toString().trim()
+            if (fileName.isNotEmpty()) {
+                saveNdefFile(fileName, ndefData)
+                localDialog.dismiss()
             }
-        view.findViewById<View>(R.id.btn_dialog_confirm).setOnClickListener {
-            val fileName = input.text.toString()
-            FragmentNdefFilePicker.getChosenFolderUri(this)?.let { uri ->
-                val root = DocumentFile.fromTreeUri(this, uri)
-                val dir = if (FragmentNdefFilePicker.getCurrentPath() == "/" || FragmentNdefFilePicker.getCurrentPath().isEmpty()) root else {
-                    FragmentNdefFilePicker.getCurrentPath().trim('/').split("/").fold(root) { parent, name ->
-                        parent?.findFile(name)?.takeIf { it.isDirectory }
-                    }
-                }
-                dir?.createFile("application/octet-stream", fileName)?.let { file ->
-                    contentResolver.openOutputStream(file.uri)?.use { outputStream ->
-                        outputStream.write(ndefData)
-                        Toast.makeText(this, R.string.toast_saved_successfully, Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-            ndefFilePicker.refreshFileList()
-            dialog?.dismiss()
         }
-        dialog?.show()
-        dialog?.window?.apply {
+
+        localDialog.show()
+        localDialog.window?.apply {
             setWindowAnimations(R.style.BottomDialogAnimation)
             setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
-            setLayout(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
+            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             setGravity(Gravity.BOTTOM)
+        }
+    }
+
+    private fun saveNdefFile(fileName: String, ndefData: ByteArray) {
+        val success = ndefFileManager.saveNdefFile(FragmentNdefFilePicker.getCurrentPath(), fileName, ndefData)
+        if (success) {
+            Toast.makeText(this, R.string.toast_saved_successfully, Toast.LENGTH_SHORT).show()
+            ndefFilePicker.refreshFileList()
+        } else {
+            Toast.makeText(this, R.string.toast_save_failed, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -265,17 +312,13 @@ class MainActivity : AppCompatActivity() {
     fun enableNfcReaderMode() {
         val options = Bundle()
         nfcAdapter.enableReaderMode(this, { tag ->
-            tag?.let {
-                processTag(tag)
-            }
-        },
-    NfcAdapter.FLAG_READER_NFC_A or
-            NfcAdapter.FLAG_READER_NFC_B or
-            NfcAdapter.FLAG_READER_NFC_F or
-            NfcAdapter.FLAG_READER_NFC_V or
-            NfcAdapter.FLAG_READER_NFC_BARCODE
-            ,
-        options)
+            tag?.let { processTag(tag) }
+        }, NfcAdapter.FLAG_READER_NFC_A or
+                NfcAdapter.FLAG_READER_NFC_B or
+                NfcAdapter.FLAG_READER_NFC_F or
+                NfcAdapter.FLAG_READER_NFC_V or
+                NfcAdapter.FLAG_READER_NFC_BARCODE,
+            options)
     }
 
     fun disableNfcReaderMode() {
