@@ -6,12 +6,10 @@ permissions:
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:
-
+    
 jobs:
   build:
+    environment: main_build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,16 +23,7 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Define CI variables
-        run: |
-          if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]] && [[ "${GITHUB_REF}" == "refs/heads/main" || "${GITHUB_REF}" == "refs/heads/dev" ]] || [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
-            echo "USE_SECRET_KEYSTORE=true" >> $GITHUB_ENV
-          else
-            echo "USE_SECRET_KEYSTORE=false" >> $GITHUB_ENV
-          fi
-
       - name: Write key
-        if: env.USE_SECRET_KEYSTORE == 'true'
         run: |
           if [ ! -z "${{ secrets.KEYSTORE }}" ]; then
             {
@@ -66,7 +55,6 @@ jobs:
           path: app/build/outputs/apk/release/*
 
       - name: Send To Telegram Group
-        if: env.USE_SECRET_KEYSTORE == 'true'
         run: |
           export TELEGRAM_BOT_TOKEN=${{secrets.TELEGRAM_BOT_TOKEN}}
           wget https://raw.githubusercontent.com/0penPublic/onHit/refs/heads/misc/telegram_on_hit_ci_bot.py
