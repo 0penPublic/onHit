@@ -33,8 +33,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:importantForAutofill="no"
+            android:importantForContentCapture="no"
             android:autofillHints=""
-            android:inputType="text" />
+            android:inputType="textNoSuggestions" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <View
@@ -90,7 +91,7 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@android:drawable/ic_menu_info_details"
+            android:src="@drawable/baseline_info_24"
             app:tint="?android:attr/textColorPrimary" />
 
         <LinearLayout

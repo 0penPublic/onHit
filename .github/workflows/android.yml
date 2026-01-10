@@ -9,59 +9,66 @@ on:
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    - name: set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-        cache: gradle
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Write key
-      if: ${{ ( github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' )) || github.ref_type == 'tag' }}
-      run: |
-        if [ ! -z "${{ secrets.KEYSTORE }}" ]; then
-          {
-            echo "" >> gradle.properties
-            echo KEYSTORE_PASSWORD='${{ secrets.KEYSTORE_PASSWORD }}'
-            echo KEY_ALIAS='onHit'
-            echo KEY_PASSWORD='${{ secrets.KEY_PASSWORD }}'
-            echo KEYSTORE_FILE='key.jks'
-          } >> gradle.properties
-          echo ${{ secrets.KEYSTORE }} | base64 -d > key.jks
-        fi
+      - name: set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+      - name: Define CI variables
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]] && [[ "${GITHUB_REF}" == "refs/heads/main" || "${GITHUB_REF}" == "refs/heads/dev" ]] || [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            echo "USE_SECRET_KEYSTORE=true" >> $GITHUB_ENV
+          else
+            echo "USE_SECRET_KEYSTORE=false" >> $GITHUB_ENV
+          fi
 
-    - name: Build Debug
-      run: ./gradlew assembleDebug
+      - name: Write key
+        if: env.USE_SECRET_KEYSTORE == 'true'
+        run: |
+          if [ ! -z "${{ secrets.KEYSTORE }}" ]; then
+            {
+              echo "" >> gradle.properties
+              echo KEYSTORE_PASSWORD='${{ secrets.KEYSTORE_PASSWORD }}'
+              echo KEY_ALIAS='onHit'
+              echo KEY_PASSWORD='${{ secrets.KEY_PASSWORD }}'
+              echo KEYSTORE_FILE='key.jks'
+            } >> gradle.properties
+            echo ${{ secrets.KEYSTORE }} | base64 -d > key.jks
+          fi
 
-    - name: Build Release
-      run: ./gradlew assembleRelease
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-    - name: Upload Debug APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: onHit-debug
-        path: app/build/outputs/apk/debug/*
+      - name: Build with Gradle
+        run: ./gradlew assembleDebug assembleRelease
 
-    - name: Upload Release APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: onHit-release
-        path: app/build/outputs/apk/release/*
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: onHit-debug
+          path: app/build/outputs/apk/debug/*
 
-    - name: Send To Telegram Group
-      if: ${{ ( github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' )) || github.ref_type == 'tag' }}
-      run: |
-        export TELEGRAM_BOT_TOKEN=${{secrets.TELEGRAM_BOT_TOKEN}}
-        wget https://raw.githubusercontent.com/0penPublic/onHit/refs/heads/misc/telegram_on_hit_ci_bot.py
-        python3 -m pip install python-telegram-bot==22.5
-        python3 telegram_on_hit_ci_bot.py
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: onHit-release
+          path: app/build/outputs/apk/release/*
+
+      - name: Send To Telegram Group
+        if: env.USE_SECRET_KEYSTORE == 'true'
+        run: |
+          export TELEGRAM_BOT_TOKEN=${{secrets.TELEGRAM_BOT_TOKEN}}
+          wget https://raw.githubusercontent.com/0penPublic/onHit/refs/heads/misc/telegram_on_hit_ci_bot.py
+          python3 -m pip install python-telegram-bot==22.5
+          python3 telegram_on_hit_ci_bot.py

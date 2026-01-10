@@ -13,38 +13,40 @@ android {
 
     defaultConfig {
         applicationId = "mba.vm.onhit"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = getGitCommitCount()
         versionName = "1.0"
     }
 
+    val keystoreFile = rootProject.file(project.findProperty("KEYSTORE_FILE") ?: "key.jks")
+
     signingConfigs {
         create("onHitSignConfig") {
-            val keystoreFile = rootProject.file(project.findProperty("KEYSTORE_FILE") ?: "key.jks")
-            if (keystoreFile.exists()) {
-                storeFile = keystoreFile
-                storePassword = project.findProperty("KEYSTORE_PASSWORD")?.toString()
-                keyAlias = project.findProperty("KEY_ALIAS")?.toString()
-                keyPassword = project.findProperty("KEY_PASSWORD")?.toString()
-            }
+            storeFile = keystoreFile
+            storePassword = project.findProperty("KEYSTORE_PASSWORD")?.toString()
+            keyAlias = project.findProperty("KEY_ALIAS")?.toString()
+            keyPassword = project.findProperty("KEY_PASSWORD")?.toString()
         }
     }
 
     buildTypes {
-        getByName("debug") {
-            signingConfigs.getByName("onHitSignConfig").storeFile?.let { storeFile ->
-                if (storeFile.exists()) signingConfig = signingConfigs.getByName("onHitSignConfig")
-            } ?: run {
+        debug {
+            signingConfig = if (keystoreFile.exists()) {
+                signingConfigs.getByName("onHitSignConfig")
+            } else {
                 signingConfigs.getByName("debug")
             }
         }
 
         release {
-            isMinifyEnabled = true
-            signingConfigs.getByName("onHitSignConfig").storeFile?.let { storeFile ->
-                if (storeFile.exists()) signingConfig = signingConfigs.getByName("onHitSignConfig")
+            signingConfig = if (keystoreFile.exists()) {
+                signingConfigs.getByName("onHitSignConfig")
+            } else {
+                signingConfigs.getByName("debug")
             }
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -62,6 +64,9 @@ android {
             (this as BaseVariantOutputImpl).outputFileName =
                 "onHit-$versionName-$versionCode-$name.apk"
         }
+    }
+    defaultConfig {
+        vectorDrawables.useSupportLibrary = true
     }
 }
 

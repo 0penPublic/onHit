@@ -23,9 +23,9 @@
         android:text="@string/saving_ndef_prompt"
         android:textSize="16sp" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_dialog_cancel"
-        style="?android:attr/borderlessButtonStyle"
+        style="?attr/borderlessButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"

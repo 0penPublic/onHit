@@ -1,27 +1,44 @@
 <resources>
     <string name="xposed_desc">在没有实体标签的情况下触发系统信任的 NFC 事件。</string>
 
-    <string name="btn_choice_ndef_file">选择一个 NDEF 文件</string>
+    <string name="btn_choice_ndef_file">选择 NDEF 文件</string>
     <string name="setting">设置</string>
-    <string name="add_ndef_record">添加一个 NDEF 记录</string>
-    <string name="search">搜索 NDEF 记录</string>
-    <string name="saving_ndef_prompt">请将需要保存 NDEF 文件的标签放在手机读卡器区域。</string>
-    <string name="ndef_filename_input_hint">输入文件名</string>
+    <string name="add">添加...</string>
+    <string name="search">搜索</string>
+    <string name="saving_ndef_prompt">请将标签靠近 NFC 感应区以保存 NDEF 数据。</string>
+    <string name="ndef_filename_input_hint">文件名</string>
     <string name="toast_saved_successfully">保存成功</string>
     <string name="toast_tag_not_support_ndef_format">该标签不支持 NDEF 格式。</string>
-    <string name="toast_select_folder_saving_ndef_files">请选择一个文件夹来存储 NDEF 文件。</string>
-    <string name="toast_selected_folder_unavailable">所选文件夹不可用，请选择其他文件夹。</string>
-    <string name="toast_not_valid_ndef_file">不是有效的 NDEF 文件</string>
+    <string name="toast_select_folder_saving_ndef_files">请选择用于存储 NDEF 文件的文件夹。</string>
+    <string name="toast_selected_folder_unavailable">所选文件夹不可用，请重新选择。</string>
+    <string name="toast_not_valid_ndef_file">无效的 NDEF 文件</string>
     <string name="toast_deleted_successfully">删除成功</string>
     <string name="toast_delete_failed">删除失败</string>
-    <string name="toast_todo">功能尚未实现</string>
-    <string name="ndef_text_example">你好，这是 onHit。</string>
-    <string name="delete_file_hint">你确定要删除文件 "%s" 吗？</string>
+    <string name="toast_todo">敬请期待</string>
+    <string name="ndef_text_example">你好，这里是 onHit。</string>
+    <string name="delete_file_hint">确定要删除 "%s" 吗？</string>
+    
     <string name="settings_title">设置</string>
-    <string name="settings_enable_fixed_uid">使用固定 UID</string>
+    <string name="settings_enable_fixed_uid">启用固定 UID</string>
     <string name="settings_hint_fixed_uid">固定 UID (十六进制)</string>
     <string name="settings_hint_random_uid_len">随机 UID 长度</string>
-    <string name="settings_reselect_directory">重新选择存储文件夹</string>
-    <string name="settings_github_repo">GitHub 页面</string>
-    <string name="settings_github_repo_summary">如果你觉得有帮助的话，点个 Star 我会非常感激！</string>
+    <string name="settings_reselect_directory">更改存储文件夹</string>
+    <string name="settings_github_repo">GitHub 仓库</string>
+    <string name="settings_github_repo_summary">如果您觉得这个项目有帮助，欢迎点个 Star！</string>
+    
+    <string name="no_files_found">未发现文件</string>
+    <string name="dialog_title_edit_path">编辑路径</string>
+    <string name="menu_add_folder">新建文件夹</string>
+    <string name="menu_add_from_tag">从标签添加</string>
+    <string name="dialog_title_add_options">添加</string>
+    <string name="hint_folder_name">文件夹名称</string>
+    
+    <string name="toast_save_failed">保存失败</string>
+    <string name="toast_create_dir_failed">创建文件夹失败</string>
+    <string name="toast_invalid_path">路径无效</string>
+    
+    <string name="menu_rename">重命名</string>
+    <string name="menu_delete">删除</string>
+    <string name="dialog_title_rename">重命名</string>
+    <string name="toast_rename_failed">重命名失败</string>
 </resources>

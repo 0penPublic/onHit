@@ -2,28 +2,45 @@
     <string name="app_name" translatable="false">onHit</string>
     <string name="xposed_desc">Trigger system-trusted NFC events without a physical tag.</string>
 
-    <string name="btn_choice_ndef_file">Choice a NDEF File</string>
-    <string name="setting">Setting</string>
-    <string name="add_ndef_record">Add a ndef record</string>
-    <string name="search">Search of NDEF Record</string>
-    <string name="saving_ndef_prompt">Please place the tag that needs to save the NDEF file in the phone\'s card reader area.</string>
-    <string name="ndef_filename_input_hint">Enter the filename</string>
+    <string name="btn_choice_ndef_file">Select NDEF File</string>
+    <string name="setting">Settings</string>
+    <string name="add">Add...</string>
+    <string name="search">Search</string>
+    <string name="saving_ndef_prompt">Place the tag near the NFC reader area to save the NDEF data.</string>
+    <string name="ndef_filename_input_hint">File Name</string>
     <string name="toast_saved_successfully">Saved successfully</string>
-    <string name="toast_tag_not_support_ndef_format">This tag does not support the NDEF format.</string>
-    <string name="toast_select_folder_saving_ndef_files">Please select a folder to store the NDEF files.</string>
-    <string name="toast_selected_folder_unavailable">The selected folder is unavailable. Please select another folder.</string>
-    <string name="toast_not_valid_ndef_file">Not a valid NDEF file</string>
+    <string name="toast_tag_not_support_ndef_format">This tag does not support NDEF format.</string>
+    <string name="toast_select_folder_saving_ndef_files">Please select a folder to store NDEF files.</string>
+    <string name="toast_selected_folder_unavailable">Selected folder is unavailable. Please choose another.</string>
+    <string name="toast_not_valid_ndef_file">Invalid NDEF file</string>
     <string name="toast_deleted_successfully">Deleted successfully</string>
-    <string name="toast_delete_failed">Not a valid NDEF file</string>
-    <string name="toast_todo">Not Implemented Yet</string>
-    <string name="ndef_text_example">Hello, There is onHit.</string>
-    <string name="delete_file_hint">Are you sure you want to delete the file "%s"?</string>
+    <string name="toast_delete_failed">Failed to delete</string>
+    <string name="toast_todo">Coming soon</string>
+    <string name="ndef_text_example">Hello, this is onHit.</string>
+    <string name="delete_file_hint">Are you sure you want to delete "%s"?</string>
     
     <string name="settings_title">Settings</string>
     <string name="settings_enable_fixed_uid">Enable Fixed UID</string>
     <string name="settings_hint_fixed_uid">Fixed UID (Hex)</string>
-    <string name="settings_hint_random_uid_len">Random UID Length (Number)</string>
-    <string name="settings_reselect_directory">Re-select Directory</string>
+    <string name="settings_hint_random_uid_len">Random UID Length</string>
+    <string name="settings_reselect_directory">Change Storage Folder</string>
     <string name="settings_github_repo">GitHub Repository</string>
-    <string name="settings_github_repo_summary">If you find it helpful, a star would be greatly appreciated.</string>
+    <string name="settings_github_repo_summary">If you find this useful, a star would be greatly appreciated!</string>
+    
+    <string name="no_files_found">No files found</string>
+    <string name="dialog_title_edit_path">Edit Path</string>
+    <string name="menu_add_folder">New Folder</string>
+    <string name="menu_add_from_tag">Add from Tag</string>
+    <string name="dialog_title_add_options">Add</string>
+    <string name="hint_folder_name">Folder Name</string>
+    
+    <string name="toast_save_failed">Save failed</string>
+    <string name="toast_create_dir_failed">Failed to create folder</string>
+    <string name="toast_invalid_path">Invalid path</string>
+    
+    <string name="menu_rename">Rename</string>
+    <string name="menu_delete">Delete</string>
+    <string name="dialog_title_rename">Rename</string>
+    <string name="toast_rename_failed">Rename failed</string>
+    <string name="toast_invalid_name">Invalid name</string>
 </resources>
