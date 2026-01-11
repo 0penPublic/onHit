@@ -5,8 +5,9 @@ import android.content.Context.MODE_PRIVATE
 import android.net.Uri
 import androidx.core.content.edit
 import mba.vm.onhit.Constant
+import mba.vm.onhit.Constant.Companion.MEGABYTES_TO_BYTES
 import mba.vm.onhit.utils.HexUtils
-import kotlin.random.Random
+import java.security.SecureRandom
 
 class SettingsManager(context: Context) {
     private val sp = context.getSharedPreferences(Constant.SHARED_PREFERENCES_NAME, MODE_PRIVATE)
@@ -36,11 +37,14 @@ class SettingsManager(context: Context) {
         }
 
     fun getUid(): ByteArray {
-        return if (isFixedUid) {
-            HexUtils.decodeHex(fixedUidValue)
-        } else {
-            val len = randomUidLen.toIntOrNull() ?: 4
-            Random.nextBytes(if (len > 0) len else 4)
+        if (isFixedUid) {
+            return HexUtils.decodeHex(fixedUidValue)
+        }
+        val len: Int = randomUidLen.toIntOrNull() ?: 4
+        val actualLen = len.takeIf { it > 0 } ?: 4
+        if (actualLen > MEGABYTES_TO_BYTES) throw IllegalArgumentException("UID length cannot exceed 1 MB")
+        return ByteArray(actualLen).apply {
+            SecureRandom().nextBytes(this)
         }
     }
 }

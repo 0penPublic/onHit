@@ -5,6 +5,8 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.os.Parcel
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -23,6 +25,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import mba.vm.onhit.Constant
+import mba.vm.onhit.Constant.Companion.MEGABYTES_TO_BYTES
 import mba.vm.onhit.R
 import mba.vm.onhit.core.NdefFileManager
 import mba.vm.onhit.core.SettingsManager
@@ -341,7 +344,32 @@ class FragmentNdefFilePicker : Fragment() {
             putExtra("uid", settingsManager.getUid())
             putExtra("ndef", ndef)
         }
-        requireContext().sendBroadcast(intent)
+
+        val size = getIntentSerializedSize(intent)
+        if (size > MEGABYTES_TO_BYTES) {
+            Toast.makeText(requireContext(), R.string.toast_ndef_too_large, Toast.LENGTH_LONG).show()
+            return
+        }
+
+        try {
+            requireContext().sendBroadcast(intent)
+        } catch (e: Exception) {
+            val msg = getString(R.string.toast_send_broadcast_failed, e.message ?: "Unknown")
+            Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
+            Log.e("sendNdefBroadcast", msg, e)
+        }
+    }
+
+    fun getIntentSerializedSize(intent: Intent): Int {
+        val parcel: Parcel = Parcel.obtain()
+        return try {
+            intent.writeToParcel(parcel, 0)
+            parcel.marshall().size
+        } catch (_: Exception) {
+            0
+        } finally {
+            parcel.recycle()
+        }
     }
 
     override fun onDestroyView() {

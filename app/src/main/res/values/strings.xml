@@ -4,7 +4,7 @@
 
     <string name="btn_choice_ndef_file">Select NDEF File</string>
     <string name="setting">Settings</string>
-    <string name="add">Add...</string>
+    <string name="add">Add…</string>
     <string name="search">Search</string>
     <string name="saving_ndef_prompt">Place the tag near the NFC reader area to save the NDEF data.</string>
     <string name="ndef_filename_input_hint">File Name</string>
@@ -43,4 +43,6 @@
     <string name="dialog_title_rename">Rename</string>
     <string name="toast_rename_failed">Rename failed</string>
     <string name="toast_invalid_name">Invalid name</string>
+    <string name="toast_send_broadcast_failed">Failed to send broadcast, reason: %s</string>
+    <string name="toast_ndef_too_large">NDEF message broadcast is too large (max 1MB)</string>
 </resources>

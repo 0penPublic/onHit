@@ -75,7 +75,7 @@ object NfcServiceHook : BaseHook() {
         dispatchTagEndpoint.invoke(
             nfcServiceHandler,
             tag, nfcService.objectHelper().getObjectOrNull("mReaderModeParams")) ?: run {
-            log("dispatchTagEndpoint is null")
+            log("mReaderModeParams is null")
         }
     }
 

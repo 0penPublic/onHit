@@ -3,7 +3,7 @@
 
     <string name="btn_choice_ndef_file">选择 NDEF 文件</string>
     <string name="setting">设置</string>
-    <string name="add">添加...</string>
+    <string name="add">添加…</string>
     <string name="search">搜索</string>
     <string name="saving_ndef_prompt">请将标签靠近 NFC 感应区以保存 NDEF 数据。</string>
     <string name="ndef_filename_input_hint">文件名</string>
@@ -31,7 +31,7 @@
     <string name="menu_add_folder">新建文件夹</string>
     <string name="menu_add_from_tag">从标签添加</string>
     <string name="dialog_title_add_options">添加</string>
-    <string name="hint_folder_name">文件夹名称</string>
+    <string name="hint_folder_name">Folder Name</string>
     
     <string name="toast_save_failed">保存失败</string>
     <string name="toast_create_dir_failed">创建文件夹失败</string>
@@ -41,4 +41,7 @@
     <string name="menu_delete">删除</string>
     <string name="dialog_title_rename">重命名</string>
     <string name="toast_rename_failed">重命名失败</string>
+    <string name="toast_invalid_name">无效名称</string>
+    <string name="toast_send_broadcast_failed">发送广播失败，原因: %s</string>
+    <string name="toast_ndef_too_large">NDEF 广播数据过大 (最大 1MB)</string>
 </resources>
