@@ -66,9 +66,6 @@ android {
                 "onHit-$versionName-$versionCode-$name.apk"
         }
     }
-    defaultConfig {
-        vectorDrawables.useSupportLibrary = true
-    }
 }
 
 tasks.withType<KotlinJvmCompile>().configureEach {

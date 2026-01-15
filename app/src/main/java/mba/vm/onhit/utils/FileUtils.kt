@@ -5,6 +5,7 @@ import android.net.Uri
 import android.nfc.NdefMessage
 import android.provider.OpenableColumns
 import androidx.documentfile.provider.DocumentFile
+import mba.vm.onhit.Constant.Companion.MAX_OF_BROADCAST_SIZE
 import mba.vm.onhit.R
 import mba.vm.onhit.ui.model.FileData
 import java.text.SimpleDateFormat
@@ -34,6 +35,7 @@ object FileUtils {
     }
 
     private fun isNdefFile(context: Context, file: DocumentFile): Boolean {
+        if (file.length() > MAX_OF_BROADCAST_SIZE) return false
         return try {
             context.contentResolver.openInputStream(file.uri)?.use { input ->
                 val bytes = input.readBytes()
