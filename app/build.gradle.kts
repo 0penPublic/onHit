@@ -10,13 +10,14 @@ plugins {
 android {
     namespace = "mba.vm.onhit"
     compileSdk = 36
+    val currentGitHash = getGitShortHash()
 
     defaultConfig {
         applicationId = "mba.vm.onhit"
         minSdk = 26
         targetSdk = 36
         versionCode = getGitCommitCount()
-        versionName = "1.0"
+        versionName = "1.0-$currentGitHash"
     }
 
     val keystoreFile = rootProject.file(project.findProperty("KEYSTORE_FILE") ?: "key.jks")
@@ -82,17 +83,20 @@ fun getGitCommitCount(): Int {
     }.standardOutput.asText.get().trim().toInt()
 }
 
+fun getGitShortHash(): String {
+    return providers.exec {
+        commandLine("git", "rev-parse", "--short", "HEAD")
+    }.standardOutput.asText.get().trim()
+}
+
+
 dependencies {
-    implementation(libs.material)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
-    implementation(libs.androidx.recyclerview)
-    implementation(libs.androidx.swiperefreshlayout)
-    implementation(libs.androidx.documentfile)
+    implementation(libs.core)
     compileOnly(libs.xposed.api)
     implementation(libs.ezxhelper.core)
     implementation(libs.ezxhelper.xposed.api)
     implementation(libs.ezxhelper.android.utils)
+    implementation(libs.androidx.documentfile)
+    implementation(libs.androidx.recyclerview)
+    implementation(libs.androidx.swiperefreshlayout)
 }

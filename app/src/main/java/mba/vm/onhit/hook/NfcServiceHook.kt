@@ -70,8 +70,7 @@ object NfcServiceHook : BaseHook() {
         uid: ByteArray,
         ndef: NdefMessage?
     ) {
-        val cl = nfcClassLoader
-        val tag = buildFakeTag(uid, ndef, cl)
+        val tag = buildFakeTag(uid, ndef)
         dispatchTagEndpoint.invoke(
             nfcServiceHandler,
             tag, nfcService.objectHelper().getObjectOrNull("mReaderModeParams")) ?: run {
@@ -82,7 +81,6 @@ object NfcServiceHook : BaseHook() {
     private fun buildFakeTag(
         uid: ByteArray,
         ndef: NdefMessage?,
-        nfcClassLoader: ClassLoader?
     ): Any {
         return Proxy.newProxyInstance(nfcClassLoader, arrayOf(tagEndpointInterface)) { _, method, _ ->
             when (method.name) {

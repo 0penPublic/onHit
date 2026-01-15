@@ -1,47 +1,55 @@
 <resources>
-    <string name="xposed_desc">在没有实体标签的情况下触发系统信任的 NFC 事件。</string>
+    <string name="xposed_desc">无需实体卡即可触发系统信任的 NFC 事件。</string>
 
-    <string name="btn_choice_ndef_file">选择 NDEF 文件</string>
     <string name="setting">设置</string>
     <string name="add">添加…</string>
-    <string name="search">搜索</string>
     <string name="saving_ndef_prompt">请将标签靠近 NFC 感应区以保存 NDEF 数据。</string>
-    <string name="ndef_filename_input_hint">文件名</string>
-    <string name="toast_saved_successfully">保存成功</string>
-    <string name="toast_tag_not_support_ndef_format">该标签不支持 NDEF 格式。</string>
-    <string name="toast_select_folder_saving_ndef_files">请选择用于存储 NDEF 文件的文件夹。</string>
-    <string name="toast_selected_folder_unavailable">所选文件夹不可用，请重新选择。</string>
-    <string name="toast_not_valid_ndef_file">无效的 NDEF 文件</string>
-    <string name="toast_deleted_successfully">删除成功</string>
-    <string name="toast_delete_failed">删除失败</string>
-    <string name="toast_todo">敬请期待</string>
-    <string name="ndef_text_example">你好，这里是 onHit。</string>
+    <string name="writing_ndef_prompt">请将标签靠近 NFC 感应区以将 NDEF 数据写入标签。</string>
+    <string name="toast_tag_not_support_ndef_format">此标签不支持 NDEF 格式或读取失败。</string>
     <string name="delete_file_hint">确定要删除 "%s" 吗？</string>
-    
+
     <string name="settings_title">设置</string>
     <string name="settings_enable_fixed_uid">启用固定 UID</string>
     <string name="settings_hint_fixed_uid">固定 UID (十六进制)</string>
     <string name="settings_hint_random_uid_len">随机 UID 长度</string>
     <string name="settings_reselect_directory">更改存储文件夹</string>
     <string name="settings_github_repo">GitHub 仓库</string>
-    <string name="settings_github_repo_summary">如果您觉得这个项目有帮助，欢迎点个 Star！</string>
-    
-    <string name="no_files_found">未发现文件</string>
-    <string name="dialog_title_edit_path">编辑路径</string>
+    <string name="settings_github_repo_summary">如果你觉得好用，欢迎点个 Star！</string>
+
     <string name="menu_add_folder">新建文件夹</string>
-    <string name="menu_add_from_tag">从标签添加</string>
     <string name="dialog_title_add_options">添加</string>
-    <string name="hint_folder_name">Folder Name</string>
-    
-    <string name="toast_save_failed">保存失败</string>
-    <string name="toast_create_dir_failed">创建文件夹失败</string>
-    <string name="toast_invalid_path">路径无效</string>
-    
+
     <string name="menu_rename">重命名</string>
     <string name="menu_delete">删除</string>
+    <string name="menu_write_to_tag">写入标签</string>
     <string name="dialog_title_rename">重命名</string>
-    <string name="toast_rename_failed">重命名失败</string>
-    <string name="toast_invalid_name">无效名称</string>
-    <string name="toast_send_broadcast_failed">发送广播失败，原因: %s</string>
-    <string name="toast_ndef_too_large">NDEF 广播数据过大 (最大 1MB)</string>
+    <string name="dialog_title_path">路径</string>
+    <string name="toast_send_broadcast_failed">广播发送失败，原因: %s</string>
+    <string name="toast_nfc_not_supported">NFC 不可用。某些功能可能会受到限制。</string>
+
+    <string name="import_ndef">从标签导入 NDEF</string>
+    <string name="read_nfc_tag">读取 NFC 标签</string>
+    <string name="write_nfc_tag">写入 NFC 标签</string>
+    <string name="dialog_title_save_ndef">保存 NDEF 文件</string>
+    <string name="dialog_title_confirm_delete">确认删除</string>
+
+    <string name="path_not_selected">未选择目录</string>
+    <string name="hint_input_name">输入名称</string>
+
+    <string name="label_parent_directory">返回上级</string>
+    <string name="label_folder">文件夹</string>
+    <string name="label_bytes">字节</string>
+    <string name="toast_file_too_large">文件太大 (限制 1MB)</string>
+    <string name="toast_not_ndef_file">这不是有效的 NDEF 文件。</string>
+    <string name="hint_search">搜索文件…</string>
+    <string name="invalid_uid_len">长度必须在 0 到 65536 之间</string>
+    <string name="toast_write_success">写入成功！</string>
+    <string name="toast_write_failed">写入失败: %s</string>
+    <string name="toast_storage_unavailable">选定的存储目录不可用。</string>
+
+    <string name="intent_import_file">将文件导入至 onHit</string>
+    <string name="intent_send_broadcast">发送 onHit 广播</string>
+    
+    <string name="toast_import_success">已导入: %s</string>
+    <string name="toast_import_failed">导入失败: %s</string>
 </resources>

@@ -1,0 +1,3 @@
+<resources>
+    <style name="Base.Theme.OnHit" parent="android:Theme.DeviceDefault.NoActionBar" />
+</resources>

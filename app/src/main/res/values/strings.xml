@@ -2,21 +2,11 @@
     <string name="app_name" translatable="false">onHit</string>
     <string name="xposed_desc">Trigger system-trusted NFC events without a physical tag.</string>
 
-    <string name="btn_choice_ndef_file">Select NDEF File</string>
     <string name="setting">Settings</string>
     <string name="add">Add…</string>
-    <string name="search">Search</string>
     <string name="saving_ndef_prompt">Place the tag near the NFC reader area to save the NDEF data.</string>
-    <string name="ndef_filename_input_hint">File Name</string>
-    <string name="toast_saved_successfully">Saved successfully</string>
-    <string name="toast_tag_not_support_ndef_format">This tag does not support NDEF format.</string>
-    <string name="toast_select_folder_saving_ndef_files">Please select a folder to store NDEF files.</string>
-    <string name="toast_selected_folder_unavailable">Selected folder is unavailable. Please choose another.</string>
-    <string name="toast_not_valid_ndef_file">Invalid NDEF file</string>
-    <string name="toast_deleted_successfully">Deleted successfully</string>
-    <string name="toast_delete_failed">Failed to delete</string>
-    <string name="toast_todo">Coming soon</string>
-    <string name="ndef_text_example">Hello, this is onHit.</string>
+    <string name="writing_ndef_prompt">Place the tag near the NFC reader area to write the NDEF data.</string>
+    <string name="toast_tag_not_support_ndef_format">This tag does not support NDEF format or reading failed.</string>
     <string name="delete_file_hint">Are you sure you want to delete "%s"?</string>
     
     <string name="settings_title">Settings</string>
@@ -27,22 +17,39 @@
     <string name="settings_github_repo">GitHub Repository</string>
     <string name="settings_github_repo_summary">If you find this useful, a star would be greatly appreciated!</string>
     
-    <string name="no_files_found">No files found</string>
-    <string name="dialog_title_edit_path">Edit Path</string>
     <string name="menu_add_folder">New Folder</string>
-    <string name="menu_add_from_tag">Add from Tag</string>
     <string name="dialog_title_add_options">Add</string>
-    <string name="hint_folder_name">Folder Name</string>
-    
-    <string name="toast_save_failed">Save failed</string>
-    <string name="toast_create_dir_failed">Failed to create folder</string>
-    <string name="toast_invalid_path">Invalid path</string>
     
     <string name="menu_rename">Rename</string>
     <string name="menu_delete">Delete</string>
+    <string name="menu_write_to_tag">Write to Tag</string>
     <string name="dialog_title_rename">Rename</string>
-    <string name="toast_rename_failed">Rename failed</string>
-    <string name="toast_invalid_name">Invalid name</string>
+    <string name="dialog_title_path">Path</string>
     <string name="toast_send_broadcast_failed">Failed to send broadcast, reason: %s</string>
-    <string name="toast_ndef_too_large">NDEF message broadcast is too large (max 1MB)</string>
+    <string name="toast_nfc_not_supported">NFC is not available. Some features may be limited.</string>
+
+    <string name="import_ndef">Import NDEF from Tag</string>
+    <string name="read_nfc_tag">Read NFC Tag</string>
+    <string name="write_nfc_tag">Write NFC Tag</string>
+    <string name="dialog_title_save_ndef">Save NDEF File</string>
+    <string name="dialog_title_confirm_delete">Confirm Delete</string>
+    
+    <string name="path_not_selected">Directory not selected</string>
+    <string name="hint_input_name">Enter name</string>
+
+    <string name="label_parent_directory">Go up</string>
+    <string name="label_folder">Folder</string>
+    <string name="label_bytes">Bytes</string>
+    <string name="toast_file_too_large">File is too large (limit 1MB)</string>
+    <string name="toast_not_ndef_file">This is not a valid NDEF file.</string>
+    <string name="hint_search">Search files…</string>
+    <string name="invalid_uid_len">Length must be between 0 and 65536</string>
+    <string name="toast_write_success">Write successful!</string>
+    <string name="toast_write_failed">Write failed: %s</string>
+    <string name="toast_storage_unavailable">Selected storage directory is unavailable.</string>
+    <string name="intent_import_file">Import File to onHit</string>
+    <string name="intent_send_broadcast">Send NDEF Broadcast</string>
+    
+    <string name="toast_import_success">Imported: %s</string>
+    <string name="toast_import_failed">Import failed: %s</string>
 </resources>
