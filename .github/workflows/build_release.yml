@@ -1,0 +1,162 @@
+name: Build Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      update_type:
+        description: "What version part to increment"
+        required: true
+        type: choice
+        default: 'patch'
+        options:
+          - 'major'
+          - 'minor'
+          - 'patch'
+      update_description:
+        description: "Release notes (optional)"
+        required: false
+        type: string
+
+jobs:
+  modify_version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.modify.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Modify Version
+        id: modify
+        shell: bash
+        run: |
+          RAW_VERSION=$(grep "versionName =" app/build.gradle.kts | awk -F'["-]' '{print $2}')
+          if [[ ! "$RAW_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            MAJOR=1; MINOR=0; PATCH=0
+          else
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$RAW_VERSION"
+            case "${{ github.event.inputs.update_type }}" in
+              major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+              minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+              patch) PATCH=$((PATCH + 1)) ;;
+            esac
+          fi
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          sed -i -E \
+            "s/versionName *= *\".*\"/versionName = \"$NEW_VERSION-\$currentGitHash\"/" \
+            app/build.gradle.kts
+          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Push to Repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/build.gradle.kts
+          git commit -m "[skip ci] chore: bump version to ${{ steps.modify.outputs.version }}" || exit 0
+          git push
+
+  build_and_release:
+    needs: modify_version
+    environment: main_build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Write key
+        run: |
+          if [ ! -z "${{ secrets.KEYSTORE }}" ]; then
+            {
+              echo "" >> gradle.properties
+              echo KEYSTORE_PASSWORD='${{ secrets.KEYSTORE_PASSWORD }}'
+              echo KEY_ALIAS='onHit'
+              echo KEY_PASSWORD='${{ secrets.KEY_PASSWORD }}'
+              echo KEYSTORE_FILE='key.jks'
+            } >> gradle.properties
+            echo ${{ secrets.KEYSTORE }} | base64 -d > key.jks
+          fi
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew assembleDebug assembleRelease
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: onHit-debug
+          path: app/build/outputs/apk/debug/*
+
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: onHit-release
+          path: app/build/outputs/apk/release/*
+
+      - name: Prepare Release
+        env:
+            CHANGES: ""
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)
+          CHANGELOG=$(git log "$PREV_TAG"..HEAD --pretty=format:"- %s" | grep -v "\[skip ci\]" || true)
+          [ -z "$CHANGELOG" ] && CHANGELOG="- No notable changes"
+          {
+            echo "CHANGES<<EOF"
+            echo "$CHANGELOG"
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+
+      - name: Packing Mapping
+        run: |
+          MAPPING_OUTPUT_DIR="app/build/outputs/mapping"
+          if [ -d $MAPPING_OUTPUT_DIR ]; then
+            zip -r mapping.zip $MAPPING_OUTPUT_DIR
+          else
+            echo "No mapping directory found, skip packing"
+            zip mapping.zip /dev/null
+          fi
+
+      - uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.modify_version.outputs.version }}
+          name: v${{ needs.modify_version.outputs.version }}
+          body: |
+            # Version ${{ needs.modify_version.outputs.version }}
+            ## What's Changed
+            ${{ env.CHANGES }}
+            
+            ---
+            
+            ***Mapping files are provided for internal debugging and crash symbolication only.***
+            
+            ${{ inputs.update_description }}
+          draft: false
+          prerelease: false
+          files: |
+            app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/release/*.apk
+            mapping.zip
+
+      - name: Send To Telegram Group
+        run: |
+            export TELEGRAM_BOT_TOKEN=${{secrets.TELEGRAM_BOT_TOKEN}}
+            wget https://raw.githubusercontent.com/0penPublic/onHit/refs/heads/misc/telegram_on_hit_ci_bot.py
+            python3 -m pip install python-telegram-bot==22.5
+            python3 telegram_on_hit_ci_bot.py ${{ needs.modify_version.outputs.version }}
