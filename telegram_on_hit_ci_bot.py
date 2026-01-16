@@ -1,17 +1,22 @@
 import os
+import sys
 import subprocess
 import asyncio
 
 from typing import Final, List
 from pathlib import Path
-from telegram import Bot, InputMediaDocument
+from telegram import Bot, InputMediaDocument, Message
 
-
+ARGS: Final[List[str]] = sys.argv[1:]
 TOKEN: Final[str] = os.getenv("TELEGRAM_BOT_TOKEN")
 TARGET_CHAT: Final[str] = "@on_Hit"
-TARGET_TOPIC_ID: Final[int] = 4 # CI Build Topic ID
-USE_REMOTE_MESSAGE: Final[bool] = True
+TARGET_TOPIC_ID: Final[int] = 271 if ARGS else 4
 CAPTION_TEMPLATE: Final[str] = """
+onHit v`{}` Release Build `{}`
+```
+{}
+```
+""" if ARGS else """
 onHit CI Build `{}`
 ```
 {}
@@ -41,7 +46,7 @@ async def send_files(
         chat_id: str,
         topic_id: int,
         files: List[Path],
-        caption: str) -> None:
+        caption: str) -> tuple[Message, ...]:
     media_group: List[InputMediaDocument] = []
     for num, file in enumerate(files):
         media_group.append(InputMediaDocument(
@@ -49,7 +54,7 @@ async def send_files(
             caption=caption if num == len(files) - 1 else "",
             parse_mode="MarkdownV2"
         ))
-    await bot.send_media_group(
+    return await bot.send_media_group(
         chat_id=chat_id,
         media=media_group,
         parse_mode="MarkdownV2",
@@ -59,17 +64,26 @@ async def send_files(
     )
 
 
-async def main() -> None:
+async def main(argv: List[str]) -> None:
     try:
         bot: Bot = Bot(token = TOKEN)
         latest_hash, latest_message = get_latest_commit()
-        caption: str = CAPTION_TEMPLATE.format(latest_hash, latest_message)
         apk_path: List[Path] = []
         for build_type in BUILD_TYPES:
             apk_path.append(get_apk_path(build_type))
-        await send_files(bot, TARGET_CHAT, TARGET_TOPIC_ID, apk_path, caption)
+        caption: str
+        if argv:
+            caption = CAPTION_TEMPLATE.format(argv[0], latest_hash, latest_message)
+        else:
+            caption = CAPTION_TEMPLATE.format(latest_hash, latest_message)
+        messages = await send_files(bot, TARGET_CHAT, TARGET_TOPIC_ID, apk_path, caption)
+        if argv:
+            if await messages[-1].pin():
+                print("Pinning the last message succeeded.")
+            else:
+                print("Pinning the last message failed.")
     except Exception as e:
         print(e)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(main(ARGS))
