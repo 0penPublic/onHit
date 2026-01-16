@@ -2,7 +2,7 @@
 agp = "8.13.2"
 kotlin = "2.3.0"
 xposed-api = "82"
-ezxhelper = "3.1.0-rc1"
+ezxhelper = "3.1.1-rc1"
 core = "1.17.0"
 documentfile = "1.1.0"
 recyclerview = "1.4.0"
