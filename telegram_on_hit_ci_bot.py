@@ -13,16 +13,27 @@ TARGET_CHAT: Final[str] = "@on_Hit"
 TARGET_TOPIC_ID: Final[int] = 271 if ARGS else 4
 CAPTION_TEMPLATE: Final[str] = """
 onHit v`{}` Release Build `{}`
-[onHit](https://github.com/0penPublic) \| [{}](https://github.com/0penPublic/onHit/releases/tag/v{})
-[Official Telegram Group](https://t.me/on_hit)
+{}
+{}
 """ if ARGS else """
 onHit CI Build `{}`
 ```
 {}
 ```
-[onHit](https://github.com/0penPublic) \| [Official Telegram Group](https://t.me/on_hit)
+{}
 """
 BUILD_TYPES: Final[list[str]] = ["debug", "release"]
+
+
+def escape_markdown_v2(text: str) -> str:
+    special_chars = r"_*[]()~`>#+-=|{}.!"""
+    return ''.join(f'\\{c}' if c in special_chars else c for c in text)
+
+
+ON_HIT_URL_CAPTION: Final[str] = (f"[onHit]({escape_markdown_v2('https://github.com/0penPublic/onHit')}) "
+                                  f"\\| [Official Telegram Group]({escape_markdown_v2('https://t.me/on_hit')})")
+RELEASE_URL_TEMPLATE: Final[str] = "https://github.com/0penPublic/onHit/releases/v{}"
+
 
 def get_apk_path(build_type: str, module: str = "app") -> Path:
     apk_dir = Path(f"{module}/build/outputs/apk/{build_type}")
@@ -30,6 +41,7 @@ def get_apk_path(build_type: str, module: str = "app") -> Path:
     if not apks:
         raise FileNotFoundError(f"No APK found in {apk_dir}")
     return apks[0]
+
 
 def get_latest_commit(branch: str = "main") -> tuple[str, str]:
     full_hash = subprocess.check_output(
@@ -40,6 +52,7 @@ def get_latest_commit(branch: str = "main") -> tuple[str, str]:
     ).strip()
 
     return full_hash, commit_msg
+
 
 async def send_files(
         bot: Bot,
@@ -54,6 +67,7 @@ async def send_files(
             caption=caption if num == len(files) - 1 else "",
             parse_mode="MarkdownV2"
         ))
+    print(caption)
     return await bot.send_media_group(
         chat_id=chat_id,
         media=media_group,
@@ -66,16 +80,20 @@ async def send_files(
 
 async def main(argv: List[str]) -> None:
     try:
-        bot: Bot = Bot(token = TOKEN)
+        bot: Bot = Bot(token=TOKEN)
         latest_hash, latest_message = get_latest_commit()
         apk_path: List[Path] = []
         for build_type in BUILD_TYPES:
             apk_path.append(get_apk_path(build_type))
         caption: str
         if argv:
-            caption = CAPTION_TEMPLATE.format(argv[0], latest_hash, argv[0], argv[0])
+            version_code: str = escape_markdown_v2(argv[0])
+            release_url: str = RELEASE_URL_TEMPLATE.format(argv[0])
+            release_markdown: str = f"[Release URL]({escape_markdown_v2(release_url)})"
+            caption = CAPTION_TEMPLATE.format(version_code, latest_hash,
+                                              release_markdown, ON_HIT_URL_CAPTION)
         else:
-            caption = CAPTION_TEMPLATE.format(latest_hash, latest_message)
+            caption = CAPTION_TEMPLATE.format(latest_hash, latest_message, ON_HIT_URL_CAPTION)
         messages = await send_files(bot, TARGET_CHAT, TARGET_TOPIC_ID, apk_path, caption)
         if argv:
             if await messages[-1].pin():
@@ -83,7 +101,8 @@ async def main(argv: List[str]) -> None:
             else:
                 print("Pinning the last message failed.")
     except Exception as e:
-        print(e)
+        raise e
+
 
 if __name__ == "__main__":
     asyncio.run(main(ARGS))
