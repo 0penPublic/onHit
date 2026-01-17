@@ -13,14 +13,14 @@ TARGET_CHAT: Final[str] = "@on_Hit"
 TARGET_TOPIC_ID: Final[int] = 271 if ARGS else 4
 CAPTION_TEMPLATE: Final[str] = """
 onHit v`{}` Release Build `{}`
-```
-{}
-```
+[onHit](https://github.com/0penPublic) | [{}](https://github.com/0penPublic/onHit/releases/tag/v{})
+[Official Telegram Group](https://t.me/on_hit)
 """ if ARGS else """
 onHit CI Build `{}`
 ```
 {}
 ```
+[onHit](https://github.com/0penPublic) | [Official Telegram Group](https://t.me/on_hit)
 """
 BUILD_TYPES: Final[list[str]] = ["debug", "release"]
 
@@ -73,7 +73,7 @@ async def main(argv: List[str]) -> None:
             apk_path.append(get_apk_path(build_type))
         caption: str
         if argv:
-            caption = CAPTION_TEMPLATE.format(argv[0], latest_hash, latest_message)
+            caption = CAPTION_TEMPLATE.format(argv[0], latest_hash, argv[0], argv[0])
         else:
             caption = CAPTION_TEMPLATE.format(latest_hash, latest_message)
         messages = await send_files(bot, TARGET_CHAT, TARGET_TOPIC_ID, apk_path, caption)
