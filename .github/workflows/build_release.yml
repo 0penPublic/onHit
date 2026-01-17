@@ -63,6 +63,12 @@ jobs:
           git commit -m "[skip ci] chore: bump version to ${{ env.VERSION }}" || exit 0
           git push
 
+      - name: Get Version Only
+        if: inputs.update_type == 'none'
+        run: |
+          RAW_VERSION=$(grep "versionName =" app/build.gradle.kts | awk -F'["-]' '{print $2}')
+          echo "VERSION=$RAW_VERSION" >> "$GITHUB_ENV"
+
       - name: set up JDK 21
         uses: actions/setup-java@v4
         with:
