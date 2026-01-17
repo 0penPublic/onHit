@@ -50,6 +50,7 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             packaging {
                 resources {
+                    excludes += "**/*.kotlin_builtins"
                     excludes += "DebugProbesKt.bin"
                     excludes += "META-INF/**"
                 }

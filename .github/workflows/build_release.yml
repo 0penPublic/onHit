@@ -1,5 +1,7 @@
 name: Build Release
-
+env:
+  VERSION: "1.0.0"
+  CHANGES: ""
 on:
   workflow_dispatch:
     inputs:
@@ -18,20 +20,18 @@ on:
         type: string
 
 jobs:
-  modify_version:
+  modify_version_and_build_release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    outputs:
-      version: ${{ steps.modify.outputs.version }}
-      new_sha: ${{ steps.get_sha.outputs.sha }}
+      packages: write
+      actions: read
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Modify Version
-        id: modify
         shell: bash
         run: |
           RAW_VERSION=$(grep "versionName =" app/build.gradle.kts | awk -F'["-]' '{print $2}')
@@ -49,34 +49,15 @@ jobs:
           sed -i -E \
             "s/versionName *= *\".*\"/versionName = \"$NEW_VERSION-\$currentGitHash\"/" \
             app/build.gradle.kts
-          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "VERSION=$NEW_VERSION" >> "$GITHUB_ENV"
 
       - name: Push to Repo
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app/build.gradle.kts
-          git commit -m "[skip ci] chore: bump version to ${{ steps.modify.outputs.version }}" || exit 0
+          git commit -m "[skip ci] chore: bump version to ${{ env.VERSION }}" || exit 0
           git push
-
-      - name: Get New SHA
-        id: get_sha
-        run: |
-          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-
-  build_and_release:
-    needs: modify_version
-    environment: main_build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
-      actions: read
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ needs.modify_version.outputs.new_sha }}
 
       - name: set up JDK 21
         uses: actions/setup-java@v4
@@ -117,11 +98,9 @@ jobs:
           path: app/build/outputs/apk/release/*
 
       - name: Prepare Release
-        env:
-            CHANGES: ""
         run: |
           PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)
-          CHANGELOG=$(git log "$PREV_TAG"..HEAD --pretty=format:"- %s" | grep -v "\[skip ci\]" || true)
+          CHANGELOG=$(git log "$PREV_TAG"..HEAD --reverse --pretty=format:"- %s" | grep -v "\[skip ci\]" || true)
           [ -z "$CHANGELOG" ] && CHANGELOG="- No notable changes"
           {
             echo "CHANGES<<EOF"
@@ -141,10 +120,10 @@ jobs:
 
       - uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ needs.modify_version.outputs.version }}
-          name: v${{ needs.modify_version.outputs.version }}
+          tag_name: v${{ env.VERSION }}
+          name: v${{ env.VERSION }}
           body: |
-            # Version ${{ needs.modify_version.outputs.version }}
+            # Version ${{ env.VERSION }}
             ## What's Changed
             ${{ env.CHANGES }}
             
@@ -166,4 +145,4 @@ jobs:
             wget https://raw.githubusercontent.com/0penPublic/onHit/refs/heads/misc/telegram_on_hit_ci_bot.py
             python3 -m pip install python-telegram-bot==22.5
 
-            python3 telegram_on_hit_ci_bot.py ${{ needs.modify_version.outputs.version }}
+            python3 telegram_on_hit_ci_bot.py ${{ env.VERSION }}
