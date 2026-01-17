@@ -59,11 +59,8 @@ android {
         viewBinding = true
         buildConfig = true
     }
-    applicationVariants.all {
-        outputs.all {
-            (this as BaseVariantOutputImpl).outputFileName =
-                "onHit-$versionName-$versionCode-$name.apk"
-        }
+    base {
+        archivesName.set("onHit-${android.defaultConfig.versionName}-${android.defaultConfig.versionCode}")
     }
 }
 
