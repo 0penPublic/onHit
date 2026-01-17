@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground"
+    android:background="?android:attr/colorBackgroundFloating"
     android:fitsSystemWindows="true">
 
     <LinearLayout
@@ -16,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingTop="24dp"
+            android:paddingTop="18dp"
             android:background="?android:attr/colorBackgroundFloating"
             android:elevation="4dp">
 
@@ -66,8 +66,8 @@
 
                     <ImageButton
                         android:id="@+id/btn_search"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
                         android:background="?android:attr/selectableItemBackgroundBorderless"
                         android:src="@drawable/baseline_search_24"
                         android:tint="?android:attr/textColorPrimary"
@@ -79,8 +79,8 @@
 
                     <ImageButton
                         android:id="@+id/btn_add"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
                         android:background="?android:attr/selectableItemBackgroundBorderless"
                         android:src="@drawable/baseline_add_24"
                         android:tint="?android:attr/textColorPrimary"
@@ -115,6 +115,7 @@
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/srl_layout"
+            android:background="?android:attr/colorBackground"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 

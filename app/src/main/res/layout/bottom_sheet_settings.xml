@@ -59,13 +59,35 @@
             android:gravity="center_vertical"
             android:padding="12dp">
 
-            <TextView
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/baseline_nfc_24"
+                android:tint="?android:attr/colorControlNormal"
+                android:contentDescription="@null" />
+
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/settings_enable_fixed_uid"
-                android:textSize="16sp"
-                android:textColor="?android:attr/textColorPrimary" />
+                android:paddingStart="16dp"
+                android:orientation="vertical"
+                android:gravity="start">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_enable_fixed_uid"
+                    android:textSize="16sp"
+                    android:textColor="?android:attr/textColorPrimary" />
+
+                <TextView
+                    android:id="@+id/tv_uid_config_summary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:textColor="?android:attr/textColorSecondary" />
+            </LinearLayout>
 
             <Switch
                 android:id="@+id/switch_fixed_uid"
@@ -78,9 +100,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="12dp"
-            android:autofillHints=""
+            android:importantForAutofill="no"
+            android:autofillHints="AUTOFILL_HINT_NONE"
+            android:privateImeOptions="nm"
             android:textSize="14sp"
-            android:inputType="textNoSuggestions"
+            android:inputType=""
             tools:ignore="LabelFor" />
 
         <View

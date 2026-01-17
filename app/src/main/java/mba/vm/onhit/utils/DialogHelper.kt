@@ -118,6 +118,7 @@ object DialogHelper {
         val btnChangeDir = dialog.findViewById<View>(R.id.btn_change_dir)
         val btnGithub = dialog.findViewById<View>(R.id.btn_github)
         val switchFixedUid = dialog.findViewById<Switch>(R.id.switch_fixed_uid)
+        val uidConfigSummary = dialog.findViewById<TextView>(R.id.tv_uid_config_summary)
         val etUidConfig = dialog.findViewById<EditText>(R.id.et_uid_config)
 
         btnChangeDir.setOnClickListener {
@@ -132,11 +133,11 @@ object DialogHelper {
 
         val isFixed = ConfigManager.isFixedUid(context)
         switchFixedUid.isChecked = isFixed
-        updateUidEditText(etUidConfig, isFixed, context)
+        updateUidEditText(uidConfigSummary, etUidConfig, isFixed, context)
 
         switchFixedUid.setOnCheckedChangeListener { _, isChecked ->
             ConfigManager.setFixedUid(context, isChecked)
-            updateUidEditText(etUidConfig, isChecked, context)
+            updateUidEditText(uidConfigSummary, etUidConfig, isChecked, context)
         }
 
         etUidConfig.addTextChangedListener(object : TextWatcher {
@@ -172,13 +173,15 @@ object DialogHelper {
         et.setTextColor(typedValue.data)
     }
 
-    private fun updateUidEditText(et: EditText, isFixed: Boolean, context: Context) {
+    private fun updateUidEditText(summary: TextView, et: EditText, isFixed: Boolean, context: Context) {
         if (isFixed) {
             et.hint = context.getString(R.string.settings_hint_fixed_uid)
+            summary.text = context.getString(R.string.settings_hint_fixed_uid)
             et.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
             et.setText(ConfigManager.getFixedUidValue(context))
         } else {
             et.hint = context.getString(R.string.settings_hint_random_uid_len)
+            summary.text = context.getString(R.string.settings_hint_random_uid_len)
             et.inputType = InputType.TYPE_CLASS_NUMBER
             et.setText(ConfigManager.getRandomUidLen(context))
         }
