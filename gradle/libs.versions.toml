@@ -1,6 +1,5 @@
 [versions]
-agp = "8.13.2"
-kotlin = "2.3.0"
+agp = "9.0.0"
 xposed-api = "82"
 ezxhelper = "3.1.1-rc1"
 core = "1.17.0"
@@ -20,4 +19,3 @@ androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "s
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

@@ -4,7 +4,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
 }
 
 android {
@@ -60,11 +59,8 @@ android {
         viewBinding = true
         buildConfig = true
     }
-    applicationVariants.all {
-        outputs.all {
-            (this as BaseVariantOutputImpl).outputFileName =
-                "onHit-$versionName-$versionCode-$name.apk"
-        }
+    base {
+        archivesName.set("onHit-${android.defaultConfig.versionName}-${android.defaultConfig.versionCode}")
     }
 }
 
