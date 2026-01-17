@@ -13,14 +13,14 @@ TARGET_CHAT: Final[str] = "@on_Hit"
 TARGET_TOPIC_ID: Final[int] = 271 if ARGS else 4
 CAPTION_TEMPLATE: Final[str] = """
 onHit v`{}` Release Build `{}`
-[onHit](https://github.com/0penPublic) | [{}](https://github.com/0penPublic/onHit/releases/tag/v{})
+[onHit](https://github.com/0penPublic) \| [{}](https://github.com/0penPublic/onHit/releases/tag/v{})
 [Official Telegram Group](https://t.me/on_hit)
 """ if ARGS else """
 onHit CI Build `{}`
 ```
 {}
 ```
-[onHit](https://github.com/0penPublic) | [Official Telegram Group](https://t.me/on_hit)
+[onHit](https://github.com/0penPublic) \| [Official Telegram Group](https://t.me/on_hit)
 """
 BUILD_TYPES: Final[list[str]] = ["debug", "release"]
 
