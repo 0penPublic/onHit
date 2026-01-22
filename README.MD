@@ -11,7 +11,7 @@
 ![GitHub Repo size](https://img.shields.io/github/repo-size/0penPublic/onHit?style=flat-square&color=3cb371)
 [![GitHub license](https://img.shields.io/github/license/0penPublic/onHit?style=flat-square)](LICENSE)
 [![GitHub Repo Languages](https://img.shields.io/github/languages/top/0penPublic/onHit?style=flat-square)](https://github.com/0penPublic/onHit/search?l=kotlin)
-[![Telegram](https://img.shields.io/badge/Telegram-onHit-blue.svg?style=flat-square&color=12b7f5)](https://t.me/@on_hit)
+[![Telegram](https://img.shields.io/badge/Telegram-onHit-blue.svg?style=flat-square&color=12b7f5)](https://t.me/on_hit)
 
 </div>
 
