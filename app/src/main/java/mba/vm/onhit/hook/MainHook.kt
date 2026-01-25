@@ -1,23 +1,18 @@
-package mba.vm.onhit
+package mba.vm.onhit.hook
 
 import de.robv.android.xposed.IXposedHookLoadPackage
-import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import io.github.kyuubiran.ezxhelper.xposed.EzXposed
-import mba.vm.onhit.hook.BaseHook
-import mba.vm.onhit.hook.NfcServiceHook
+import mba.vm.onhit.Constant.Companion.NFC_SERVICE_PACKAGE_NAME
 
-class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
+class MainHook : IXposedHookLoadPackage {
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
-        if (lpparam.packageName != "com.android.nfc") return
         EzXposed.initHandleLoadPackage(lpparam)
-        initHooks(NfcServiceHook, lpparam.classLoader)
-    }
-
-    override fun initZygote(startupParam: IXposedHookZygoteInit.StartupParam) {
-        EzXposed.initZygote(startupParam)
+        when (lpparam.packageName) {
+            NFC_SERVICE_PACKAGE_NAME -> initHooks(NfcServiceHook, lpparam.classLoader)
+        }
     }
 
     private fun initHooks(hook: BaseHook, classLoader: ClassLoader?) {

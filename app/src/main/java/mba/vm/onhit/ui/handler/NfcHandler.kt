@@ -1,4 +1,4 @@
-package mba.vm.onhit.utils
+package mba.vm.onhit.ui.handler
 
 import android.app.Activity
 import android.app.Dialog
@@ -9,13 +9,14 @@ import android.nfc.tech.Ndef
 import android.nfc.tech.NdefFormatable
 import android.widget.Toast
 import mba.vm.onhit.R
+import mba.vm.onhit.helper.DialogHelper
 
 class NfcHandler(private val activity: Activity) {
     private val nfcAdapter: NfcAdapter? = NfcAdapter.getDefaultAdapter(activity)
     private var nfcDialog: Dialog? = null
     private var pendingNdefData: ByteArray? = null
     private var isWritingMode = false
-    
+
     var onNdefRead: ((ByteArray) -> Unit)? = null
 
     fun isEnabled() = nfcAdapter?.isEnabled == true

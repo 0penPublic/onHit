@@ -52,4 +52,6 @@
     
     <string name="toast_import_success">Imported: %s</string>
     <string name="toast_import_failed">Import failed: %s</string>
+
+    <string name="title_save_to">Save %s to…</string>
 </resources>
