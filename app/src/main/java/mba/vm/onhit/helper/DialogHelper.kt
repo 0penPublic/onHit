@@ -1,4 +1,4 @@
-package mba.vm.onhit.utils
+package mba.vm.onhit.helper
 
 import android.app.Dialog
 import android.content.Context
@@ -21,6 +21,7 @@ import android.widget.TextView
 import mba.vm.onhit.Constant
 import mba.vm.onhit.R
 import mba.vm.onhit.core.ConfigManager
+import mba.vm.onhit.utils.HexUtils
 
 object DialogHelper {
 
@@ -50,12 +51,12 @@ object DialogHelper {
         val etInput = dialog.findViewById<EditText>(R.id.et_input)
         val btnOk = dialog.findViewById<Button>(R.id.btn_ok)
         val btnCancel = dialog.findViewById<Button>(R.id.btn_cancel)
-        
+
         dialog.findViewById<TextView>(R.id.tv_title).text = title
         etInput.setText(defaultText)
         btnOk.setText(android.R.string.ok)
         btnCancel.setText(android.R.string.cancel)
-        
+
         btnOk.setOnClickListener {
             val text = etInput.text.toString()
             if (text.isNotEmpty()) {
@@ -77,7 +78,7 @@ object DialogHelper {
         dialog.findViewById<TextView>(R.id.tv_title).text = title
         val etInput = dialog.findViewById<EditText>(R.id.et_input)
         etInput.visibility = View.GONE
-        
+
         val tvMsg = TextView(context).apply {
             text = message
             textSize = 16f
@@ -87,7 +88,7 @@ object DialogHelper {
 
         val btnOk = dialog.findViewById<Button>(R.id.btn_ok)
         val btnCancel = dialog.findViewById<Button>(R.id.btn_cancel)
-        
+
         btnOk.setText(android.R.string.cancel)
         btnCancel.setText(android.R.string.ok)
         btnCancel.setTextColor(0xFFFF5252.toInt())
@@ -114,7 +115,7 @@ object DialogHelper {
 
     fun showSettingsSheet(context: Context, onChangeDir: () -> Unit) {
         val dialog = createBottomDialog(context, R.layout.bottom_sheet_settings)
-        
+
         val btnChangeDir = dialog.findViewById<View>(R.id.btn_change_dir)
         val btnGithub = dialog.findViewById<View>(R.id.btn_github)
         val switchFixedUid = dialog.findViewById<Switch>(R.id.switch_fixed_uid)

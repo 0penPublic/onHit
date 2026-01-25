@@ -23,10 +23,10 @@ import mba.vm.onhit.Constant.Companion.MAX_OF_BROADCAST_SIZE
 import mba.vm.onhit.R
 import mba.vm.onhit.core.ConfigManager
 import mba.vm.onhit.databinding.ActivityMainBinding
+import mba.vm.onhit.helper.DialogHelper
+import mba.vm.onhit.ui.handler.NfcHandler
 import mba.vm.onhit.ui.model.FileData
-import mba.vm.onhit.utils.DialogHelper
 import mba.vm.onhit.utils.FileUtils
-import mba.vm.onhit.utils.NfcHandler
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -47,10 +47,13 @@ class MainActivity : Activity() {
     private val executor = Executors.newSingleThreadExecutor()
     private var isRefreshing = false
 
+    private var pendingImportUri: Uri? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        handleIntent(intent)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -64,12 +67,7 @@ class MainActivity : Activity() {
         binding.rvFiles.adapter = adapter
 
         setupListeners()
-
-        if (!restoreLastDirectory()) {
-            requestSelectDirectory()
-        } else {
-            handleIntent(intent)
-        }
+        if (!restoreLastDirectory()) requestSelectDirectory()
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -116,27 +114,35 @@ class MainActivity : Activity() {
     }
 
     private fun importFile(uri: Uri) {
+        pendingImportUri = uri
         val fileName = FileUtils.getFileName(this, uri) ?: "imported_${System.currentTimeMillis()}.ndef"
-        if (currentDir == null) {
+        binding.tvAppTitle.text = getString(R.string.title_save_to, fileName)
+        binding.fabSettings.setImageResource(R.drawable.baseline_save_24)
+        binding.btnSearch.visibility = View.GONE
+    }
+
+    private fun performImportSave() {
+        val uri = pendingImportUri ?: return
+        val dir = currentDir ?: run {
             Toast.makeText(this, R.string.path_not_selected, Toast.LENGTH_SHORT).show()
             return
         }
+        val fileName = FileUtils.getFileName(this, uri) ?: "imported_${System.currentTimeMillis()}.ndef"
+        
         try {
             contentResolver.openInputStream(uri)?.use { input ->
                 val data = input.readBytes()
-                val file = currentDir?.createFile("application/octet-stream", fileName)
+                val file = dir.createFile("application/octet-stream", fileName)
                 file?.uri?.let { destUri ->
                     contentResolver.openOutputStream(destUri)?.use { output ->
                         output.write(data)
                     }
-                    refreshCurrentDir()
                     Toast.makeText(this, getString(R.string.toast_import_success, fileName), Toast.LENGTH_SHORT).show()
+                    finishAndRemoveTask()
                 }
             }
         } catch (e: Exception) {
             Toast.makeText(this, getString(R.string.toast_import_failed, e.message), Toast.LENGTH_SHORT).show()
-        } finally {
-            refreshCurrentDir()
         }
     }
 
@@ -167,8 +173,12 @@ class MainActivity : Activity() {
     }
 
     private fun setupListeners() {
-        binding.fabSettings.setOnClickListener { 
-            DialogHelper.showSettingsSheet(this) { requestSelectDirectory() }
+        binding.fabSettings.setOnClickListener {
+            if (pendingImportUri != null) {
+                performImportSave()
+            } else {
+                DialogHelper.showSettingsSheet(this) { requestSelectDirectory() }
+            }
         }
 
         binding.btnAdd.setOnClickListener { view ->
@@ -241,9 +251,13 @@ class MainActivity : Activity() {
         } else if (fileData.isDirectory) {
             fileData.documentFile?.let { navigateTo(it) }
         } else if (fileData.isNdef) {
-            simulateNdefTag(fileData)
+            pendingImportUri ?: run {
+                simulateNdefTag(fileData)
+            }
         } else {
-            Toast.makeText(this, R.string.toast_not_ndef_file, Toast.LENGTH_SHORT).show()
+            pendingImportUri ?: run {
+                Toast.makeText(this, R.string.toast_not_ndef_file, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -263,7 +277,6 @@ class MainActivity : Activity() {
         try {
             val ndef = NdefMessage(ndefBytes)
             val uid = ConfigManager.getUid(this)
-            
             val intent = Intent(Constant.BROADCAST_TAG_EMULATOR_REQUEST).apply {
                 putExtra("uid", uid)
                 putExtra("ndef", ndef)
@@ -289,7 +302,8 @@ class MainActivity : Activity() {
     private fun showAddPopupMenu(view: View) {
         val popup = PopupMenu(this, view)
         popup.menu.add(0, 1, 0, R.string.menu_add_folder)
-        if (nfcHandler.isEnabled()) popup.menu.add(0, 2, 2, R.string.import_ndef)
+        if (nfcHandler.isEnabled() &&
+            pendingImportUri == null) popup.menu.add(0, 2, 2, R.string.import_ndef)
 
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
@@ -316,11 +330,12 @@ class MainActivity : Activity() {
     }
 
     private fun showItemPopupMenu(view: View, fileData: FileData) {
+        if (pendingImportUri != null) return
         if (fileData.isParent) return
         val popup = PopupMenu(this, view)
         popup.menu.add(0, 1, 0, R.string.menu_rename)
         popup.menu.add(0, 2, 1, R.string.menu_delete)
-        if (fileData.isNdef && nfcHandler.isEnabled()) popup.menu.add(0, 3, 2, R.string.menu_write_to_tag)
+        if (fileData.isNdef && nfcHandler.isEnabled() && pendingImportUri == null) popup.menu.add(0, 3, 2, R.string.menu_write_to_tag)
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 1 -> DialogHelper.showInputBottomSheet(this, getString(R.string.menu_rename), fileData.name) { newName ->

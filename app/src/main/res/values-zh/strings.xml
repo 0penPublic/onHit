@@ -52,4 +52,5 @@
     
     <string name="toast_import_success">已导入: %s</string>
     <string name="toast_import_failed">导入失败: %s</string>
+    <string name="title_save_to">将 %s 保存至…</string>
 </resources>

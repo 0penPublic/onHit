@@ -2,6 +2,7 @@ package mba.vm.onhit
 
 class Constant {
     companion object {
+        const val NFC_SERVICE_PACKAGE_NAME = "com.android.nfc"
         const val BROADCAST_TAG_EMULATOR_REQUEST = "${BuildConfig.APPLICATION_ID}.TAG_EMULATOR_REQUEST"
         const val SHARED_PREFERENCES_NAME = BuildConfig.APPLICATION_ID
         const val SHARED_PREFERENCES_CHOSEN_FOLDER = "chosen_folder"

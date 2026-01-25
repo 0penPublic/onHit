@@ -3,13 +3,10 @@
 -overloadaggressively
 -dontskipnonpubliclibraryclasses
 -dontpreverify
--renamesourcefileattribute SourceFile
--keepattributes SourceFile,LineNumberTable
 
--keep class mba.vm.onhit.MainHook {
+-keep class mba.vm.onhit.hook.MainHook {
     <init>();
     void handleLoadPackage(...);
-    void initZygote(...);
 }
 
 -assumenosideeffects class android.util.Log {
