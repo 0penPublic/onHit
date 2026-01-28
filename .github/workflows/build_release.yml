@@ -1,7 +1,6 @@
 name: Build Release
 env:
   VERSION: "1.0.0"
-  CHANGES: ""
 on:
   workflow_dispatch:
     inputs:
@@ -98,25 +97,14 @@ jobs:
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: onHit-debug
+          name: onHit-v${{ env.VERSION }}-debug
           path: app/build/outputs/apk/debug/*
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: onHit-release
+          name: onHit-v${{ env.VERSION }}-release
           path: app/build/outputs/apk/release/*
-
-      - name: Prepare Release
-        run: |
-          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)
-          CHANGELOG=$(git log "$PREV_TAG"..HEAD --reverse --pretty=format:"- %s" | grep -v "\[skip ci\]" || true)
-          [ -z "$CHANGELOG" ] && CHANGELOG="- No notable changes"
-          {
-            echo "CHANGES<<EOF"
-            echo "$CHANGELOG"
-            echo "EOF"
-          } >> "$GITHUB_ENV"
 
       - name: Packing Mapping
         run: |
@@ -128,15 +116,20 @@ jobs:
             zip mapping.zip /dev/null
           fi
 
-      - uses: softprops/action-gh-release@v1
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.VERSION }}
           name: v${{ env.VERSION }}
+          generate_release_notes: true
+          draft: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: v${{ env.VERSION }}
+          append_body: true
           body: |
-            # Version ${{ env.VERSION }}
-            ## What's Changed
-            ${{ env.CHANGES }}
-            
             ---
             
             ***Mapping files are provided for internal debugging and crash symbolication only.***
@@ -150,9 +143,9 @@ jobs:
             mapping.zip
 
       - name: Send To Telegram Group
+        env:
+            TELEGRAM_BOT_TOKEN: ${{secrets.TELEGRAM_BOT_TOKEN}}
         run: |
-            export TELEGRAM_BOT_TOKEN=${{secrets.TELEGRAM_BOT_TOKEN}}
             wget https://raw.githubusercontent.com/0penPublic/onHit/refs/heads/misc/telegram_on_hit_ci_bot.py
             python3 -m pip install python-telegram-bot==22.5
-
-            python3 telegram_on_hit_ci_bot.py ${{ env.VERSION }}
+            python3 telegram_on_hit_ci_bot.py "${{ env.VERSION }}"

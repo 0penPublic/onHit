@@ -6,6 +6,9 @@ permissions:
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - '.github/workflows/android_on_push.yml'
+      - 'app/**'
     
 jobs:
   build:
