@@ -6,7 +6,6 @@ import android.nfc.NdefMessage
 import android.os.Bundle
 import androidx.core.content.ContextCompat
 import de.robv.android.xposed.XposedHelpers.findClass
-import io.github.kyuubiran.ezxhelper.android.logging.Logger
 import io.github.kyuubiran.ezxhelper.core.finder.MethodFinder
 import io.github.kyuubiran.ezxhelper.core.helper.ObjectHelper.`-Static`.objectHelper
 import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createHook
@@ -27,9 +26,6 @@ object NfcServiceHook : BaseHook() {
 
     override val name: String = this::class.simpleName!!
 
-    fun log(text: String) = if (BuildConfig.DEBUG) Logger.i("[ onHit ] [ $name ] $text") else Unit
-
-
     override fun init(classLoader: ClassLoader?) {
         classLoader?.let {
             nfcClassLoader = classLoader
@@ -37,7 +33,6 @@ object NfcServiceHook : BaseHook() {
             log("nfcClassLoader is null")
             return
         }
-
         tagEndpointInterface = findClass($$"com.android.nfc.DeviceHost$TagEndpoint", nfcClassLoader)
         MethodFinder.fromClass("com.android.nfc.NfcApplication", nfcClassLoader)
             .filterByName("onCreate")
@@ -53,6 +48,7 @@ object NfcServiceHook : BaseHook() {
                         dispatchTagEndpoint = MethodFinder.fromClass(nfcServiceHandler::class)
                             .filterByName("dispatchTagEndpoint")
                             .first()
+                        if (BuildConfig.DEBUG) nfcService.objectHelper().setObject("DBG", true)
                         ContextCompat.registerReceiver(
                             app,
                             NfcServiceHookBroadcastReceiver(),

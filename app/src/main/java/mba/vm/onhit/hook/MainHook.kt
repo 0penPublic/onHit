@@ -11,11 +11,14 @@ class MainHook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
         EzXposed.initHandleLoadPackage(lpparam)
         when (lpparam.packageName) {
-            NFC_SERVICE_PACKAGE_NAME -> initHooks(NfcServiceHook, lpparam.classLoader)
+            NFC_SERVICE_PACKAGE_NAME -> {
+                initHook(NfcServiceHook, lpparam.classLoader)
+                initHook(NfcDispatchManagerHook, lpparam.classLoader)
+            }
         }
     }
 
-    private fun initHooks(hook: BaseHook, classLoader: ClassLoader?) {
+    private fun initHook(hook: BaseHook, classLoader: ClassLoader?) {
         try {
             hook.init(classLoader)
         } catch (e: Exception) {
