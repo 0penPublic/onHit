@@ -1,5 +1,8 @@
 name: Sync Release to Xposed-Modules-Repo
 
+permissions:
+  contents: read
+
 on:
   release:
     types: [published]
