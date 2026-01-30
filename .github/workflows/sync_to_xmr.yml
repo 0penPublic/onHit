@@ -1,0 +1,56 @@
+name: Sync Release to Xposed-Modules-Repo
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: main_build
+    steps:
+      - name: Fetch Release Assets
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          version: tags/${{ github.event.release.tag_name }}
+          regex: true
+          file: ".*\\.(apk|zip)" 
+          target: "sync-assets/"
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Parse Version from Filename
+        id: parse_version
+        run: |
+          FILENAME=$(ls sync-assets/ | grep "-release.apk" | head -n 1)
+          if [ -z "$FILENAME" ]; then
+            echo "Error: No APK file found with suffix -release.apk"
+            exit 1
+          fi
+          echo "Found file: $FILENAME"
+          TEMP_STR=${FILENAME#onHit-}
+          TEMP_STR=${TEMP_STR%-release.apk}
+          
+          VC=${TEMP_STR##*-}
+          VN=${TEMP_STR%-*}
+          
+          XMR_TAG="${VC}-${VN}"
+          
+          echo "Extracted VersionCode: $VC"
+          echo "Extracted VersionName: $VN"
+          echo "Target XMR Tag: $XMR_TAG"
+          
+          echo "xmr_tag=$XMR_TAG" >> $GITHUB_OUTPUT
+          echo "version_name=$VN" >> $GITHUB_OUTPUT
+
+      - name: Upload to Xposed Repo
+        uses: softprops/action-gh-release@v2
+        with:
+          repository: Xposed-Modules-Repo/mba.vm.onhit
+          token: ${{ secrets.XPOSED_MODULES_REPO_PUBLISH_TOKEN }}
+          tag_name: ${{ steps.parse_version.outputs.xmr_tag }}
+          name: ${{ github.event.release.name || steps.parse_version.outputs.version_name }}
+          body: ${{ github.event.release.body }}
+          files: "sync-assets/*"
+          draft: false
+          prerelease: false
