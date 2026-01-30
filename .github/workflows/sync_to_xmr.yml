@@ -11,13 +11,15 @@ jobs:
     environment: main_build
     steps:
       - name: Fetch Release Assets
-        uses: dsaltares/fetch-gh-release-asset@master
-        with:
-          version: tags/${{ github.event.release.tag_name }}
-          regex: true
-          file: ".*\\.(apk|zip)" 
-          target: "sync-assets/"
-          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TARGET_TAG=${{ github.event.release.tag_name || 'latest' }}
+          echo "Fetching assets for tag: $TARGET_TAG"
+          mkdir -p sync-assets
+          gh release download "$TARGET_TAG" --repo ${{ github.repository }} --pattern "*.apk" --dir sync-assets/
+          gh release download "$TARGET_TAG" --repo ${{ github.repository }} --pattern "*.zip" --dir sync-assets/
+          ls -R sync-assets/
 
       - name: Parse Version from Filename
         id: parse_version
@@ -53,4 +55,5 @@ jobs:
           body: ${{ github.event.release.body }}
           files: "sync-assets/*"
           draft: false
+
           prerelease: false
