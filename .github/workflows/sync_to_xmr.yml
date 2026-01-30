@@ -35,24 +35,21 @@ jobs:
       - name: Parse Version from Filename
         id: parse_version
         run: |
-          FILENAME=$(ls sync-assets/ | grep "-release.apk" | head -n 1)
-          if [ -z "$FILENAME" ]; then
-            echo "Error: No APK file found with suffix -release.apk"
+          FULL_PATH=$(find sync-assets/ -name "*-release.apk" | head -n 1)
+          if [ -z "$FULL_PATH" ]; then
+            echo "Error: No APK file found in sync-assets/"
             exit 1
           fi
+          FILENAME=$(basename "$FULL_PATH")
           echo "Found file: $FILENAME"
           TEMP_STR=${FILENAME#onHit-}
           TEMP_STR=${TEMP_STR%-release.apk}
-          
           VC=${TEMP_STR##*-}
           VN=${TEMP_STR%-*}
-          
           XMR_TAG="${VC}-${VN}"
-          
           echo "Extracted VersionCode: $VC"
           echo "Extracted VersionName: $VN"
           echo "Target XMR Tag: $XMR_TAG"
-          
           echo "xmr_tag=$XMR_TAG" >> $GITHUB_OUTPUT
           echo "version_name=$VN" >> $GITHUB_OUTPUT
 
@@ -67,3 +64,4 @@ jobs:
           files: "sync-assets/*"
           draft: false
           prerelease: false
+
