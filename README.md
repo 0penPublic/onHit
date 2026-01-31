@@ -107,3 +107,7 @@ You may use, modify, and redistribute this software under the terms of GPLv2.
 Any derivative work must also be distributed under the same license.
 
 See the `LICENSE` file for full license text.
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=0penPublic/onHit&type=date&legend=top-left)](https://www.star-history.com/#0penPublic/onHit&type=date&legend=top-left)
