@@ -1,0 +1,43 @@
+name: Sync Readme to Xposed-Modules-Repo
+
+env:
+    TARGET_REPO: "Xposed-Modules-Repo/mba.vm.onhit"
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'README.md'
+
+jobs:
+    sync:
+        environment: main_build
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
+                repository: ${{ env.TARGET_REPO }}
+                token: ${{ secrets.XPOSED_MODULES_REPO_PUBLISH_TOKEN }}
+
+            - name: Fetch Raw README
+              run: |
+                curl -sSL https://raw.githubusercontent.com/0penPublic/onHit/main/README.md -o README.md
+            
+            - name: Push to Repo
+              run: |
+                git config user.name "onHitReleaseBot"
+                git config user.email "onhit_release_bot@vm.mba"
+                git add README.md
+
+                if git diff --staged --quiet; then
+                    echo "No changes to sync."
+                else
+                    git commit -m "sync: Update README.md from source" \
+                        -m "Co-authored-by: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>"
+                    git push
+                fi
