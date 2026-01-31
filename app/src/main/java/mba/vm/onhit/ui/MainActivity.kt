@@ -123,26 +123,26 @@ class MainActivity : Activity() {
 
     private fun performImportSave() {
         val uri = pendingImportUri ?: return
-        val dir = currentDir ?: run {
+        currentDir ?: run {
             Toast.makeText(this, R.string.path_not_selected, Toast.LENGTH_SHORT).show()
             return
         }
         val fileName = FileUtils.getFileName(this, uri) ?: "imported_${System.currentTimeMillis()}.ndef"
-        
         try {
             contentResolver.openInputStream(uri)?.use { input ->
                 val data = input.readBytes()
-                val file = dir.createFile("application/octet-stream", fileName)
-                file?.uri?.let { destUri ->
-                    contentResolver.openOutputStream(destUri)?.use { output ->
-                        output.write(data)
+                DialogHelper.showInputBottomSheet(this, getString(R.string.dialog_title_save_ndef), fileName) { name ->
+                    val file = currentDir?.createFile("application/octet-stream", name)
+                    file?.uri?.let { uri ->
+                        contentResolver.openOutputStream(uri)?.use { it.write(data) }
                     }
-                    Toast.makeText(this, getString(R.string.toast_import_success, fileName), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, R.string.toast_import_success, Toast.LENGTH_SHORT).show()
                     finishAndRemoveTask()
                 }
             }
         } catch (e: Exception) {
             Toast.makeText(this, getString(R.string.toast_import_failed, e.message), Toast.LENGTH_SHORT).show()
+            finishAndRemoveTask()
         }
     }
 

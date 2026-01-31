@@ -101,7 +101,6 @@ object NfcServiceHook : BaseHook() {
                     arrayOf(ndefBundle)
                 }
                 "getHandle" -> 0
-                "isPresent" -> true
                 else -> {
                     when (method.returnType) {
                         Boolean::class.javaPrimitiveType -> false
