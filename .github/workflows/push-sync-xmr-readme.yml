@@ -14,6 +14,7 @@ on:
 
 jobs:
     sync:
+        if: github.repository == '0penPublic/onHit'
         environment: main_build
         runs-on: ubuntu-latest
 
