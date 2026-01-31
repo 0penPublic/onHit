@@ -116,16 +116,20 @@ jobs:
             zip mapping.zip /dev/null
           fi
 
+      - name: Move release files
+        run: |
+          mkdir -p release_assets
+          cp app/build/outputs/apk/debug/*.apk release_assets/
+          cp app/build/outputs/apk/release/*.apk release_assets/
+          mv mapping.zip release_assets/
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.VERSION }}
           name: v${{ env.VERSION }}
           body: |
-            ## v${{ env.VERSION }}
-            
-            ***Mapping files are provided for internal debugging and crash symbolication only.***
-            
+            ## v${{ env.VERSION }}            
             ${{ inputs.update_description }}
 
             
@@ -133,11 +137,57 @@ jobs:
           prerelease: false
           append_body: true
           generate_release_notes: true
-          files: |
-            app/build/outputs/apk/debug/*.apk
-            app/build/outputs/apk/release/*.apk
-            mapping.zip
+          files: "release_assets/*"
+        
+      - name: Parse Version from Filename
+        id: parse_version
+        run: |
+          FULL_PATH=$(find release_assets/ -name "*-release.apk" | head -n 1)
+          if [ -z "$FULL_PATH" ]; then
+            echo "Error: No APK file found in release_assets/"
+            exit 1
+          fi
+          FILENAME=$(basename "$FULL_PATH")
+          echo "Found file: $FILENAME"
+          TEMP_STR=${FILENAME#onHit-}
+          TEMP_STR=${TEMP_STR%-release.apk}
+          VC=${TEMP_STR##*-}
+          VN=${TEMP_STR%-*}
+          XMR_TAG="${VC}-${VN}"
+          echo "Extracted VersionCode: $VC"
+          echo "Extracted VersionName: $VN"
+          echo "Target XMR Tag: $XMR_TAG"
+          echo "xmr_tag=$XMR_TAG" >> $GITHUB_OUTPUT
+          echo "version_name=$VN" >> $GITHUB_OUTPUT
+          rm -rf release_assets/mapping.zip
 
+      - name: Fetch Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: fetch_release
+        run: |
+          TARGET_TAG="v${{ env.VERSION }}"
+          echo "Target Tag to sync: $TARGET_TAG"
+          REL_JSON=$(gh release view "$TARGET_TAG" --json body,name)
+          REL_NAME=$(echo "$REL_JSON" | jq -r '.name')
+          REL_BODY=$(echo "$REL_JSON" | jq -r '.body')
+          echo "rel_name=$REL_NAME" >> $GITHUB_OUTPUT
+          echo "rel_body<<EOF" >> $GITHUB_OUTPUT
+          echo "$REL_BODY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: Upload to Xposed Repo
+        uses: softprops/action-gh-release@v2
+        with:
+          repository: Xposed-Modules-Repo/mba.vm.onhit
+          token: ${{ secrets.XPOSED_MODULES_REPO_PUBLISH_TOKEN }}
+          tag_name: ${{ steps.parse_version.outputs.xmr_tag }}
+          name: ${{ steps.fetch_release.outputs.rel_name || steps.parse_version.outputs.version_name }}
+          body: ${{ steps.fetch_release.outputs.rel_body }}
+          files: "release_assets/*"
+          draft: false
+          prerelease: false
+      
       - name: Send To Telegram Group
         env:
             TELEGRAM_BOT_TOKEN: ${{secrets.TELEGRAM_BOT_TOKEN}}
