@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackgroundFloating"
+    android:background="?android:attr/colorBackground"
     android:fitsSystemWindows="true">
 
     <LinearLayout
@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingTop="18dp"
-            android:background="?android:attr/colorBackgroundFloating"
+            android:background="?android:attr/colorBackground"
             android:elevation="4dp">
 
             <RelativeLayout
@@ -105,7 +105,7 @@
                     android:paddingHorizontal="24dp"
                     android:layout_margin="8dp"
                     android:paddingVertical="4dp"
-                    android:background="?android:attr/selectableItemBackground"
+                    android:background="?android:attr/colorBackground"
                     android:clickable="true"
                     android:focusable="true"
                     android:singleLine="true"
@@ -115,7 +115,7 @@
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/srl_layout"
-            android:background="?android:attr/colorBackground"
+            android:background="?android:attr/colorBackgroundFloating"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -140,6 +140,7 @@
         android:background="@drawable/bg_circle_icon"
         android:src="@drawable/baseline_settings_24"
         android:tint="?android:attr/textColorPrimary"
+        android:backgroundTint="?android:attr/colorBackground"
         android:elevation="6dp"
         android:contentDescription="@string/setting" />
 

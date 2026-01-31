@@ -17,7 +17,7 @@
         android:padding="10dp"
         android:src="@drawable/baseline_folder_24"
         android:background="@drawable/bg_circle_icon"
-        android:backgroundTint="#1A888888"
+        android:backgroundTint="?android:attr/colorBackground"
         android:tint="?android:attr/textColorSecondary" />
 
     <LinearLayout

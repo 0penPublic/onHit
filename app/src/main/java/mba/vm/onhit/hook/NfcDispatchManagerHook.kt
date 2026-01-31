@@ -29,7 +29,7 @@ object NfcDispatchManagerHook : BaseHook() {
             .filterByName("checkForegroundDiretWhiteList")
             .first()
             .createHook {
-                after { param ->
+                before { param ->
                     val pkg = param.args[0] as String
                     // If the package is our app, force the method to return false
                     // Effect: NFC dispatch will not treat this app as whitelisted
