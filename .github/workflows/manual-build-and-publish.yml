@@ -141,6 +141,7 @@ jobs:
         
       - name: Parse Version from Filename
         id: parse_version
+        if: github.repository == '0penPublic/onHit'
         run: |
           FULL_PATH=$(find release_assets/ -name "*-release.apk" | head -n 1)
           if [ -z "$FULL_PATH" ]; then
@@ -165,6 +166,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         id: fetch_release
+        if: github.repository == '0penPublic/onHit'
         run: |
           TARGET_TAG="v${{ env.VERSION }}"
           echo "Target Tag to sync: $TARGET_TAG"
@@ -178,6 +180,7 @@ jobs:
       
       - name: Upload to Xposed Repo
         uses: softprops/action-gh-release@v2
+        if: github.repository == '0penPublic/onHit'
         with:
           repository: Xposed-Modules-Repo/mba.vm.onhit
           token: ${{ secrets.XPOSED_MODULES_REPO_PUBLISH_TOKEN }}
@@ -189,6 +192,7 @@ jobs:
           prerelease: false
       
       - name: Send To Telegram Group
+        if: github.repository == '0penPublic/onHit'
         env:
             TELEGRAM_BOT_TOKEN: ${{secrets.TELEGRAM_BOT_TOKEN}}
         run: |
