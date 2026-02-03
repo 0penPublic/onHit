@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.IntentFilter
 import android.nfc.NdefMessage
 import android.os.Bundle
+import android.os.Handler
 import androidx.core.content.ContextCompat
 import de.robv.android.xposed.XposedHelpers.findClass
 import io.github.kyuubiran.ezxhelper.core.finder.MethodFinder
@@ -11,6 +12,7 @@ import io.github.kyuubiran.ezxhelper.core.helper.ObjectHelper.`-Static`.objectHe
 import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createHook
 import mba.vm.onhit.BuildConfig
 import mba.vm.onhit.Constant
+import mba.vm.onhit.Constant.Companion.MAX_OF_BROADCAST_SIZE
 import mba.vm.onhit.core.TagTechnology
 import mba.vm.onhit.hook.boardcast.NfcServiceHookBroadcastReceiver
 import java.lang.reflect.Method
@@ -18,21 +20,16 @@ import java.lang.reflect.Proxy
 
 
 object NfcServiceHook : BaseHook() {
-    private lateinit var nfcServiceHandler: Any
     private lateinit var nfcService: Any
+    private lateinit var nfcServiceHandler: Handler
     private lateinit var nfcClassLoader: ClassLoader
     private lateinit var dispatchTagEndpoint: Method
     private lateinit var tagEndpointInterface: Class<*>
 
-    override val name: String = this::class.simpleName!!
+    override val name: String = this.javaClass.simpleName
 
-    override fun init(classLoader: ClassLoader?) {
-        classLoader?.let {
-            nfcClassLoader = classLoader
-        } ?: run {
-            log("nfcClassLoader is null")
-            return
-        }
+    override fun init(classLoader: ClassLoader) {
+        nfcClassLoader = classLoader
         tagEndpointInterface = findClass($$"com.android.nfc.DeviceHost$TagEndpoint", nfcClassLoader)
         MethodFinder.fromClass("com.android.nfc.NfcApplication", nfcClassLoader)
             .filterByName("onCreate")
@@ -42,10 +39,14 @@ object NfcServiceHook : BaseHook() {
                     val app = params.thisObject as? Application
                     app?.let {
                         nfcService = app.objectHelper().getObjectOrNull("mNfcService") ?: run {
-                            log("Cannot get NFC Service now")
+                            log("Cannot get NFC Service now, Hook Failed. Is NFC Service Working?")
+                            return@after
                         }
-                        nfcServiceHandler = nfcService.objectHelper().getObjectOrNull("mHandler")!!
-                        dispatchTagEndpoint = MethodFinder.fromClass(nfcServiceHandler::class)
+                        nfcServiceHandler = nfcService.objectHelper().getObjectOrNull("mHandler") as? Handler?: run {
+                            log("Cannot get NFC Service Handler, Hook Failed.")
+                            return@after
+                        }
+                        dispatchTagEndpoint = MethodFinder.fromClass(nfcServiceHandler.javaClass)
                             .filterByName("dispatchTagEndpoint")
                             .first()
                         if (BuildConfig.DEBUG) nfcService.objectHelper().setObject("DBG", true)
@@ -67,12 +68,15 @@ object NfcServiceHook : BaseHook() {
         ndef: NdefMessage?
     ) {
         val tag = buildFakeTag(uid, ndef)
-        dispatchTagEndpoint.invoke(
-            nfcServiceHandler,
-            tag, nfcService.objectHelper().getObjectOrNull("mReaderModeParams")) ?: run {
-            log("mReaderModeParams is null")
+        nfcServiceHandler.post {
+            dispatchTagEndpoint.invoke(
+                nfcServiceHandler,
+                tag,
+                nfcService.objectHelper().getObjectOrNull("mReaderModeParams")
+            )
         }
     }
+
 
     private fun buildFakeTag(
         uid: ByteArray,
@@ -94,9 +98,9 @@ object NfcServiceHook : BaseHook() {
                 "getTechExtras" -> {
                     val ndefBundle = Bundle().apply {
                         putParcelable("ndefmsg", ndef)
-                        putInt("ndefmaxlength", Int.MAX_VALUE)
+                        putInt("ndefmaxlength", MAX_OF_BROADCAST_SIZE)
                         putInt("ndefcardstate", 1)
-                        putInt("ndeftype", 4)
+                        putInt("ndeftype", 2)
                     }
                     arrayOf(ndefBundle)
                 }
