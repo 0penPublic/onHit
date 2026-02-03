@@ -17,7 +17,7 @@ object PackageManagerHook : BaseHook() {
                 before { param ->
                     log("hasSystemFeature called in ${param.thisObject.javaClass.name}")
                     if (param.args.isEmpty()) return@before
-                    if (param.args[0] as? String in PACKAGE_MANAGER_SYSTEM_NFC_FEATURES) param.result = false
+                    if (param.args[0] as? String in PACKAGE_MANAGER_SYSTEM_NFC_FEATURES) param.result = true
                 }
             }
     }
