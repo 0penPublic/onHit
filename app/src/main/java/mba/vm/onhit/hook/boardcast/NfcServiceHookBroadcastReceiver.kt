@@ -5,13 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.nfc.NdefMessage
 import androidx.core.content.IntentCompat
-import io.github.kyuubiran.ezxhelper.android.logging.Logger
 import mba.vm.onhit.Constant
+import mba.vm.onhit.hook.NfcDispatchManagerHook.log
 import mba.vm.onhit.hook.NfcServiceHook
 
 class NfcServiceHookBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        Logger.i("${this.javaClass.name} onReceive: ${intent.action}")
+        log("${this.javaClass.name} onReceive: ${intent.action}")
         when (intent.action) {
             Constant.BROADCAST_TAG_EMULATOR_REQUEST -> {
                 val uid = intent.getByteArrayExtra("uid")

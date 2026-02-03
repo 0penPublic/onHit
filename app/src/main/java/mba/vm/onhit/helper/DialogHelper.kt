@@ -155,7 +155,7 @@ object DialogHelper {
                     ConfigManager.setFixedUidValue(context, hex)
                 } else {
                     val len = input.toIntOrNull()
-                    if (len != null && len in 0..65536) {
+                    if (len != null && len in 0..65535) {
                         setNormalTextColor(etUidConfig, context)
                         ConfigManager.setRandomUidLen(context, input)
                     } else {
