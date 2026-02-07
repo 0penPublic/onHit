@@ -8,27 +8,28 @@
 ![Release Download](https://img.shields.io/github/downloads/0penPublic/onHit/total?style=flat-square)
 [![Release Version](https://img.shields.io/github/v/release/0penPublic/onHit?style=flat-square)](https://github.com/0penPublic/onHit/releases/latest)  
 [![GitHub Star](https://img.shields.io/github/stars/0penPublic/onHit?style=flat-square)](https://github.com/0penPublic/onHit/stargazers)
+[![GitHub Star](https://img.shields.io/github/stars/Xposed-Modules-Repo/mba.vm.onhit?style=flat-square)](https://github.com/Xposed-Modules-Repo/mba.vm.onhit/stargazers)
 [![GitHub Fork](https://img.shields.io/github/forks/0penPublic/onHit?style=flat-square)](https://github.com/0penPublic/onHit/network/members)
 ![GitHub Repo size](https://img.shields.io/github/repo-size/0penPublic/onHit?style=flat-square&color=3cb371)
 [![GitHub license](https://img.shields.io/github/license/0penPublic/onHit?style=flat-square)](LICENSE)
 [![GitHub Repo Languages](https://img.shields.io/github/languages/top/0penPublic/onHit?style=flat-square)](https://github.com/0penPublic/onHit/search?l=kotlin)
-[![Telegram](https://img.shields.io/badge/Telegram-onHit-blue.svg?style=flat-square&color=12b7f5)](https://t.me/on_hit)
+[![Telegram](https://img.shields.io/badge/Telegram-on_hit-blue.svg?style=flat-square&color=12b7f5)](https://t.me/on_hit)
 
 </div>
 
 ## 什么是 onHit ?
 
-这是一个 Xposed 模块，用于在 系统内部模拟 NFC 标签触碰事件，从而触发系统对 NDEF 数据的解析与分发流程，使目标应用能够像接收到真实 NFC 标签一样处理 NDEF 内容。
+这是一个 **Xposed 模块**，用于在 **系统内部模拟 NFC 标签触碰事件**，从而触发系统对 **NDEF 数据** 的解析与分发流程，使目标应用能够像接收到真实 NFC 标签一样处理 NDEF 内容。
 
-模块内置了一个 简易文件管理器，用于：
+模块内置了一个 **简易的文件管理器**，用于：
 
- - 从实体 NFC 标签中读取并保存 NDEF 数据（原始字节流）
+ - 从实体 NFC 标签中读取并保存 **NDEF 数据（原始字节流）**
 
- - 将已保存的 NDEF 文件写入实体 NFC 标签
+ - 将已保存的 **NDEF 文件**写入实体 NFC 标签
 
 NDEF 的 读写过程完全基于 Android 官方公开 API 实现，理论上在不使用 Xposed 的情况下也可独立运行；
 
-Xposed 仅用于实现 “无实体标签的 NDEF 重放”，即在系统层直接注入 NFC 触碰事件，这是普通应用无法完成的部分。
+Xposed 仅用于实现 **“无实体标签的 NDEF 重放”**，即在系统层直接注入 NFC 触碰事件，这是普通应用无法完成的部分。
 
 ## What is onHit?
 
