@@ -8,6 +8,10 @@ on:
     branches: [ "main" ]
     paths:
       - 'app/**'
+      - 'gradle/**'
+      - 'build.gradle.kts'
+      - 'gradle.properties'
+      - 'settings.gradle.kts'
 
 jobs:
   build:
