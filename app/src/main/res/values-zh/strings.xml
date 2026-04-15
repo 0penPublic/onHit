@@ -22,7 +22,6 @@
     <string name="menu_rename">重命名</string>
     <string name="menu_delete">删除</string>
     <string name="menu_write_to_tag">写入标签</string>
-    <string name="dialog_title_rename">重命名</string>
     <string name="dialog_title_path">路径</string>
     <string name="toast_send_broadcast_failed">广播发送失败，原因: %s</string>
     <string name="toast_nfc_not_supported">NFC 不可用。某些功能可能会受到限制。</string>
@@ -42,7 +41,6 @@
     <string name="toast_file_too_large">文件太大 (限制 1MB)</string>
     <string name="toast_not_ndef_file">这不是有效的 NDEF 文件。</string>
     <string name="hint_search">搜索文件…</string>
-    <string name="invalid_uid_len">长度必须在 0 到 65536 之间</string>
     <string name="toast_write_success">写入成功！</string>
     <string name="toast_write_failed">写入失败: %s</string>
     <string name="toast_storage_unavailable">选定的存储目录不可用。</string>

@@ -1,4 +1,3 @@
-import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
@@ -8,13 +7,13 @@ plugins {
 
 android {
     namespace = "mba.vm.onhit"
-    compileSdk = 36
+    compileSdk = 37
     val currentGitHash = getGitShortHash()
 
     defaultConfig {
         applicationId = "mba.vm.onhit"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = getGitCommitCount()
         versionName = "1.0.6-$currentGitHash"
     }
@@ -66,9 +65,11 @@ android {
         viewBinding = true
         buildConfig = true
     }
-    base {
-        archivesName.set("onHit-${android.defaultConfig.versionName}-${android.defaultConfig.versionCode}")
-    }
+    compileSdkMinor = 0
+}
+
+base {
+    archivesName.set("onHit-${android.defaultConfig.versionName}-${android.defaultConfig.versionCode}")
 }
 
 tasks.withType<KotlinJvmCompile>().configureEach {

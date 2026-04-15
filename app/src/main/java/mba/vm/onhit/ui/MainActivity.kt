@@ -10,6 +10,7 @@ import android.os.Parcel
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.WindowInsets
 import android.view.inputmethod.InputMethodManager
 import android.widget.PopupMenu
 import android.widget.Toast
@@ -136,7 +137,7 @@ class MainActivity : Activity() {
                     file?.uri?.let { uri ->
                         contentResolver.openOutputStream(uri)?.use { it.write(data) }
                     }
-                    Toast.makeText(this, R.string.toast_import_success, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.toast_import_success, fileName), Toast.LENGTH_SHORT).show()
                     finishAndRemoveTask()
                 }
             }
@@ -222,8 +223,13 @@ class MainActivity : Activity() {
         binding.tvAppTitle.visibility = View.GONE
         binding.etSearch.visibility = View.VISIBLE
         binding.etSearch.requestFocus()
-        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.showSoftInput(binding.etSearch, InputMethodManager.SHOW_IMPLICIT)
+        binding.etSearch.requestFocus()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            binding.etSearch.windowInsetsController?.show(WindowInsets.Type.ime())
+        } else {
+            val imm = binding.etSearch.context.getSystemService(InputMethodManager::class.java)
+            imm?.showSoftInput(binding.etSearch, 0)
+        }
     }
 
     private fun hideSearch() {

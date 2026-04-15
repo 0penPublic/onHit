@@ -23,7 +23,6 @@
     <string name="menu_rename">Rename</string>
     <string name="menu_delete">Delete</string>
     <string name="menu_write_to_tag">Write to Tag</string>
-    <string name="dialog_title_rename">Rename</string>
     <string name="dialog_title_path">Path</string>
     <string name="toast_send_broadcast_failed">Failed to send broadcast, reason: %s</string>
     <string name="toast_nfc_not_supported">NFC is not available. Some features may be limited.</string>
@@ -43,7 +42,6 @@
     <string name="toast_file_too_large">File is too large (limit 1MB)</string>
     <string name="toast_not_ndef_file">This is not a valid NDEF file.</string>
     <string name="hint_search">Search files…</string>
-    <string name="invalid_uid_len">Length must be between 0 and 65536</string>
     <string name="toast_write_success">Write successful!</string>
     <string name="toast_write_failed">Write failed: %s</string>
     <string name="toast_storage_unavailable">Selected storage directory is unavailable.</string>

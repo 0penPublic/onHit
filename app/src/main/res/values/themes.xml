@@ -1,10 +1,4 @@
 <resources>
     <style name="Base.Theme.OnHit" parent="android:Theme.DeviceDefault.Light.NoActionBar" />
-
     <style name="Theme.OnHit" parent="Base.Theme.OnHit" />
-
-    <style name="BottomDialogAnimation">
-        <item name="android:windowEnterAnimation">@anim/slide_in_bottom</item>
-        <item name="android:windowExitAnimation">@anim/slide_out_bottom</item>
-    </style>
 </resources>
