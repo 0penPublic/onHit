@@ -28,7 +28,7 @@ jobs:
       packages: write
       actions: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -69,7 +69,7 @@ jobs:
           echo "VERSION=$RAW_VERSION" >> "$GITHUB_ENV"
 
       - name: set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -92,16 +92,20 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew assembleDebug assembleRelease
+        run: |
+          ./gradlew assembleDebug assembleRelease \
+            --build-cache \
+            --parallel \
+            --daemon
 
       - name: Upload Debug APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: onHit-v${{ env.VERSION }}-debug
           path: app/build/outputs/apk/debug/*
 
       - name: Upload Release APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: onHit-v${{ env.VERSION }}-release
           path: app/build/outputs/apk/release/*
@@ -124,7 +128,7 @@ jobs:
           mv mapping.zip release_assets/
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ env.VERSION }}
           name: v${{ env.VERSION }}
@@ -179,7 +183,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
       
       - name: Upload to Xposed Repo
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         if: github.repository == '0penPublic/onHit'
         with:
           repository: Xposed-Modules-Repo/mba.vm.onhit
