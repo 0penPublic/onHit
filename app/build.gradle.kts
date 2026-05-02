@@ -15,7 +15,7 @@ android {
         minSdk = 26
         targetSdk = 37
         versionCode = getGitCommitCount()
-        versionName = "1.0.7-$currentGitHash"
+        versionName = "1.0.8-$currentGitHash"
     }
 
     val keystoreFile = rootProject.file(project.findProperty("KEYSTORE_FILE") ?: "key.jks")
