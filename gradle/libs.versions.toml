@@ -1,5 +1,5 @@
 [versions]
-agp = "9.2.0"
+agp = "9.2.1"
 xposed-api = "82"
 ezxhelper = "3.2.0-preview1"
 core = "1.18.0"
