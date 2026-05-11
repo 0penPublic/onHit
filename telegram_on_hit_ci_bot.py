@@ -53,9 +53,12 @@ def get_latest_commit(branch: str = "main") -> tuple[str, str]:
     commit_msg = subprocess.check_output(
         ["git", "log", branch, "-1", "--pretty=format:%B"], text=True
     ).strip()
-
     return full_hash, commit_msg
 
+def truncate_caption(text: str, limit: int = 1024) -> str:
+    if len(text) <= limit:
+        return text
+    return text[:limit - 3] + "..."
 
 async def send_files(
         bot: Bot,
@@ -96,7 +99,7 @@ async def main(argv: List[str]) -> None:
             caption = CAPTION_TEMPLATE.format(version_code, latest_hash,
                                               release_markdown, ON_HIT_URL_CAPTION)
         else:
-            caption = CAPTION_TEMPLATE.format(latest_hash, latest_message, ON_HIT_URL_CAPTION)
+            caption = truncate_caption(CAPTION_TEMPLATE.format(latest_hash, latest_message, ON_HIT_URL_CAPTION))
         messages = await send_files(bot, TARGET_CHAT, TARGET_TOPIC_ID, apk_path, caption)
         if argv:
             if await messages[-1].pin():
