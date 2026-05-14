@@ -80,6 +80,7 @@ Xposed is only required to enable **tagless NDEF replay**, which injects NFC tag
  - [LSPosed](https://github.com/LSPosed/LSPosed)
  - [ExXHelper](https://github.com/KyuubiRan/EzXHelper)
  - [AndroidX](https://developer.android.com/jetpack/androidx)
+ - [Material Symbols](https://fonts.google.com/icons)
  
     ...
 
