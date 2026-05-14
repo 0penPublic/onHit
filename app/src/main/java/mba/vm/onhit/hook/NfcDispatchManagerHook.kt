@@ -14,7 +14,7 @@ import mba.vm.onhit.BuildConfig
 object NfcDispatchManagerHook : BaseHook() {
     override val name: String = this.javaClass.simpleName
 
-    override fun init(classLoader: ClassLoader) {
+    override fun init(classLoader: ClassLoader, packageName: String) {
         val clazz = try {
             Class.forName("com.oplus.nfc.dispatch.NfcDispatchManager", false, classLoader)
         } catch (_: ClassNotFoundException) {

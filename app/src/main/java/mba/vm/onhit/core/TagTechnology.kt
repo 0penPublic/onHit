@@ -2,6 +2,7 @@ package mba.vm.onhit.core
 
 @Suppress("unused")
 enum class TagTechnology(val flag: Int) {
+    Unknown(-1),
     NFC_A(1),
     NFC_B(2),
     ISO_DEP(3),
@@ -15,8 +16,11 @@ enum class TagTechnology(val flag: Int) {
 
     fun toFlag(): Int = flag
     companion object {
+        private val FLAG_MAP: Map<Int, TagTechnology> = entries.associateBy { it.flag }
         fun arrayOfTagTechnology(vararg tagTechnologies: TagTechnology): IntArray {
             return tagTechnologies.map { it.flag }.toIntArray()
         }
+
+        fun fromInt(flag: Int): TagTechnology = FLAG_MAP[flag] ?: Unknown
     }
 }

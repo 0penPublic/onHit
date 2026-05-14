@@ -38,6 +38,7 @@ class FileAdapter(
         val iconRes = when {
             item.isDirectory -> R.drawable.baseline_folder_24
             item.isNdef -> R.drawable.baseline_nfc_24
+            item.isMfcData -> R.drawable.baseline_card_24
             else -> R.drawable.baseline_article_24
         }
         holder.ivIcon.setImageResource(iconRes)
