@@ -4,6 +4,7 @@ import android.nfc.NdefMessage
 import android.os.Bundle
 import mba.vm.onhit.core.TagTechnology
 import java.lang.reflect.Proxy
+import java.security.SecureRandom
 
 abstract class BaseFakeTag {
     abstract val name: String
@@ -17,6 +18,7 @@ abstract class BaseFakeTag {
         )
 
         var lastConnectedTechnology = TagTechnology.Unknown
+        var lastHandle = 0
 
         fun createTagEndpoint(
             nfcClassloader: ClassLoader,
@@ -27,6 +29,7 @@ abstract class BaseFakeTag {
             transceive: (cmd: ByteArray) -> ByteArray,
             ndef: NdefMessage? = null
         ): Any {
+            lastHandle = SecureRandom().nextInt()
             lastConnectedTechnology = TagTechnology.Unknown
             return Proxy.newProxyInstance(nfcClassloader, arrayOf(tagEndpointInterface)) { _, method, args ->
                 when (method.name) {
@@ -51,6 +54,8 @@ abstract class BaseFakeTag {
                     "getTechList" -> techList
                     "getTechExtras" -> techExtras
                     "isPresent" -> true
+                    "getHandle" -> lastHandle
+                    "getTechHandles" -> IntArray(techList.size) { lastHandle }
                     else -> {
                         when (method.returnType) {
                             Boolean::class.javaPrimitiveType -> true
