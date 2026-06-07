@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
-    alias(libs.plugins.android.application)
+    id("com.android.application")
 }
 
 android {
@@ -65,7 +65,6 @@ android {
         viewBinding = true
         buildConfig = true
     }
-    compileSdkMinor = 0
 }
 
 base {
