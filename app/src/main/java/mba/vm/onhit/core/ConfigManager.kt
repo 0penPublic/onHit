@@ -10,6 +10,7 @@ import mba.vm.onhit.Constant.Companion.SHARED_PREFERENCES_CHOSEN_FOLDER
 import mba.vm.onhit.Constant.Companion.SHARED_PREFERENCES_NAME
 import mba.vm.onhit.utils.HexUtils
 import java.security.SecureRandom
+import mba.vm.onhit.Constant.Companion.PREF_BACKGROUND_URI
 
 object ConfigManager {
     fun getRootUri(context: Context): Uri? {
@@ -47,9 +48,25 @@ object ConfigManager {
             .getString(PREF_RANDOM_UID_LEN, "4") ?: "4"
     }
 
+
     fun setRandomUidLen(context: Context, len: String) {
         context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
             .edit().putString(PREF_RANDOM_UID_LEN, len).apply()
+    }
+
+
+    fun getBackgroundUri(context: Context): Uri? {
+        val value = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+            .getString(PREF_BACKGROUND_URI, null)
+        return if (value.isNullOrEmpty()) null else Uri.parse(value)
+    }
+
+    fun setBackgroundUri(context: Context, uri: Uri?) {
+        context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+            .edit().apply {
+                if (uri == null) remove(PREF_BACKGROUND_URI)
+                else putString(PREF_BACKGROUND_URI, uri.toString())
+            }.apply()
     }
 
     fun getUid(context: Context): ByteArray {

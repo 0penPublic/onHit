@@ -113,7 +113,14 @@ object DialogHelper {
         return dialog
     }
 
-    fun showSettingsSheet(context: Context, onChangeDir: () -> Unit) {
+    fun showSettingsSheet(
+        context: Context,
+        onChangeDir: () -> Unit,
+        onChangeBackground: () -> Unit,
+        onClearBackground: () -> Unit
+    )
+
+    {
         val dialog = createBottomDialog(context, R.layout.bottom_sheet_settings)
 
         val btnChangeDir = dialog.findViewById<View>(R.id.btn_change_dir)
@@ -121,6 +128,34 @@ object DialogHelper {
         val switchFixedUid = dialog.findViewById<Switch>(R.id.switch_fixed_uid)
         val uidConfigSummary = dialog.findViewById<TextView>(R.id.tv_uid_config_summary)
         val etUidConfig = dialog.findViewById<EditText>(R.id.et_uid_config)
+
+        val btnChangeBackground = dialog.findViewById<View>(R.id.btn_change_background)
+        val btnClearBackground = dialog.findViewById<View>(R.id.btn_clear_background)
+        val backgroundSummary = dialog.findViewById<TextView>(R.id.tv_background_summary)
+
+        backgroundSummary.text =
+            if (ConfigManager.getBackgroundUri(context) == null) {
+                context.getString(R.string.settings_background_default)
+            } else {
+                context.getString(R.string.settings_background_custom)
+            }
+
+        btnChangeBackground.setOnClickListener {
+            dialog.dismiss()
+            onChangeBackground()
+        }
+
+        btnClearBackground.setOnClickListener {
+
+            ConfigManager.setBackgroundUri(context, null)
+
+            backgroundSummary.text =
+                context.getString(R.string.settings_background_default)
+
+            dialog.dismiss()
+
+            onClearBackground()
+        }
 
         btnChangeDir.setOnClickListener {
             dialog.dismiss()
