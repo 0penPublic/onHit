@@ -570,7 +570,13 @@ class MainActivity : Activity() {
 
         try {
             startActivityForResult(cropIntent, REQUEST_CROP_BACKGROUND)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Toast.makeText(
+                this,
+                "无法打开裁剪工具，已使用原图：${e.message ?: "出现错误"}",
+                Toast.LENGTH_SHORT
+            ).show()
+
             ConfigManager.setBackgroundUri(this, sourceUri)
             applyCustomBackground()
         }
@@ -601,7 +607,13 @@ class MainActivity : Activity() {
                 getColor(R.color.custom_panel_background)
             )
 
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Toast.makeText(
+                this,
+                "背景加载失败：${e.message ?: "错误"}",
+                Toast.LENGTH_SHORT
+            ).show()
+
             ConfigManager.setBackgroundUri(this, null)
             applyCustomBackground()
         }
