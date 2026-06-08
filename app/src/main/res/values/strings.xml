@@ -57,5 +57,5 @@
     <string name="settings_clear_background">Clear background image</string>
     <string name="settings_background_default">Using default background</string>
     <string name="settings_background_custom">Using custom background</string>
-    <string name="toast_background_failed">Failed to set background: %s</string>
+    <string name="unknow_error">unknow error</string>
 </resources>

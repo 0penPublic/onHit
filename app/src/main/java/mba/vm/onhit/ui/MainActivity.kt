@@ -245,7 +245,6 @@ class MainActivity : Activity() {
         binding.tvAppTitle.visibility = View.GONE
         binding.etSearch.visibility = View.VISIBLE
         binding.etSearch.requestFocus()
-        binding.etSearch.requestFocus()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             binding.etSearch.windowInsetsController?.show(WindowInsets.Type.ime())
         } else {
@@ -570,12 +569,8 @@ class MainActivity : Activity() {
 
         try {
             startActivityForResult(cropIntent, REQUEST_CROP_BACKGROUND)
-        } catch (e: Exception) {
-            Toast.makeText(
-                this,
-                "无法打开裁剪工具，已使用原图：${e.message ?: "出现错误"}",
-                Toast.LENGTH_SHORT
-            ).show()
+        } catch (_: Exception) {
+            Toast.makeText(this, R.string.unknow_error, Toast.LENGTH_SHORT).show()
 
             ConfigManager.setBackgroundUri(this, sourceUri)
             applyCustomBackground()
@@ -607,13 +602,8 @@ class MainActivity : Activity() {
                 getColor(R.color.custom_panel_background)
             )
 
-        } catch (e: Exception) {
-            Toast.makeText(
-                this,
-                "背景加载失败：${e.message ?: "错误"}",
-                Toast.LENGTH_SHORT
-            ).show()
-
+        } catch (_: Exception) {
+            Toast.makeText(this, R.string.unknow_error, Toast.LENGTH_SHORT).show()
             ConfigManager.setBackgroundUri(this, null)
             applyCustomBackground()
         }
