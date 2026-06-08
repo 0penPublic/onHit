@@ -9,7 +9,8 @@ import mba.vm.onhit.Constant.Companion.MAX_OF_BROADCAST_SIZE
 import mba.vm.onhit.R
 import mba.vm.onhit.ui.model.FileData
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 object FileUtils {
     fun getFileDataList(context: Context, dir: DocumentFile, rootDir: DocumentFile?): List<FileData> {
@@ -26,12 +27,30 @@ object FileUtils {
                 documentFile = file,
                 size = if (isDir) 0 else file.length(),
                 lastModified = file.lastModified(),
-                isNdef = !isDir && isNdefFile(context, file)
+                isNdef = !isDir && isNdefFile(context, file),
+                isMfcData = !isDir && isMfcData(context, file)
             )
         }.sortedWith(compareBy({ !it.isDirectory }, { it.name.lowercase() }))
 
         list.addAll(items)
         return list
+    }
+
+    private fun isMfcData(context: Context, file: DocumentFile): Boolean {
+        val len = file.length()
+        if (len != 1024L && len != 4096L && len != 320L) return false
+        return try {
+            context.contentResolver.openInputStream(file.uri)?.use { input ->
+                val buffer = ByteArray(16)
+                if (input.skip(48) != 48L) return false
+                if (input.read(buffer) != 16) return false
+                if (buffer.all { it == 0.toByte() }) return false
+                val isLikelyAccessBits = !(buffer[6] == 0.toByte() && buffer[7] == 0.toByte() && buffer[8] == 0.toByte())
+                isLikelyAccessBits
+            } ?: false
+        } catch (_: Exception) {
+            false
+        }
     }
 
     private fun isNdefFile(context: Context, file: DocumentFile): Boolean {

@@ -3,7 +3,6 @@ package mba.vm.onhit.ui
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import android.nfc.NdefMessage
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcel
@@ -111,7 +110,7 @@ class MainActivity : Activity() {
         try {
             contentResolver.openInputStream(uri)?.use { input ->
                 val bytes = input.readBytes()
-                sendEmulateBroadcast(bytes)
+                sendEmulateBroadcast(bytes, "ndef")
             }
         } catch (e: Exception) {
             Toast.makeText(this, getString(R.string.toast_send_broadcast_failed, e.message), Toast.LENGTH_SHORT).show()
@@ -279,7 +278,11 @@ class MainActivity : Activity() {
             fileData.documentFile?.let { navigateTo(it) }
         } else if (fileData.isNdef) {
             pendingImportUri ?: run {
-                simulateNdefTag(fileData)
+                simulateTag(fileData, "ndef")
+            }
+        } else if (fileData.isMfcData) {
+            pendingImportUri ?: run {
+                simulateTag(fileData, "mfc")
             }
         } else {
             pendingImportUri ?: run {
@@ -288,42 +291,36 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun simulateNdefTag(fileData: FileData) {
+    private fun simulateTag(fileData: FileData, tagType: String) {
         val file = fileData.documentFile ?: return
         try {
             contentResolver.openInputStream(file.uri)?.use { input ->
                 val bytes = input.readBytes()
-                sendEmulateBroadcast(bytes)
+                sendEmulateBroadcast(bytes, tagType)
             }
         } catch (e: Exception) {
             Toast.makeText(this, getString(R.string.toast_send_broadcast_failed, e.message), Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun sendEmulateBroadcast(ndefBytes: ByteArray) {
-        try {
-            val ndef = NdefMessage(ndefBytes)
-            val uid = ConfigManager.getUid(this)
-            val intent = Intent(Constant.BROADCAST_TAG_EMULATOR_REQUEST).apply {
-                putExtra("uid", uid)
-                putExtra("ndef", ndef)
-            }
-
-            val parcel = Parcel.obtain()
-            try {
-                intent.writeToParcel(parcel, 0)
-                if (parcel.dataSize() > MAX_OF_BROADCAST_SIZE) {
-                    Toast.makeText(this, R.string.toast_file_too_large, Toast.LENGTH_SHORT).show()
-                    return
-                }
-            } finally {
-                parcel.recycle()
-            }
-
-            sendBroadcast(intent)
-        } catch (e: Exception) {
-            Toast.makeText(this, getString(R.string.toast_send_broadcast_failed, e.message), Toast.LENGTH_SHORT).show()
+    private fun sendEmulateBroadcast(data: ByteArray, tagType: String) {
+        val uid = ConfigManager.getUid(this)
+        val intent = Intent(Constant.BROADCAST_TAG_EMULATOR_REQUEST).apply {
+            putExtra("uid", uid)
+            putExtra("data", data)
+            putExtra("tagType", tagType)
         }
+        val parcel = Parcel.obtain()
+        try {
+            intent.writeToParcel(parcel, 0)
+            if (parcel.dataSize() > MAX_OF_BROADCAST_SIZE) {
+                Toast.makeText(this, R.string.toast_file_too_large, Toast.LENGTH_SHORT).show()
+                return
+            }
+        } finally {
+            parcel.recycle()
+        }
+        sendBroadcast(intent)
     }
 
     private fun showAddPopupMenu(view: View) {

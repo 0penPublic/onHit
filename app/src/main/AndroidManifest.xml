@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.NFC" />
     <uses-feature android:name="android.hardware.nfc" android:required="false" />
     <queries>
@@ -83,7 +82,7 @@
             android:value="82" />
         <meta-data
             android:name="xposedscope"
-            android:value="com.android.nfc" />
+            android:value="com.android.nfc,com.samsung.android.nfc" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

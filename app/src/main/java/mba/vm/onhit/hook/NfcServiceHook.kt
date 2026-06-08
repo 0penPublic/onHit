@@ -2,8 +2,6 @@ package mba.vm.onhit.hook
 
 import android.app.Application
 import android.content.IntentFilter
-import android.nfc.NdefMessage
-import android.os.Bundle
 import android.os.Handler
 import androidx.core.content.ContextCompat
 import de.robv.android.xposed.XposedHelpers.findClass
@@ -12,11 +10,10 @@ import io.github.kyuubiran.ezxhelper.core.helper.ObjectHelper.`-Static`.objectHe
 import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createHook
 import mba.vm.onhit.BuildConfig
 import mba.vm.onhit.Constant
-import mba.vm.onhit.Constant.Companion.MAX_OF_BROADCAST_SIZE
-import mba.vm.onhit.core.TagTechnology
+import mba.vm.onhit.Constant.Companion.NFC_SERVICE_PACKAGE_NAME
+import mba.vm.onhit.core.tag.BaseFakeTag
 import mba.vm.onhit.hook.boardcast.NfcServiceHookBroadcastReceiver
 import java.lang.reflect.Method
-import java.lang.reflect.Proxy
 
 
 object NfcServiceHook : BaseHook() {
@@ -28,10 +25,30 @@ object NfcServiceHook : BaseHook() {
 
     override val name: String = this.javaClass.simpleName
 
-    override fun init(classLoader: ClassLoader) {
+
+    fun findAvailableClass(classLoader: ClassLoader, vararg classNames: String): Class<*>? {
+        classNames.forEach { name ->
+            runCatching {
+                return findClass(name, classLoader)
+            }
+        }
+        log("Unable to class from: ${classNames.joinToString()}")
+        return null
+    }
+
+    override fun init(classLoader: ClassLoader, packageName: String) {
         nfcClassLoader = classLoader
-        tagEndpointInterface = findClass($$"com.android.nfc.DeviceHost$TagEndpoint", nfcClassLoader)
-        MethodFinder.fromClass("com.android.nfc.NfcApplication", nfcClassLoader)
+        tagEndpointInterface = findAvailableClass(
+            nfcClassLoader,
+            $$"$${packageName}.DeviceHost$TagEndpoint",
+            $$"$${NFC_SERVICE_PACKAGE_NAME}.DeviceHost$TagEndpoint",
+        ) ?: return
+        val nfcApplication = findAvailableClass(
+            nfcClassLoader,
+            "${packageName}.NfcApplication",
+            "${NFC_SERVICE_PACKAGE_NAME}.NfcApplication"
+        ) ?: return
+        MethodFinder.fromClass(nfcApplication)
             .filterByName("onCreate")
             .first()
             .createHook {
@@ -64,56 +81,15 @@ object NfcServiceHook : BaseHook() {
     }
 
     fun dispatchFakeTag(
-        uid: ByteArray,
-        ndef: NdefMessage?
+        fakeTag: BaseFakeTag
     ) {
-        val tag = buildFakeTag(uid, ndef)
+        val tag = fakeTag.makeEndpoint(nfcClassLoader, tagEndpointInterface)
         nfcServiceHandler.post {
             dispatchTagEndpoint.invoke(
                 nfcServiceHandler,
                 tag,
                 nfcService.objectHelper().getObjectOrNull("mReaderModeParams")
             )
-        }
-    }
-
-
-    private fun buildFakeTag(
-        uid: ByteArray,
-        ndef: NdefMessage?,
-    ): Any {
-        return Proxy.newProxyInstance(nfcClassLoader, arrayOf(tagEndpointInterface)) { _, method, _ ->
-            when (method.name) {
-                "getUid" -> uid
-                "findAndReadNdef" -> ndef
-                "getNdef" -> ndef
-                "readNdef" -> ndef?.toByteArray() ?: byteArrayOf()
-                "connect" -> true
-                "disconnect" -> true
-                "transceive" -> byteArrayOf()
-                "getConnectedTechnology" -> TagTechnology.NDEF.flag
-                "getTechList" -> TagTechnology.arrayOfTagTechnology(
-                    TagTechnology.NDEF,
-                )
-                "getTechExtras" -> {
-                    val ndefBundle = Bundle().apply {
-                        putParcelable("ndefmsg", ndef)
-                        putInt("ndefmaxlength", MAX_OF_BROADCAST_SIZE)
-                        putInt("ndefcardstate", 1)
-                        putInt("ndeftype", 2)
-                    }
-                    arrayOf(ndefBundle)
-                }
-                "getHandle" -> 0
-                else -> {
-                    when (method.returnType) {
-                        Boolean::class.javaPrimitiveType -> false
-                        Int::class.javaPrimitiveType -> 0
-                        Void.TYPE -> null
-                        else -> null
-                    }
-                }
-            }
         }
     }
 }
