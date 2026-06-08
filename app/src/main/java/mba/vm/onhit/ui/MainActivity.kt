@@ -567,7 +567,7 @@ class MainActivity : Activity() {
         try {
             startActivityForResult(cropIntent, REQUEST_CROP_BACKGROUND)
         } catch (_: Exception) {
-            Toast.makeText(this, R.string.unknow_error, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.unknown_error, Toast.LENGTH_SHORT).show()
 
             ConfigManager.setBackgroundUri(this, sourceUri)
             applyCustomBackground()
@@ -600,7 +600,7 @@ class MainActivity : Activity() {
             )
 
         } catch (_: Exception) {
-            Toast.makeText(this, R.string.unknow_error, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.unknown_error, Toast.LENGTH_SHORT).show()
             ConfigManager.setBackgroundUri(this, null)
             applyCustomBackground()
         }
