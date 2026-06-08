@@ -18,7 +18,6 @@ import android.window.OnBackInvokedDispatcher
 import androidx.core.content.IntentCompat
 import androidx.core.view.WindowCompat
 import androidx.documentfile.provider.DocumentFile
-import mba.vm.onhit.BuildConfig
 import mba.vm.onhit.Constant
 import mba.vm.onhit.Constant.Companion.MAX_OF_BROADCAST_SIZE
 import mba.vm.onhit.R
@@ -50,10 +49,18 @@ class MainActivity : Activity() {
 
     private var pendingImportUri: Uri? = null
 
+    private val REQUEST_SELECT_BACKGROUND = 1002
+
+    private val REQUEST_CROP_BACKGROUND = 1003
+    private var pendingCroppedBackgroundUri: Uri? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        applyCustomBackground()
+
         handleIntent(intent)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -79,7 +86,7 @@ class MainActivity : Activity() {
 
     private fun handleIntent(intent: Intent?) {
         val className = intent?.component?.className ?: return
-        val appId = BuildConfig.APPLICATION_ID
+        val appId = packageName
         when (className) {
             "$appId.ImportHandler" -> {
                 val uri = if (intent.action == Intent.ACTION_SEND) {
@@ -178,7 +185,22 @@ class MainActivity : Activity() {
             if (pendingImportUri != null) {
                 performImportSave()
             } else {
-                DialogHelper.showSettingsSheet(this) { requestSelectDirectory() }
+                DialogHelper.showSettingsSheet(
+                    this,
+
+                    {
+                        requestSelectDirectory()
+                    },
+
+                    {
+                        requestSelectBackground()
+                    },
+
+                    {
+                        ConfigManager.setBackgroundUri(this, null)
+                        applyCustomBackground()
+                    }
+                )
             }
         }
 
@@ -439,6 +461,24 @@ class MainActivity : Activity() {
                     Toast.makeText(this, R.string.toast_storage_unavailable, Toast.LENGTH_SHORT).show()
                 }
             }
+        } else if (requestCode == REQUEST_SELECT_BACKGROUND && resultCode == RESULT_OK) {
+            data?.data?.let { uri ->
+                try {
+                    contentResolver.takePersistableUriPermission(
+                        uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                } catch (_: Exception) {
+                }
+
+                startCropBackground(uri)
+            }
+
+        } else if (requestCode == REQUEST_CROP_BACKGROUND && resultCode == RESULT_OK) {
+            pendingCroppedBackgroundUri?.let { uri ->
+                ConfigManager.setBackgroundUri(this, uri)
+                applyCustomBackground()
+            }
         }
     }
 
@@ -457,5 +497,113 @@ class MainActivity : Activity() {
     override fun onDestroy() {
         super.onDestroy()
         executor.shutdown()
+    }
+    private fun requestSelectBackground() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "image/*"
+            addFlags(
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                        Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+            )
+        }
+
+        startActivityForResult(intent, REQUEST_SELECT_BACKGROUND)
+    }
+
+    private fun startCropBackground(sourceUri: Uri) {
+        val outputFile = java.io.File(filesDir, "custom_background_cropped.jpg")
+
+        if (!outputFile.exists()) {
+            outputFile.createNewFile()
+        }
+
+        val outputUri = androidx.core.content.FileProvider.getUriForFile(
+            this,
+            "${packageName}.fileprovider",
+            outputFile
+        )
+
+        pendingCroppedBackgroundUri = outputUri
+
+        val cropIntent = Intent("com.android.camera.action.CROP").apply {
+            setDataAndType(sourceUri, "image/*")
+
+            putExtra("crop", "true")
+            putExtra("aspectX", 9)
+            putExtra("aspectY", 16)
+            putExtra("scale", true)
+            putExtra("return-data", false)
+
+            putExtra(android.provider.MediaStore.EXTRA_OUTPUT, outputUri)
+            putExtra("outputFormat", android.graphics.Bitmap.CompressFormat.JPEG.toString())
+
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+
+            clipData = android.content.ClipData.newRawUri(
+                "cropped_background",
+                outputUri
+            )
+        }
+
+        val resInfoList = packageManager.queryIntentActivities(
+            cropIntent,
+            android.content.pm.PackageManager.MATCH_DEFAULT_ONLY
+        )
+
+        for (resolveInfo in resInfoList) {
+            val packageName = resolveInfo.activityInfo.packageName
+
+            grantUriPermission(
+                packageName,
+                sourceUri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+
+            grantUriPermission(
+                packageName,
+                outputUri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            )
+        }
+
+        try {
+            startActivityForResult(cropIntent, REQUEST_CROP_BACKGROUND)
+        } catch (_: Exception) {
+            ConfigManager.setBackgroundUri(this, sourceUri)
+            applyCustomBackground()
+        }
+    }
+    private fun applyCustomBackground() {
+        val uri = ConfigManager.getBackgroundUri(this)
+
+        if (uri == null) {
+            binding.ivCustomBackground.setImageDrawable(null)
+            binding.ivCustomBackground.visibility = View.GONE
+            binding.vBackgroundScrim.visibility = View.GONE
+
+            binding.topBar.setBackgroundColor(
+                android.graphics.Color.TRANSPARENT
+            )
+
+            return
+        }
+
+        try {
+            binding.ivCustomBackground.setImageDrawable(null)
+            binding.ivCustomBackground.setImageURI(uri)
+
+            binding.ivCustomBackground.visibility = View.VISIBLE
+            binding.vBackgroundScrim.visibility = View.VISIBLE
+
+            binding.topBar.setBackgroundColor(
+                getColor(R.color.custom_panel_background)
+            )
+
+        } catch (_: Exception) {
+            ConfigManager.setBackgroundUri(this, null)
+            applyCustomBackground()
+        }
     }
 }

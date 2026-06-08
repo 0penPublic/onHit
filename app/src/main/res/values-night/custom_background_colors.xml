@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- 壁纸遮罩 -->
+    <color name="custom_background_scrim">#11000000</color>
+
+    <!-- 顶栏 -->
+    <color name="custom_panel_background">#44000000</color>
+
+    <!-- 路径栏 -->
+    <color name="custom_chip_background">#00000000</color>
+
+    <!-- 设置按钮 -->
+    <color name="custom_fab_background">#66000000</color>
+
+</resources>

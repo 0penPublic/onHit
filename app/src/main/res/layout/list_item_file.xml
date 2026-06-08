@@ -3,11 +3,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="72dp"
+    android:layout_marginHorizontal="6dp"
+    android:layout_marginVertical="3dp"
     android:orientation="horizontal"
+    android:gravity="center_vertical"
     android:paddingStart="16dp"
     android:paddingEnd="16dp"
-    android:gravity="center_vertical"
-    android:background="?android:attr/selectableItemBackground">
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:background="@drawable/bg_file_item"
+    android:foreground="?android:attr/selectableItemBackground">
 
     <ImageView
         android:id="@+id/iv_icon"
