@@ -3,6 +3,8 @@ package mba.vm.onhit.ui
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.nfc.NdefMessage
+import android.nfc.NdefRecord
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcel
@@ -12,6 +14,11 @@ import android.view.View
 import android.view.WindowInsets
 import android.view.inputmethod.InputMethodManager
 import android.widget.PopupMenu
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
 import android.window.OnBackInvokedDispatcher
 import androidx.core.content.IntentCompat
@@ -326,6 +333,7 @@ class MainActivity : Activity() {
     private fun showAddPopupMenu(view: View) {
         val popup = PopupMenu(this, view)
         popup.menu.add(0, 1, 0, R.string.menu_add_folder)
+        popup.menu.add(0, 3, 1, R.string.menu_build_ndef)
         if (nfcHandler.isEnabled() &&
             pendingImportUri == null) popup.menu.add(0, 2, 2, R.string.import_ndef)
 
@@ -336,10 +344,256 @@ class MainActivity : Activity() {
                     refreshCurrentDir()
                 }
                 2 -> nfcHandler.startRead()
+                3 -> showBuildNdefDialog()
             }
             true
         }
         popup.show()
+    }
+
+
+    private fun showBuildNdefDialog() {
+        val dialog = DialogHelper.createBottomDialog(
+            this,
+            R.layout.bottom_sheet_build_ndef
+        )
+
+        data class BuiltRecord(
+            val type: String,
+            val value: String,
+            val record: NdefRecord
+        )
+
+        val builtRecords = mutableListOf<BuiltRecord>()
+
+        val spinner = dialog.findViewById<Spinner>(R.id.spinner_ndef_type)
+        val input = dialog.findViewById<EditText>(R.id.et_ndef_value)
+        val btnAddRecord = dialog.findViewById<Button>(R.id.btn_add_ndef_record)
+        val btnClearRecords = dialog.findViewById<Button>(R.id.btn_clear_ndef_records)
+        val tvRecordCount = dialog.findViewById<TextView>(R.id.tv_ndef_record_count)
+        val tvRecordList = dialog.findViewById<TextView>(R.id.tv_ndef_record_list)
+        val btnOk = dialog.findViewById<Button>(R.id.btn_ndef_ok)
+        val btnCancel = dialog.findViewById<Button>(R.id.btn_ndef_cancel)
+
+        val types = listOf(
+            getString(R.string.build_ndef_type_website),
+            getString(R.string.build_ndef_type_phone),
+            getString(R.string.build_ndef_type_text)
+        )
+
+        spinner.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            types
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+
+        fun ntagHint(size: Int): String {
+            return when {
+                size <= 0 -> ""
+                size <= 144 -> getString(R.string.build_ndef_ntag_213)
+                size <= 504 -> getString(R.string.build_ndef_ntag_215_216)
+                size <= 888 -> getString(R.string.build_ndef_ntag_216)
+                else -> getString(R.string.build_ndef_ntag_too_large)
+            }
+        }
+
+        fun refreshRecordList() {
+            val bytesSize = if (builtRecords.isEmpty()) {
+                0
+            } else {
+                buildNdefBytes(builtRecords.map { it.record }).size
+            }
+
+            tvRecordCount.text = getString(
+                R.string.build_ndef_record_status,
+                builtRecords.size,
+                bytesSize,
+                ntagHint(bytesSize)
+            )
+
+            tvRecordList.text = if (builtRecords.isEmpty()) {
+                getString(R.string.build_ndef_empty_records)
+            } else {
+                builtRecords.mapIndexed { index, item ->
+                    getString(
+                        R.string.build_ndef_record_item,
+                        index + 1,
+                        item.type,
+                        item.value
+                    )
+                }.joinToString("\n")
+            }
+        }
+
+        fun addCurrentRecord(): Boolean {
+            val type = spinner.selectedItem.toString()
+            val value = input.text.toString().trim()
+
+            if (value.isEmpty()) {
+                Toast.makeText(
+                    this,
+                    R.string.build_ndef_error_empty_value,
+                    Toast.LENGTH_SHORT
+                ).show()
+                return false
+            }
+
+            return try {
+                val record = buildNdefRecord(type, value)
+                builtRecords.add(
+                    BuiltRecord(
+                        type = type,
+                        value = value,
+                        record = record
+                    )
+                )
+                input.setText("")
+                refreshRecordList()
+                true
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this,
+                    getString(
+                        R.string.build_ndef_error_add_failed,
+                        e.message ?: getString(R.string.unknown_error)
+                    ),
+                    Toast.LENGTH_SHORT
+                ).show()
+                false
+            }
+        }
+
+        btnAddRecord.setOnClickListener {
+            addCurrentRecord()
+        }
+
+        btnClearRecords.setOnClickListener {
+            builtRecords.clear()
+            refreshRecordList()
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnOk.setOnClickListener {
+            if (input.text.toString().trim().isNotEmpty()) {
+                if (!addCurrentRecord()) return@setOnClickListener
+            }
+
+            if (builtRecords.isEmpty()) {
+                Toast.makeText(
+                    this,
+                    R.string.build_ndef_error_empty_records,
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+
+            try {
+                val bytes = buildNdefBytes(builtRecords.map { it.record })
+                saveBuiltNdef(bytes)
+                dialog.dismiss()
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this,
+                    getString(
+                        R.string.build_ndef_error_build_failed,
+                        e.message ?: getString(R.string.unknown_error)
+                    ),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        refreshRecordList()
+        dialog.show()
+    }
+
+    private fun buildNdefRecord(type: String, value: String): NdefRecord {
+        return when (type) {
+            getString(R.string.build_ndef_type_website) -> {
+                val url = if (
+                    value.startsWith("http://", ignoreCase = true) ||
+                    value.startsWith("https://", ignoreCase = true)
+                ) {
+                    value
+                } else {
+                    "https://$value"
+                }
+                NdefRecord.createUri(url)
+            }
+
+            getString(R.string.build_ndef_type_phone) -> {
+                val phone = value.replace(" ", "")
+                NdefRecord.createUri("tel:$phone")
+            }
+
+            else -> {
+                createTextRecord(getCurrentNdefTextLanguage(), value)
+            }
+        }
+    }
+
+    private fun buildNdefBytes(records: List<NdefRecord>): ByteArray {
+        return NdefMessage(records.toTypedArray()).toByteArray()
+    }
+
+    private fun getCurrentNdefTextLanguage(): String {
+        val language = Locale.getDefault().language
+        return language.ifBlank { "en" }
+    }
+
+    private fun createTextRecord(language: String, text: String): NdefRecord {
+        val languageBytes = language.toByteArray(Charsets.US_ASCII)
+        val textBytes = text.toByteArray(Charsets.UTF_8)
+        val payload = ByteArray(1 + languageBytes.size + textBytes.size)
+
+        payload[0] = languageBytes.size.toByte()
+        System.arraycopy(languageBytes, 0, payload, 1, languageBytes.size)
+        System.arraycopy(textBytes, 0, payload, 1 + languageBytes.size, textBytes.size)
+
+        return NdefRecord(
+            NdefRecord.TNF_WELL_KNOWN,
+            NdefRecord.RTD_TEXT,
+            ByteArray(0),
+            payload
+        )
+    }
+
+    private fun saveBuiltNdef(bytes: ByteArray) {
+        val dir = currentDir ?: run {
+            Toast.makeText(this, R.string.path_not_selected, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val fileName =
+            SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault())
+                .format(Date()) + "_built.ndef"
+
+        val file = dir.createFile("application/octet-stream", fileName)
+        val uri = file?.uri ?: run {
+            Toast.makeText(
+                this,
+                R.string.build_ndef_error_create_file_failed,
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        contentResolver.openOutputStream(uri)?.use {
+            it.write(bytes)
+        }
+
+        Toast.makeText(
+            this,
+            getString(R.string.build_ndef_saved, fileName),
+            Toast.LENGTH_SHORT
+        ).show()
+
+        refreshCurrentDir()
     }
 
     private fun showNdefSaveDialog(data: ByteArray) {

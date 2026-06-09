@@ -57,5 +57,34 @@
     <string name="settings_clear_background">Clear background image</string>
     <string name="settings_background_default">Using default background</string>
     <string name="settings_background_custom">Using custom background</string>
-    <string name="unknown_error">unknown error</string>
+    <string name="unknown_error">unknow error</string>
+
+    <string name="menu_build_ndef">Build NDEF(beta)</string>
+
+    <string name="build_ndef_title">Build NDEF(beta)</string>
+    <string name="build_ndef_type">Type</string>
+    <string name="build_ndef_value">Value</string>
+    <string name="build_ndef_value_hint">Enter website, phone number or text</string>
+    <string name="build_ndef_add_record">Add record</string>
+    <string name="build_ndef_clear_records">Clear</string>
+    <string name="build_ndef_generate">Generate</string>
+    <string name="build_ndef_empty_records">No records</string>
+    <string name="build_ndef_record_status">Records: %1$d, NDEF size: %2$d bytes%3$s</string>
+    <string name="build_ndef_record_item">%1$d. %2$s: %3$s</string>
+
+    <string name="build_ndef_type_website">Website</string>
+    <string name="build_ndef_type_phone">Phone</string>
+    <string name="build_ndef_type_text">Text</string>
+
+    <string name="build_ndef_error_empty_value">Value cannot be empty</string>
+    <string name="build_ndef_error_add_failed">Failed to add record: %s</string>
+    <string name="build_ndef_error_empty_records">Please add at least one record</string>
+    <string name="build_ndef_error_build_failed">Failed to build NDEF: %s</string>
+    <string name="build_ndef_error_create_file_failed">Failed to create NDEF file</string>
+    <string name="build_ndef_saved">Created: %s</string>
+
+    <string name="build_ndef_ntag_213">, fits NTAG213 approximately</string>
+    <string name="build_ndef_ntag_215_216">, may require NTAG215/216</string>
+    <string name="build_ndef_ntag_216">, may require NTAG216</string>
+    <string name="build_ndef_ntag_too_large">, may exceed common NTAG capacity</string>
 </resources>
