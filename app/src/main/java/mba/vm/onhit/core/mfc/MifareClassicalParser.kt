@@ -49,10 +49,8 @@ object MifareClassicalParser {
     }
 
     fun blockToSector(blockIndex: Int): Int {
-        return if (blockIndex < 32 * 4) {
-            blockIndex / 4
-        } else {
-            32 + (blockIndex - 32 * 4) / 16
-        }
+        if (blockIndex !in 0..<256) return -1
+        return if (blockIndex < 32 * 4) blockIndex / 4
+        else 32 + (blockIndex - 32 * 4) / 16
     }
 }
