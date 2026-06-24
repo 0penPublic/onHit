@@ -13,8 +13,8 @@ abstract class BaseFakeTag {
 
     companion object {
         val TAG_TYPE_MAPPING = mapOf(
-            Pair("ndef", Ndef()),
-            Pair("mfc", MifareClassical())
+            Pair("ndef", Ndef::class.java),
+            Pair("mfc", MifareClassical::class.java)
         )
 
         var lastConnectedTechnology = TagTechnology.Unknown

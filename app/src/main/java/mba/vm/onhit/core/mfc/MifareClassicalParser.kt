@@ -47,4 +47,12 @@ object MifareClassicalParser {
         val atqa = byteArrayOf(block0[6], block0[7])
         return atqa to sak
     }
+
+    fun blockToSector(blockIndex: Int): Int {
+        return if (blockIndex < 32 * 4) {
+            blockIndex / 4
+        } else {
+            32 + (blockIndex - 32 * 4) / 16
+        }
+    }
 }

@@ -38,6 +38,10 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.Executors
 import kotlin.system.exitProcess
+import androidx.core.view.isVisible
+import androidx.core.view.isGone
+import mba.vm.onhit.Constant.Companion.REQUEST_CROP_BACKGROUND
+import mba.vm.onhit.Constant.Companion.REQUEST_SELECT_BACKGROUND
 
 class MainActivity : Activity() {
 
@@ -54,10 +58,6 @@ class MainActivity : Activity() {
     private var isRefreshing = false
 
     private var pendingImportUri: Uri? = null
-
-    private val REQUEST_SELECT_BACKGROUND = 1002
-
-    private val REQUEST_CROP_BACKGROUND = 1003
     private var pendingCroppedBackgroundUri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,7 +81,10 @@ class MainActivity : Activity() {
         binding.rvFiles.adapter = adapter
 
         setupListeners()
-        if (!restoreLastDirectory()) requestSelectDirectory()
+        if (!restoreLastDirectory()) {
+            Toast.makeText(this, R.string.toast_no_valid_storage, Toast.LENGTH_LONG).show()
+            requestSelectDirectory()
+        }
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -173,7 +176,7 @@ class MainActivity : Activity() {
     }
 
     private fun handleBackNavigation(): Boolean {
-        if (binding.etSearch.visibility == View.VISIBLE) {
+        if (binding.etSearch.isVisible) {
             hideSearch()
             return true
         }
@@ -215,7 +218,7 @@ class MainActivity : Activity() {
         }
 
         binding.btnSearch.setOnClickListener {
-            if (binding.etSearch.visibility == View.GONE) {
+            if (binding.etSearch.isGone) {
                 showSearch()
             } else {
                 hideSearch()
@@ -696,38 +699,42 @@ class MainActivity : Activity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == 1001 && resultCode == RESULT_OK) {
-            data?.data?.let { uri ->
-                contentResolver.takePersistableUriPermission(
-                    uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                )
-                ConfigManager.setRootUri(this, uri)
-                val df = DocumentFile.fromTreeUri(this, uri)
-                if (df != null && df.exists() && df.canRead()) {
-                    rootDir = df
-                    navigateTo(df)
-                } else {
-                    Toast.makeText(this, R.string.toast_storage_unavailable, Toast.LENGTH_SHORT).show()
-                }
-            }
-        } else if (requestCode == REQUEST_SELECT_BACKGROUND && resultCode == RESULT_OK) {
-            data?.data?.let { uri ->
-                try {
+        when (requestCode) {
+            1001 if resultCode == RESULT_OK -> {
+                data?.data?.let { uri ->
                     contentResolver.takePersistableUriPermission(
                         uri,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                     )
-                } catch (_: Exception) {
+                    ConfigManager.setRootUri(this, uri)
+                    val df = DocumentFile.fromTreeUri(this, uri)
+                    if (df != null && df.exists() && df.canRead()) {
+                        rootDir = df
+                        navigateTo(df)
+                    } else {
+                        Toast.makeText(this, R.string.toast_storage_unavailable, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            REQUEST_SELECT_BACKGROUND if resultCode == RESULT_OK -> {
+                data?.data?.let { uri ->
+                    try {
+                        contentResolver.takePersistableUriPermission(
+                            uri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        )
+                    } catch (_: Exception) {
+                    }
+
+                    startCropBackground(uri)
                 }
 
-                startCropBackground(uri)
             }
-
-        } else if (requestCode == REQUEST_CROP_BACKGROUND && resultCode == RESULT_OK) {
-            pendingCroppedBackgroundUri?.let { uri ->
-                ConfigManager.setBackgroundUri(this, uri)
-                applyCustomBackground()
+            REQUEST_CROP_BACKGROUND if resultCode == RESULT_OK -> {
+                pendingCroppedBackgroundUri?.let { uri ->
+                    ConfigManager.setBackgroundUri(this, uri)
+                    applyCustomBackground()
+                }
             }
         }
     }

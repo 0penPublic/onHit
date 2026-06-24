@@ -26,6 +26,7 @@
     <string name="toast_send_broadcast_failed">广播发送失败，原因: %s</string>
     <string name="toast_nfc_not_supported">NFC 不可用。某些功能可能会受到限制。</string>
 
+    <string name="toast_no_valid_storage">当前未配置有效的存储目录，请在文件管理器中选择或创建一个文件夹作为存储目录。</string>
     <string name="import_ndef">从标签导入 NDEF</string>
     <string name="read_nfc_tag">读取 NFC 标签</string>
     <string name="write_nfc_tag">写入 NFC 标签</string>

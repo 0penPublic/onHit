@@ -18,9 +18,9 @@ class NfcServiceHookBroadcastReceiver : BroadcastReceiver() {
                 val tagType = intent.getStringExtra("tagType") ?: "ndef"
                 try {
                     if (uid != null && data != null) {
-                        val tag = TAG_TYPE_MAPPING[tagType]?.init(uid, data)
-                        tag?.let {
-                            dispatchFakeTag(it)
+                        TAG_TYPE_MAPPING[tagType]?.let { clazz ->
+                            val tag = clazz.getDeclaredConstructor().newInstance().init(uid, data)
+                            dispatchFakeTag(tag)
                         }
                     }
                 } catch (e: Exception) {

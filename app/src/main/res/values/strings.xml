@@ -26,6 +26,7 @@
     <string name="dialog_title_path">Path</string>
     <string name="toast_send_broadcast_failed">Failed to send broadcast, reason: %s</string>
     <string name="toast_nfc_not_supported">NFC is not available. Some features may be limited.</string>
+    <string name="toast_no_valid_storage">No valid storage directory is configured. Please select or create a folder in the file manager and set it as the storage directory.</string>
 
     <string name="import_ndef">Import NDEF from Tag</string>
     <string name="read_nfc_tag">Read NFC Tag</string>

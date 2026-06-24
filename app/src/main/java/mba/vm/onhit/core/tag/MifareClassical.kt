@@ -36,11 +36,32 @@ class MifareClassical : BaseFakeTag() {
         return null
     }
 
+    fun authentication(cmd: ByteArray): ByteArray? {
+        fun auth(sectorIndex: Int, isKeyB: Boolean, key: ByteArray): ByteArray? {
+            val sector = sectors.getOrNull(sectorIndex) ?: return null
+            val targetKey = if (isKeyB) {
+                sector.trailerBlock.sliceArray(10..15)
+            } else {
+                sector.trailerBlock.sliceArray(0..5)
+            }
+            return if (key.contentEquals(targetKey)) {
+                byteArrayOf(0x00)
+            } else {
+                null
+            }
+        }
+        if (cmd.size < 8) return null
+        val targetBlock = cmd[1].toInt() and 0xFF
+        val sectorIndex = MifareClassicalParser.blockToSector(targetBlock)
+        val providedKey = cmd.sliceArray(2..7)
+        return auth(sectorIndex, cmd[0].toInt() == 0x60, providedKey)
+    }
+
     fun transceive(req: ByteArray): ByteArray {
         if (req.isEmpty()) return byteArrayOf(0x00)
         val firstByte = req[0].toInt() and 0xFF
         when (firstByte) {
-            0x60, 0x61 -> return byteArrayOf(0x00)
+            0x60, 0x61 -> authentication(req)
             0x30 -> { // Read
                 if (req.size < 2) return byteArrayOf(0x00)
                 val targetBlock = req[1].toInt() and 0xFF
