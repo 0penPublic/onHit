@@ -5,12 +5,14 @@ import mba.vm.onhit.core.TagTechnology
 import mba.vm.onhit.core.mfc.MifareClassicSector
 import mba.vm.onhit.core.mfc.MifareClassicalParser
 
+// WIP
 class MifareClassical : BaseFakeTag() {
     override val name: String = this.javaClass.name
     var uid: ByteArray = byteArrayOf()
     var sectors: Array<MifareClassicSector> = arrayOf()
     var atqa: ByteArray = byteArrayOf(0x00, 0x04)
     var sak: Short = 0x08
+    var currentUnlockSectorIndex: Int = -1
 
     override fun init(uid: ByteArray, bytes: ByteArray): BaseFakeTag {
         this.uid = uid
@@ -29,25 +31,65 @@ class MifareClassical : BaseFakeTag() {
             val size = sector.dataBlocks.size + 1
             if (targetBlock < currentTotal + size) {
                 val rel = targetBlock - currentTotal
-                return if (rel < sector.dataBlocks.size) sector.dataBlocks[rel].data else sector.trailerBlock
+                if (rel < sector.dataBlocks.size) {
+                    return sector.dataBlocks[rel].data
+                } else {
+                    val rawTrailer = sector.trailerBlock
+                    if (rawTrailer.size < 16) return rawTrailer
+                    val maskedTrailer = ByteArray(16)
+                    System.arraycopy(rawTrailer, 6, maskedTrailer, 6, 4)
+                    System.arraycopy(rawTrailer, 10, maskedTrailer, 10, 6)
+                    return maskedTrailer
+                }
             }
             currentTotal += size
         }
         return null
     }
 
-    fun transceive(req: ByteArray): ByteArray {
-        if (req.isEmpty()) return byteArrayOf(0x00)
-        val firstByte = req[0].toInt() and 0xFF
-        when (firstByte) {
-            0x60, 0x61 -> return byteArrayOf(0x00)
-            0x30 -> { // Read
-                if (req.size < 2) return byteArrayOf(0x00)
-                val targetBlock = req[1].toInt() and 0xFF
-                return getBlockData(targetBlock) ?: ByteArray(16)
+    fun authentication(cmd: ByteArray): Pair<Boolean, ByteArray> {
+        currentUnlockSectorIndex = -1
+        fun auth(sectorIndex: Int, isKeyB: Boolean, key: ByteArray): Pair<Boolean, ByteArray> {
+            val sector = sectors.getOrNull(sectorIndex) ?: return Pair(false, byteArrayOf())
+            val targetKey = if (isKeyB) {
+                sector.trailerBlock.sliceArray(10..15)
+            } else {
+                sector.trailerBlock.sliceArray(0..5)
+            }
+            return if (key.contentEquals(targetKey)) {
+                currentUnlockSectorIndex = sectorIndex
+                Pair(true, byteArrayOf(0x00))
+            } else {
+                Pair(false, byteArrayOf())
             }
         }
-        return byteArrayOf(0x00)
+        if (cmd.size < 12) return Pair(false, byteArrayOf())
+        val targetBlock = cmd[1].toInt() and 0xFF
+        val sectorIndex = MifareClassicalParser.blockToSector(targetBlock)
+        val providedKey = cmd.sliceArray(6..11)
+        return auth(sectorIndex, (cmd[0].toInt() and 0xFF) == 0x61, providedKey)
+    }
+
+    fun transceive(req: ByteArray): Pair<Boolean, ByteArray> {
+        if (req.isEmpty()) return Pair(false, byteArrayOf())
+        val firstByte = req[0].toInt() and 0xFF
+        when (firstByte) {
+            0x60, 0x61 -> return authentication(req)
+            0x30 -> {
+                if (req.size < 2) return Pair(false, byteArrayOf())
+                val targetBlock = req[1].toInt() and 0xFF
+                if (currentUnlockSectorIndex != MifareClassicalParser.blockToSector(targetBlock)) {
+                    return Pair(false, byteArrayOf())
+                }
+                val blockData = getBlockData(targetBlock)
+                return if (blockData != null) {
+                    Pair(true, blockData)
+                } else {
+                    Pair(false, byteArrayOf())
+                }
+            }
+        }
+        return Pair(true, byteArrayOf())
     }
 
     override fun makeEndpoint(

@@ -18,6 +18,8 @@ class Constant {
         const val MAX_OF_BROADCAST_SIZE = 1048576
         const val GITHUB_URL = "https://github.com/0penPublic/onHit"
 
+        const val REQUEST_SELECT_BACKGROUND = 1002
+        const val REQUEST_CROP_BACKGROUND = 1003
         val PACKAGE_MANAGER_SYSTEM_NFC_FEATURES = setOf(PackageManager.FEATURE_NFC, PACKAGE_MANAGER_FEATURE_NFC_ANY)
     }
 }

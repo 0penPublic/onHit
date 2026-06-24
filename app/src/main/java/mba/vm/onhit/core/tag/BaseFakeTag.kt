@@ -13,8 +13,8 @@ abstract class BaseFakeTag {
 
     companion object {
         val TAG_TYPE_MAPPING = mapOf(
-            Pair("ndef", Ndef()),
-            Pair("mfc", MifareClassical())
+            Pair("ndef", Ndef::class.java),
+            Pair("mfc", MifareClassical::class.java)
         )
 
         var lastConnectedTechnology = TagTechnology.Unknown
@@ -26,7 +26,7 @@ abstract class BaseFakeTag {
             uid: ByteArray,
             techList: IntArray,
             techExtras: Array<Bundle>,
-            transceive: (cmd: ByteArray) -> ByteArray,
+            transceive: (cmd: ByteArray) -> Pair<Boolean, ByteArray>,
             ndef: NdefMessage? = null
         ): Any {
             lastHandle = SecureRandom().nextInt()
@@ -44,11 +44,25 @@ abstract class BaseFakeTag {
                     "disconnect" -> false
                     "transceive" -> {
                         val data = args?.firstOrNull { it is ByteArray } as? ByteArray
+                        val raw = args?.firstOrNull { it is Boolean } as? Boolean
                         val returnCode = args?.firstOrNull { it is IntArray } as? IntArray
-                        if (returnCode != null && returnCode.isNotEmpty()) {
-                            returnCode[0] = 0 // Success
+                        if (raw != true) {
+                            if (data != null) {
+                                val result = transceive(data)
+                                if (result.first) {
+                                    returnCode?.set(0, 0)
+                                } else {
+                                    returnCode?.set(0, -4)
+                                }
+                                result.second
+                            } else {
+                                returnCode?.set(0, 0)
+                                byteArrayOf()
+                            }
+                        } else {
+                            returnCode?.set(0, 0)
+                            byteArrayOf()
                         }
-                        if (data != null) transceive(data) else byteArrayOf()
                     }
                     "getConnectedTechnology" -> lastConnectedTechnology.flag
                     "getTechList" -> techList

@@ -29,7 +29,7 @@ class Ndef : BaseFakeTag() {
             putInt("ndefcardstate", 1)
             putInt("ndeftype", 4)
         }),
-        { byteArrayOf() },
+        { Pair(true, byteArrayOf()) },
         ndefMessage
     )
 }
