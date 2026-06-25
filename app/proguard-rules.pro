@@ -1,4 +1,4 @@
--optimizationpasses 8
+-optimizationpasses 10
 -allowaccessmodification
 -overloadaggressively
 -dontskipnonpubliclibraryclasses
@@ -7,6 +7,10 @@
 -keep class mba.vm.onhit.hook.MainHook {
     <init>();
     void handleLoadPackage(...);
+}
+
+-keep class * extends mba.vm.onhit.core.tag.BaseFakeTag {
+    public <init>();
 }
 
 -assumenosideeffects class android.util.Log {
