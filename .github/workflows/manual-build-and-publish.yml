@@ -27,6 +27,8 @@ jobs:
       contents: write
       packages: write
       actions: read
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/checkout@v6
         with:
@@ -95,8 +97,7 @@ jobs:
         run: |
           ./gradlew assembleDebug assembleRelease \
             --build-cache \
-            --parallel \
-            --daemon
+            --parallel
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v7
@@ -126,6 +127,16 @@ jobs:
           cp app/build/outputs/apk/debug/*.apk release_assets/
           cp app/build/outputs/apk/release/*.apk release_assets/
           mv mapping.zip release_assets/
+
+      - name: Generate SHA256 checksums
+        run: |
+          cd release_assets
+          sha256sum *.apk > checksums_sha256.txt
+          
+      - name: Attest Build Provenance
+        uses: actions/attest@v4
+        with:
+          subject-path: 'release_assets/*.apk'
 
       - name: Create Release
         uses: softprops/action-gh-release@v3
