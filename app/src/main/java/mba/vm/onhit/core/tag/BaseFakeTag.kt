@@ -69,7 +69,7 @@ abstract class BaseFakeTag {
                     "getTechList" -> techList
                     "getTechExtras" -> techExtras
                     "isPresent" -> true
-                    "getHandle" -> lastHandle
+                    "getHandle" -> lastHandle.toInt()
                     "getTechHandles" -> IntArray(techList.size) { lastHandle.toInt() }
                     else -> {
                         when (method.returnType) {

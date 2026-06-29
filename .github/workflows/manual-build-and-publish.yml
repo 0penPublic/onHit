@@ -135,8 +135,12 @@ jobs:
           
       - name: Attest Build Provenance
         uses: actions/attest@v4
+        id: attest
         with:
           subject-path: 'release_assets/*.apk'
+
+      - name: Move attestation to release assets
+        run: cp ${{ steps.attest.outputs.bundle-path }} release_assets/attestation.jsonl
 
       - name: Create Release
         uses: softprops/action-gh-release@v3
@@ -176,6 +180,7 @@ jobs:
           echo "xmr_tag=$XMR_TAG" >> $GITHUB_OUTPUT
           echo "version_name=$VN" >> $GITHUB_OUTPUT
           rm -rf release_assets/mapping.zip
+          rm -rf release_assets/checksums_sha256.txt
 
       - name: Fetch Release
         env:
