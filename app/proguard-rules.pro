@@ -9,7 +9,7 @@
     void handleLoadPackage(...);
 }
 
--keep class * extends mba.vm.onhit.core.tag.BaseFakeTag {
+-keepclassmembers class * extends mba.vm.onhit.core.tag.BaseFakeTag {
     public <init>();
 }
 

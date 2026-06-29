@@ -12,13 +12,14 @@ abstract class BaseFakeTag {
     abstract fun makeEndpoint(nfcClassloader: ClassLoader, tagEndpointInterface: Class<*>): Any
 
     companion object {
+        val random = SecureRandom()
         val TAG_TYPE_MAPPING = mapOf(
             Pair("ndef", Ndef::class.java),
             Pair("mfc", MifareClassical::class.java)
         )
 
         var lastConnectedTechnology = TagTechnology.Unknown
-        var lastHandle = 0
+        var lastHandle: UInt = 0u
 
         fun createTagEndpoint(
             nfcClassloader: ClassLoader,
@@ -29,7 +30,7 @@ abstract class BaseFakeTag {
             transceive: (cmd: ByteArray) -> Pair<Boolean, ByteArray>,
             ndef: NdefMessage? = null
         ): Any {
-            lastHandle = SecureRandom().nextInt()
+            lastHandle = random.nextInt().toUInt()
             lastConnectedTechnology = TagTechnology.Unknown
             return Proxy.newProxyInstance(nfcClassloader, arrayOf(tagEndpointInterface)) { _, method, args ->
                 when (method.name) {
@@ -69,7 +70,7 @@ abstract class BaseFakeTag {
                     "getTechExtras" -> techExtras
                     "isPresent" -> true
                     "getHandle" -> lastHandle
-                    "getTechHandles" -> IntArray(techList.size) { lastHandle }
+                    "getTechHandles" -> IntArray(techList.size) { lastHandle.toInt() }
                     else -> {
                         when (method.returnType) {
                             Boolean::class.javaPrimitiveType -> true
