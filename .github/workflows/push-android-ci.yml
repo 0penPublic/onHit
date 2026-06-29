@@ -50,8 +50,7 @@ jobs:
         run: |
           ./gradlew assembleDebug assembleRelease \
             --build-cache \
-            --parallel \
-            --daemon
+            --parallel
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v7
