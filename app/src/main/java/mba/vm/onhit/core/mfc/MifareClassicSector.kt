@@ -1,6 +1,6 @@
 package mba.vm.onhit.core.mfc
 
-import mba.vm.onhit.core.mfc.MifareClassicalParser.MIFARE_CLASSICAL_BLOCK_SIZE
+import mba.vm.onhit.core.mfc.MifareClassicParser.MIFARE_CLASSICAL_BLOCK_SIZE
 
 
 data class MifareClassicSector(

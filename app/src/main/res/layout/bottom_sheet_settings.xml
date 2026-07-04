@@ -72,7 +72,8 @@
                 android:layout_weight="1"
                 android:paddingStart="16dp"
                 android:orientation="vertical"
-                android:gravity="start">
+                android:gravity="start"
+                tools:ignore="RtlSymmetry">
 
                 <TextView
                     android:layout_width="match_parent"
@@ -185,6 +186,45 @@
             android:background="?android:attr/dividerVertical"
             android:layout_marginVertical="8dp"
             android:alpha="0.1" />
+
+        <LinearLayout
+            android:id="@+id/btn_telegram"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="12dp"
+            android:background="?android:attr/selectableItemBackground">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/baseline_info_24"
+                android:tint="?android:attr/colorControlNormal"
+                android:contentDescription="@null" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_telegram_community"
+                    android:textSize="16sp"
+                    android:textColor="?android:attr/textColorPrimary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_telegram_community_summary"
+                    android:textSize="12sp"
+                    android:textColor="?android:attr/textColorSecondary" />
+            </LinearLayout>
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/btn_github"

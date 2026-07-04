@@ -1,6 +1,6 @@
 package mba.vm.onhit.core.mfc
 
-object MifareClassicalParser {
+object MifareClassicParser {
     const val MIFARE_CLASSICAL_BLOCK_SIZE = 16
 
     fun parse(fileBytes: ByteArray): Array<MifareClassicSector> {
