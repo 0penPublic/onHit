@@ -80,8 +80,8 @@ Xposed is only required to enable **tagless NDEF replay**, which injects NFC tag
 
 [![Telegram](https://img.shields.io/badge/Telegram-Join_Chat-blue.svg?style=for-the-badge&logo=telegram&color=12b7f5)](https://t.me/on_hit)  
 
-欢迎加入我们的 Telegram 频道/群组获取最新动态与交流  
-Join our Telegram channel/group for updates and discussions.
+欢迎加入我们的 Telegram 群组获取最新动态与交流  
+Join our Telegram group for updates and discussions.
 
 ## Acknowledgments
  Special thanks to the following projects for their invaluable contributions to the community:
