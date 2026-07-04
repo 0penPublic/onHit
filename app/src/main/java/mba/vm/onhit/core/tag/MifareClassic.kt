@@ -3,10 +3,10 @@ package mba.vm.onhit.core.tag
 import android.os.Bundle
 import mba.vm.onhit.core.TagTechnology
 import mba.vm.onhit.core.mfc.MifareClassicSector
-import mba.vm.onhit.core.mfc.MifareClassicalParser
+import mba.vm.onhit.core.mfc.MifareClassicParser
 
 // WIP
-class MifareClassical : BaseFakeTag() {
+class MifareClassic : BaseFakeTag() {
     override val name: String = this.javaClass.name
     var uid: ByteArray = byteArrayOf()
     var sectors: Array<MifareClassicSector> = arrayOf()
@@ -16,9 +16,9 @@ class MifareClassical : BaseFakeTag() {
 
     override fun init(uid: ByteArray, bytes: ByteArray): BaseFakeTag {
         this.uid = uid
-        sectors = MifareClassicalParser.parse(bytes)
+        sectors = MifareClassicParser.parse(bytes)
         if (sectors.isNotEmpty()) {
-            val cardInfo = MifareClassicalParser.getTagInfo(sectors[0])
+            val cardInfo = MifareClassicParser.getTagInfo(sectors[0])
             atqa = cardInfo.first ?: byteArrayOf(0x00, 0x04)
             sak = cardInfo.second?.toShort() ?: 0x08
         }
@@ -65,7 +65,7 @@ class MifareClassical : BaseFakeTag() {
         }
         if (cmd.size < 12) return Pair(false, byteArrayOf())
         val targetBlock = cmd[1].toInt() and 0xFF
-        val sectorIndex = MifareClassicalParser.blockToSector(targetBlock)
+        val sectorIndex = MifareClassicParser.blockToSector(targetBlock)
         val providedKey = cmd.sliceArray(6..11)
         return auth(sectorIndex, (cmd[0].toInt() and 0xFF) == 0x61, providedKey)
     }
@@ -78,7 +78,7 @@ class MifareClassical : BaseFakeTag() {
             0x30 -> {
                 if (req.size < 2) return Pair(false, byteArrayOf())
                 val targetBlock = req[1].toInt() and 0xFF
-                if (currentUnlockSectorIndex != MifareClassicalParser.blockToSector(targetBlock)) {
+                if (currentUnlockSectorIndex != MifareClassicParser.blockToSector(targetBlock)) {
                     return Pair(false, byteArrayOf())
                 }
                 val blockData = getBlockData(targetBlock)

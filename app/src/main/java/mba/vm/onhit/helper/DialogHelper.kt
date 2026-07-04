@@ -4,7 +4,6 @@ import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.net.Uri
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
@@ -18,6 +17,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Switch
 import android.widget.TextView
+import androidx.core.net.toUri
 import mba.vm.onhit.Constant
 import mba.vm.onhit.R
 import mba.vm.onhit.core.ConfigManager
@@ -125,6 +125,7 @@ object DialogHelper {
 
         val btnChangeDir = dialog.findViewById<View>(R.id.btn_change_dir)
         val btnGithub = dialog.findViewById<View>(R.id.btn_github)
+        val btnTelegram = dialog.findViewById<View>(R.id.btn_telegram)
         val switchFixedUid = dialog.findViewById<Switch>(R.id.switch_fixed_uid)
         val uidConfigSummary = dialog.findViewById<TextView>(R.id.tv_uid_config_summary)
         val etUidConfig = dialog.findViewById<EditText>(R.id.et_uid_config)
@@ -163,7 +164,12 @@ object DialogHelper {
         }
 
         btnGithub.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(Constant.GITHUB_URL))
+            val intent = Intent(Intent.ACTION_VIEW, Constant.GITHUB_URL.toUri())
+            context.startActivity(intent)
+        }
+
+        btnTelegram.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW, Constant.TELEGRAM_URL.toUri())
             context.startActivity(intent)
         }
 

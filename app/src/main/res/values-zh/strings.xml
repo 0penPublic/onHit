@@ -15,6 +15,8 @@
     <string name="settings_reselect_directory">更改存储文件夹</string>
     <string name="settings_github_repo">GitHub 仓库</string>
     <string name="settings_github_repo_summary">如果你觉得好用，欢迎点个 Star！</string>
+    <string name="settings_telegram_community">Telegram 群组</string>
+    <string name="settings_telegram_community_summary">加入我们的 Telegram 群组以沟通交流以及获取更新。</string>
 
     <string name="menu_add_folder">新建文件夹</string>
     <string name="dialog_title_add_options">添加</string>

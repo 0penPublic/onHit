@@ -16,6 +16,8 @@
     <string name="settings_reselect_directory">Change Storage Folder</string>
     <string name="settings_github_repo">GitHub Repository</string>
     <string name="settings_github_repo_summary">If you find this useful, a star would be greatly appreciated!</string>
+    <string name="settings_telegram_community">Telegram Group</string>
+    <string name="settings_telegram_community_summary">Join our group for updates and discussion.</string>
     
     <string name="menu_add_folder">New Folder</string>
     <string name="dialog_title_add_options">Add</string>

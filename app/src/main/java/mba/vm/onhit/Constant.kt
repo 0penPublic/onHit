@@ -17,6 +17,7 @@ class Constant {
         const val PREF_BACKGROUND_URI = "pref_background_uri"
         const val MAX_OF_BROADCAST_SIZE = 1048576
         const val GITHUB_URL = "https://github.com/0penPublic/onHit"
+        const val TELEGRAM_URL = "https://t.me/on_hit"
 
         const val REQUEST_SELECT_BACKGROUND = 1002
         const val REQUEST_CROP_BACKGROUND = 1003
