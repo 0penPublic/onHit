@@ -1,6 +1,15 @@
 version: 2
 updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    commit-message:
+      prefix: workflow
+    schedule:
+      interval: weekly
+
   - package-ecosystem: "gradle"
     directory: "/"
+    commit-message:
+      prefix: gradle
     schedule:
       interval: "weekly"
