@@ -12,8 +12,6 @@ import mba.vm.onhit.BuildConfig
  *   when this app is in the foreground.
  */
 object NfcDispatchManagerHook : BaseHook() {
-    override val name: String = this.javaClass.simpleName
-
     override fun init(classLoader: ClassLoader, packageName: String) {
         val clazz = try {
             Class.forName("com.oplus.nfc.dispatch.NfcDispatchManager", false, classLoader)
