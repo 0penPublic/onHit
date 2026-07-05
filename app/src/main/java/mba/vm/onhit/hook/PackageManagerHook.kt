@@ -5,7 +5,6 @@ import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createHook
 import mba.vm.onhit.Constant.Companion.PACKAGE_MANAGER_SYSTEM_NFC_FEATURES
 
 object PackageManagerHook : BaseHook() {
-    override val name: String = this.javaClass.simpleName
     override fun init(classLoader: ClassLoader, packageName: String) {
         MethodFinder.fromClass(
             "android.app.ApplicationPackageManager",

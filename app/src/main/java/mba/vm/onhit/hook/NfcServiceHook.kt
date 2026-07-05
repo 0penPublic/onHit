@@ -23,9 +23,6 @@ object NfcServiceHook : BaseHook() {
     private lateinit var dispatchTagEndpoint: Method
     private lateinit var tagEndpointInterface: Class<*>
 
-    override val name: String = this.javaClass.simpleName
-
-
     fun findAvailableClass(classLoader: ClassLoader, vararg classNames: String): Class<*>? {
         classNames.forEach { name ->
             runCatching {
@@ -83,7 +80,8 @@ object NfcServiceHook : BaseHook() {
     fun dispatchFakeTag(
         fakeTag: BaseFakeTag
     ) {
-        val tag = fakeTag.makeEndpoint(nfcClassLoader, tagEndpointInterface)
+        val targetClassLoader = tagEndpointInterface.classLoader ?: nfcClassLoader
+        val tag = fakeTag.makeEndpoint(targetClassLoader, tagEndpointInterface)
         nfcServiceHandler.post {
             dispatchTagEndpoint.invoke(
                 nfcServiceHandler,
