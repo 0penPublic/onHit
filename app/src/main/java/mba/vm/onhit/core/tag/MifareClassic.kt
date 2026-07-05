@@ -7,7 +7,6 @@ import mba.vm.onhit.core.mfc.MifareClassicParser
 
 // WIP
 class MifareClassic : BaseFakeTag() {
-    override val name: String = this.javaClass.name
     var uid: ByteArray = byteArrayOf()
     var sectors: Array<MifareClassicSector> = arrayOf()
     var atqa: ByteArray = byteArrayOf(0x00, 0x04)

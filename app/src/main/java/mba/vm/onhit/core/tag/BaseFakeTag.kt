@@ -7,7 +7,8 @@ import java.lang.reflect.Proxy
 import java.security.SecureRandom
 
 abstract class BaseFakeTag {
-    abstract val name: String
+    open val name: String
+        get() = this::class.java.simpleName
     abstract fun init(uid: ByteArray, bytes: ByteArray): BaseFakeTag
     abstract fun makeEndpoint(nfcClassloader: ClassLoader, tagEndpointInterface: Class<*>): Any
 

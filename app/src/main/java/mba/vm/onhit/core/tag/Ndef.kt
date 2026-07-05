@@ -5,7 +5,6 @@ import android.os.Bundle
 import mba.vm.onhit.core.TagTechnology
 
 class Ndef : BaseFakeTag() {
-    override val name: String = this.javaClass.name
     lateinit var ndefMessage: NdefMessage
     lateinit var uid: ByteArray
 
