@@ -48,20 +48,25 @@ abstract class BaseFakeTag {
                         val data = args?.firstOrNull { it is ByteArray } as? ByteArray
                         val raw = args?.firstOrNull { it is Boolean } as? Boolean
                         val returnCode = args?.firstOrNull { it is IntArray } as? IntArray
-                        if (raw != true) {
-                            if (data != null) {
-                                val result = transceive(data)
-                                if (result.first) {
+                        raw?.let {
+                            if (!it) {
+                                data?.let {
+                                    val result = transceive(data)
+                                    if (result.first) {
+                                        returnCode?.set(0, 0)
+                                    } else {
+                                        returnCode?.set(0, -4)
+                                    }
+                                    result.second
+                                } ?: run {
                                     returnCode?.set(0, 0)
-                                } else {
-                                    returnCode?.set(0, -4)
+                                    byteArrayOf()
                                 }
-                                result.second
                             } else {
                                 returnCode?.set(0, 0)
                                 byteArrayOf()
                             }
-                        } else {
+                        } ?: run {
                             returnCode?.set(0, 0)
                             byteArrayOf()
                         }
