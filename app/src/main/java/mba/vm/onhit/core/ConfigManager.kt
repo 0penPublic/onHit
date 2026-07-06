@@ -11,16 +11,18 @@ import mba.vm.onhit.Constant.Companion.SHARED_PREFERENCES_NAME
 import mba.vm.onhit.utils.HexUtils
 import java.security.SecureRandom
 import mba.vm.onhit.Constant.Companion.PREF_BACKGROUND_URI
+import androidx.core.content.edit
+import androidx.core.net.toUri
 
 object ConfigManager {
     fun getRootUri(context: Context): Uri? {
         val prefs = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-        return prefs.getString(SHARED_PREFERENCES_CHOSEN_FOLDER, null).let { if (it.isNullOrEmpty()) null else Uri.parse(it) }
+        return prefs.getString(SHARED_PREFERENCES_CHOSEN_FOLDER, null).let { if (it.isNullOrEmpty()) null else it.toUri() }
     }
 
     fun setRootUri(context: Context, uri: Uri) {
         context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-            .edit().putString(SHARED_PREFERENCES_CHOSEN_FOLDER, uri.toString()).apply()
+            .edit { putString(SHARED_PREFERENCES_CHOSEN_FOLDER, uri.toString()) }
     }
 
     fun isFixedUid(context: Context): Boolean {
@@ -30,7 +32,7 @@ object ConfigManager {
 
     fun setFixedUid(context: Context, fixed: Boolean) {
         context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-            .edit().putBoolean(PREF_FIXED_UID, fixed).apply()
+            .edit { putBoolean(PREF_FIXED_UID, fixed) }
     }
 
     fun getFixedUidValue(context: Context): String {
@@ -40,7 +42,7 @@ object ConfigManager {
 
     fun setFixedUidValue(context: Context, value: String) {
         context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-            .edit().putString(PREF_FIXED_UID_VALUE, value).apply()
+            .edit { putString(PREF_FIXED_UID_VALUE, value) }
     }
 
     fun getRandomUidLen(context: Context): String {
@@ -51,22 +53,22 @@ object ConfigManager {
 
     fun setRandomUidLen(context: Context, len: String) {
         context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-            .edit().putString(PREF_RANDOM_UID_LEN, len).apply()
+            .edit { putString(PREF_RANDOM_UID_LEN, len) }
     }
 
 
     fun getBackgroundUri(context: Context): Uri? {
         val value = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
             .getString(PREF_BACKGROUND_URI, null)
-        return if (value.isNullOrEmpty()) null else Uri.parse(value)
+        return if (value.isNullOrEmpty()) null else value.toUri()
     }
 
     fun setBackgroundUri(context: Context, uri: Uri?) {
         context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-            .edit().apply {
+            .edit {
                 if (uri == null) remove(PREF_BACKGROUND_URI)
                 else putString(PREF_BACKGROUND_URI, uri.toString())
-            }.apply()
+            }
     }
 
     fun getUid(context: Context): ByteArray {

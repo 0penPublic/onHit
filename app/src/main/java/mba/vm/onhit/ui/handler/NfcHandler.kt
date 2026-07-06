@@ -101,10 +101,10 @@ class NfcHandler(private val activity: Activity) {
                 Toast.makeText(activity, R.string.toast_write_success, Toast.LENGTH_SHORT).show()
                 closeAction()
             } else {
-                val formatable = NdefFormatable.get(tag)
-                if (formatable != null) {
-                    formatable.connect()
-                    formatable.format(message)
+                val formatAble = NdefFormatable.get(tag)
+                if (formatAble != null) {
+                    formatAble.connect()
+                    formatAble.format(message)
                     Toast.makeText(activity, R.string.toast_write_success, Toast.LENGTH_SHORT).show()
                     closeAction()
                 } else {

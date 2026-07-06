@@ -94,8 +94,7 @@ class MifareClassic : BaseFakeTag() {
     override fun makeEndpoint(
         nfcClassloader: ClassLoader,
         tagEndpointInterface: Class<*>
-    ): Any {
-        return createTagEndpoint(
+    ): Any = createTagEndpoint(
             nfcClassloader,
             tagEndpointInterface,
             uid,
@@ -112,5 +111,4 @@ class MifareClassic : BaseFakeTag() {
             ),
             ::transceive
         )
-    }
 }
