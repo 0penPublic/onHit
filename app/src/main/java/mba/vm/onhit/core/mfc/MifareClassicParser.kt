@@ -2,13 +2,13 @@ package mba.vm.onhit.core.mfc
 
 import android.nfc.NdefMessage
 import android.util.Log
-import mba.vm.onhit.Constant.Companion.KEY_MAD_NFC_FORUM
-import mba.vm.onhit.Constant.Companion.KEY_NDEF_APPLICATION
 import mba.vm.onhit.utils.HexUtils.encodeHex
 import java.io.ByteArrayOutputStream
 
 object MifareClassicParser {
     const val MIFARE_CLASSICAL_BLOCK_SIZE = 16
+    val KEY_MAD_NFC_FORUM = byteArrayOf(0xA0.toByte(), 0xA1.toByte(), 0xA2.toByte(), 0xA3.toByte(), 0xA4.toByte(), 0xA5.toByte())
+    val KEY_NDEF_APPLICATION = byteArrayOf(0xD3.toByte(), 0xF7.toByte(), 0xD3.toByte(), 0xF7.toByte(), 0xD3.toByte(), 0xF7.toByte())
 
     fun checkNdef(sectors: Array<MifareClassicSector>): NdefMessage? {
         if (sectors.isEmpty()) return null

@@ -22,8 +22,5 @@ class Constant {
         const val REQUEST_SELECT_BACKGROUND = 1002
         const val REQUEST_CROP_BACKGROUND = 1003
         val PACKAGE_MANAGER_SYSTEM_NFC_FEATURES = setOf(PackageManager.FEATURE_NFC, PACKAGE_MANAGER_FEATURE_NFC_ANY)
-
-        val KEY_MAD_NFC_FORUM = byteArrayOf(0xA0.toByte(), 0xA1.toByte(), 0xA2.toByte(), 0xA3.toByte(), 0xA4.toByte(), 0xA5.toByte())
-        val KEY_NDEF_APPLICATION = byteArrayOf(0xD3.toByte(), 0xF7.toByte(), 0xD3.toByte(), 0xF7.toByte(), 0xD3.toByte(), 0xF7.toByte())
     }
 }
