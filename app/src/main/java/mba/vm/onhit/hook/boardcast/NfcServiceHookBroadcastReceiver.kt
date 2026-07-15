@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import mba.vm.onhit.Constant
-import mba.vm.onhit.core.tag.BaseFakeTag.Companion.TAG_TYPE_MAPPING
+import mba.vm.onhit.core.tag.BaseFakeTag
 import mba.vm.onhit.hook.NfcDispatchManagerHook.log
 import mba.vm.onhit.hook.NfcServiceHook.dispatchFakeTag
 
@@ -18,8 +18,8 @@ class NfcServiceHookBroadcastReceiver : BroadcastReceiver() {
                 val tagType = intent.getStringExtra("tagType") ?: "ndef"
                 try {
                     if (uid != null && data != null) {
-                        TAG_TYPE_MAPPING[tagType]?.let { clazz ->
-                            val tag = clazz.getDeclaredConstructor().newInstance().init(uid, data)
+                        BaseFakeTag.create(tagType)?.let { tag ->
+                            tag.init(uid, data)
                             dispatchFakeTag(tag)
                         }
                     }

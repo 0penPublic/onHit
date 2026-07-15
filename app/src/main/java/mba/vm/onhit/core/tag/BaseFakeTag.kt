@@ -22,13 +22,17 @@ abstract class BaseFakeTag {
         var lastConnectedTechnology = TagTechnology.Unknown
         var lastHandle: Int = -1
 
+        fun create(tech: String): BaseFakeTag? {
+            return TAG_TYPE_MAPPING[tech]?.getDeclaredConstructor()?.newInstance()
+        }
+
         fun createTagEndpoint(
             nfcClassloader: ClassLoader,
             tagEndpointInterface: Class<*>,
             uid: ByteArray,
             techList: IntArray,
             techExtras: Array<Bundle>,
-            transceive: (cmd: ByteArray) -> Pair<Boolean, ByteArray>,
+            transceive: (cmd: ByteArray) -> ByteArray?,
             ndef: NdefMessage? = null
         ): Any {
             lastHandle = random.nextInt(Int.MAX_VALUE) + 1
@@ -48,27 +52,16 @@ abstract class BaseFakeTag {
                         val data = args?.firstOrNull { it is ByteArray } as? ByteArray
                         val raw = args?.firstOrNull { it is Boolean } as? Boolean
                         val returnCode = args?.firstOrNull { it is IntArray } as? IntArray
-                        raw?.let {
-                            if (!it) {
-                                data?.let {
-                                    val result = transceive(data)
-                                    if (result.first) {
-                                        returnCode?.set(0, 0)
-                                    } else {
-                                        returnCode?.set(0, -4)
-                                    }
-                                    result.second
-                                } ?: run {
-                                    returnCode?.set(0, 0)
-                                    byteArrayOf()
-                                }
+                        if (data != null && raw != null && returnCode != null) {
+                            returnCode[0] = 0
+                            if (raw) {
+                                null
                             } else {
-                                returnCode?.set(0, 0)
-                                byteArrayOf()
+                                transceive(data)
                             }
-                        } ?: run {
+                        } else {
                             returnCode?.set(0, 0)
-                            byteArrayOf()
+                            null
                         }
                     }
                     "getConnectedTechnology" -> lastConnectedTechnology.flag

@@ -28,7 +28,7 @@ class Ndef : BaseFakeTag() {
             putInt("ndefcardstate", 1)
             putInt("ndeftype", 4)
         }),
-        { Pair(true, byteArrayOf()) },
+        { null },
         ndefMessage
     )
 }

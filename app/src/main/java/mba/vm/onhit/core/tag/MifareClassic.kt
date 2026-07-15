@@ -1,18 +1,34 @@
 package mba.vm.onhit.core.tag
 
+import android.nfc.NdefMessage
 import android.os.Bundle
 import mba.vm.onhit.core.TagTechnology
-import mba.vm.onhit.core.mfc.MifareClassicSector
 import mba.vm.onhit.core.mfc.MifareClassicParser
+import mba.vm.onhit.core.mfc.MifareClassicParser.checkNdef
+import mba.vm.onhit.core.mfc.MifareClassicParser.maxNdefMessageSize
+import mba.vm.onhit.core.mfc.MifareClassicSector
 
-// WIP
 class MifareClassic : BaseFakeTag() {
     var uid: ByteArray = byteArrayOf()
     var sectors: Array<MifareClassicSector> = arrayOf()
     var atqa: ByteArray = byteArrayOf(0x00, 0x04)
     var sak: Short = 0x08
+    var ndef: NdefMessage? = null
+    var techs: MutableList<TagTechnology> = mutableListOf(TagTechnology.NFC_A, TagTechnology.MIFARE_CLASSIC)
+    var extras: MutableList<Bundle> = mutableListOf(
+        Bundle().apply {
+            putShort("sak", sak)
+            putByteArray("atqa", atqa)
+        },
+        Bundle()
+    )
     var currentUnlockSectorIndex: Int = -1
 
+    /**
+     * Initializes the fake tag using raw binary dump bytes from a Proxmark3 (pm3) Mifare Classic export.
+     *
+     * NOTE: The configured [uid] might differ from the first 4 bytes of Block 0 (the manufacturer block).
+     */
     override fun init(uid: ByteArray, bytes: ByteArray): BaseFakeTag {
         this.uid = uid
         sectors = MifareClassicParser.parse(bytes)
@@ -20,6 +36,18 @@ class MifareClassic : BaseFakeTag() {
             val cardInfo = MifareClassicParser.getTagInfo(sectors[0])
             atqa = cardInfo.first ?: byteArrayOf(0x00, 0x04)
             sak = cardInfo.second?.toShort() ?: 0x08
+        }
+        ndef = checkNdef(sectors)
+        if (ndef != null) {
+            techs.add(TagTechnology.NDEF)
+            extras.add(
+                Bundle().apply {
+                    putParcelable("ndefmsg", ndef)
+                    putInt("ndefmaxlength", sectors.maxNdefMessageSize)
+                    putInt("ndefcardstate", 4)
+                    putInt("ndeftype", 1)
+                }
+            )
         }
         return this
     }
@@ -30,15 +58,10 @@ class MifareClassic : BaseFakeTag() {
             val size = sector.dataBlocks.size + 1
             if (targetBlock < currentTotal + size) {
                 val rel = targetBlock - currentTotal
-                if (rel < sector.dataBlocks.size) {
-                    return sector.dataBlocks[rel].data
+                return if (rel < sector.dataBlocks.size) {
+                    sector.dataBlocks[rel].data
                 } else {
-                    val rawTrailer = sector.trailerBlock
-                    if (rawTrailer.size < 16) return rawTrailer
-                    val maskedTrailer = ByteArray(16)
-                    System.arraycopy(rawTrailer, 6, maskedTrailer, 6, 4)
-                    System.arraycopy(rawTrailer, 10, maskedTrailer, 10, 6)
-                    return maskedTrailer
+                    sector.trailerBlock.toMaskedByteArray()
                 }
             }
             currentTotal += size
@@ -46,69 +69,51 @@ class MifareClassic : BaseFakeTag() {
         return null
     }
 
-    fun authentication(cmd: ByteArray): Pair<Boolean, ByteArray> {
+    fun authentication(cmd: ByteArray): ByteArray? {
         currentUnlockSectorIndex = -1
-        fun auth(sectorIndex: Int, isKeyB: Boolean, key: ByteArray): Pair<Boolean, ByteArray> {
-            val sector = sectors.getOrNull(sectorIndex) ?: return Pair(false, byteArrayOf())
-            val targetKey = if (isKeyB) {
-                sector.trailerBlock.sliceArray(10..15)
-            } else {
-                sector.trailerBlock.sliceArray(0..5)
-            }
-            return if (key.contentEquals(targetKey)) {
-                currentUnlockSectorIndex = sectorIndex
-                Pair(true, byteArrayOf(0x00))
-            } else {
-                Pair(false, byteArrayOf())
-            }
-        }
-        if (cmd.size < 12) return Pair(false, byteArrayOf())
+        if (cmd.size < 12) return null
         val targetBlock = cmd[1].toInt() and 0xFF
         val sectorIndex = MifareClassicParser.blockToSector(targetBlock)
         val providedKey = cmd.sliceArray(6..11)
-        return auth(sectorIndex, (cmd[0].toInt() and 0xFF) == 0x61, providedKey)
+        val isKeyB = (cmd[0].toInt() and 0xFF) == 0x61
+        val sector = sectors.getOrNull(sectorIndex) ?: return null
+        val targetKey = if (isKeyB) sector.trailerBlock.keyB else sector.trailerBlock.keyA
+        return if (providedKey.contentEquals(targetKey)) {
+            currentUnlockSectorIndex = sectorIndex
+            byteArrayOf(0x00)
+        } else {
+            null
+        }
     }
 
-    fun transceive(req: ByteArray): Pair<Boolean, ByteArray> {
-        if (req.isEmpty()) return Pair(false, byteArrayOf())
+    fun transceive(req: ByteArray): ByteArray? {
+        // I don't think we need write functionality; this is just a read-only PoC. I guess.
+        if (req.isEmpty()) return null
         val firstByte = req[0].toInt() and 0xFF
+
         when (firstByte) {
             0x60, 0x61 -> return authentication(req)
             0x30 -> {
-                if (req.size < 2) return Pair(false, byteArrayOf())
+                if (req.size < 2) return null
                 val targetBlock = req[1].toInt() and 0xFF
-                if (currentUnlockSectorIndex != MifareClassicParser.blockToSector(targetBlock)) {
-                    return Pair(false, byteArrayOf())
-                }
+                if (currentUnlockSectorIndex != MifareClassicParser.blockToSector(targetBlock)) return null
                 val blockData = getBlockData(targetBlock)
-                return if (blockData != null) {
-                    Pair(true, blockData)
-                } else {
-                    Pair(false, byteArrayOf())
-                }
+                return blockData
             }
         }
-        return Pair(true, byteArrayOf())
+        return null
     }
 
     override fun makeEndpoint(
         nfcClassloader: ClassLoader,
         tagEndpointInterface: Class<*>
     ): Any = createTagEndpoint(
-            nfcClassloader,
-            tagEndpointInterface,
-            uid,
-            TagTechnology.arrayOfTagTechnology(
-                TagTechnology.NFC_A,
-                TagTechnology.MIFARE_CLASSIC
-            ),
-            arrayOf(
-                Bundle().apply {
-                    putShort("sak", sak)
-                    putByteArray("atqa", atqa)
-                },
-                Bundle()
-            ),
-            ::transceive
-        )
+        nfcClassloader,
+        tagEndpointInterface,
+        uid,
+        TagTechnology.arrayOfTagTechnology(*techs.toTypedArray()),
+        extras.toTypedArray(),
+        ::transceive,
+        ndef = ndef
+    )
 }
