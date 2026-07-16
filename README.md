@@ -86,7 +86,7 @@ Join our Telegram group for updates and discussions.
 ## Acknowledgments
  Special thanks to the following projects for their invaluable contributions to the community:
  - [LSPosed](https://github.com/LSPosed/LSPosed)
- - [ExXHelper](https://github.com/KyuubiRan/EzXHelper)
+ - [EzXHelper](https://github.com/KyuubiRan/EzXHelper)
  - [AndroidX](https://developer.android.com/jetpack/androidx)
  - [Material Symbols](https://fonts.google.com/icons)
  
