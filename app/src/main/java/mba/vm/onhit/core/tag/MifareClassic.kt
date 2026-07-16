@@ -10,7 +10,7 @@ import mba.vm.onhit.core.mfc.MifareClassicSector
 
 class MifareClassic : BaseFakeTag() {
     var uid: ByteArray = byteArrayOf()
-    var sectors: Array<MifareClassicSector> = arrayOf()
+    var sectors: List<MifareClassicSector> = listOf()
     var atqa: ByteArray = byteArrayOf(0x00, 0x04)
     var sak: Short = 0x08
     var ndef: NdefMessage? = null
@@ -38,11 +38,11 @@ class MifareClassic : BaseFakeTag() {
             sak = cardInfo.second?.toShort() ?: 0x08
         }
         ndef = checkNdef(sectors)
-        if (ndef != null) {
+        ndef?.let {
             techs.add(TagTechnology.NDEF)
             extras.add(
                 Bundle().apply {
-                    putParcelable("ndefmsg", ndef)
+                    putParcelable("ndefmsg", it)
                     putInt("ndefmaxlength", sectors.maxNdefMessageSize)
                     putInt("ndefcardstate", 4)
                     putInt("ndeftype", 1)
