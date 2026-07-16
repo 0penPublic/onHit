@@ -1,12 +1,12 @@
 package mba.vm.onhit.core.mfc
 
-import mba.vm.onhit.core.mfc.MifareClassicParser.MIFARE_CLASSICAL_BLOCK_SIZE
+import mba.vm.onhit.Constant.Companion.MIFARE_CLASSICAL_BLOCK_SIZE
+
 
 data class MifareClassicSector(
-    var dataBlocks: Array<MifareBlock>,
-    var trailerBlock: MifareTrailerBlock
+    val dataBlocks: List<MifareBlock>,
+    val trailerBlock: MifareTrailerBlock
 ) {
-
     data class MifareTrailerBlock(
         val keyA: ByteArray = ByteArray(6) { 0xFF.toByte() },
         val accessBits: ByteArray = byteArrayOf(0xFF.toByte(), 0x07.toByte(), 0x80.toByte()),
@@ -19,6 +19,7 @@ data class MifareClassicSector(
             require(keyB.size == 6) { "Key B must be 6 bytes" }
         }
 
+        @Suppress("unused")
         fun toByteArray(): ByteArray {
             val result = ByteArray(16)
             System.arraycopy(keyA, 0, result, 0, 6)
@@ -29,10 +30,10 @@ data class MifareClassicSector(
         }
 
         fun toMaskedByteArray(): ByteArray {
-            val raw = this.toByteArray()
-            for (i in 0 until 6) raw[i] = 0.toByte()
-            for (i in 10 until 16) raw[i] = 0.toByte()
-            return raw
+            val result = ByteArray(16)
+            System.arraycopy(accessBits, 0, result, 6, 3)
+            result[9] = userData
+            return result
         }
 
         companion object {
@@ -49,15 +50,11 @@ data class MifareClassicSector(
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
-
             other as MifareTrailerBlock
-
-            if (!keyA.contentEquals(other.keyA)) return false
-            if (!accessBits.contentEquals(other.accessBits)) return false
-            if (userData != other.userData) return false
-            if (!keyB.contentEquals(other.keyB)) return false
-
-            return true
+            return userData == other.userData &&
+                    keyA.contentEquals(other.keyA) &&
+                    accessBits.contentEquals(other.accessBits) &&
+                    keyB.contentEquals(other.keyB)
         }
 
         override fun hashCode(): Int {
@@ -68,6 +65,7 @@ data class MifareClassicSector(
             return result
         }
     }
+
     @JvmInline
     value class MifareBlock(val data: ByteArray) {
         init {
@@ -78,24 +76,26 @@ data class MifareClassicSector(
     init {
         val dataBlkSize = dataBlocks.size
         require(dataBlkSize == 3 || dataBlkSize == 15) { "Invalid data blocks size: $dataBlkSize" }
-        require(dataBlocks.all { it.data.size == MIFARE_CLASSICAL_BLOCK_SIZE }) { "Each data block must be 16 bytes" }
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-
         other as MifareClassicSector
 
-        if (!dataBlocks.contentDeepEquals(other.dataBlocks)) return false
         if (trailerBlock != other.trailerBlock) return false
-
+        if (dataBlocks.size != other.dataBlocks.size) return false
+        for (i in dataBlocks.indices) {
+            if (!dataBlocks[i].data.contentEquals(other.dataBlocks[i].data)) return false
+        }
         return true
     }
 
     override fun hashCode(): Int {
-        var result = dataBlocks.contentDeepHashCode()
-        result = 31 * result + trailerBlock.hashCode()
+        var result = trailerBlock.hashCode()
+        for (block in dataBlocks) {
+            result = 31 * result + block.data.contentHashCode()
+        }
         return result
     }
 }

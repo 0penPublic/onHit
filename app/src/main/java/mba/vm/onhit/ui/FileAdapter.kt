@@ -60,7 +60,6 @@ class FileAdapter(
             override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
                 val oldItem = fileList[oldItemPosition]
                 val newItem = newList[newItemPosition]
-                // 假设 DocumentFile 的 URI 或路径可以唯一标识一个文件
                 return oldItem.name == newItem.name && oldItem.isDirectory == newItem.isDirectory
             }
 

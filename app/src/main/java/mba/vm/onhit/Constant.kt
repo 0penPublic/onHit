@@ -21,6 +21,7 @@ class Constant {
 
         const val REQUEST_SELECT_BACKGROUND = 1002
         const val REQUEST_CROP_BACKGROUND = 1003
+        const val MIFARE_CLASSICAL_BLOCK_SIZE = 16
         val PACKAGE_MANAGER_SYSTEM_NFC_FEATURES = setOf(PackageManager.FEATURE_NFC, PACKAGE_MANAGER_FEATURE_NFC_ANY)
     }
 }
