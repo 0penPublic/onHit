@@ -2,90 +2,51 @@ package mba.vm.onhit.core.tag
 
 import android.nfc.NdefMessage
 import android.os.Bundle
-import mba.vm.onhit.core.TagTechnology
+import mba.vm.onhit.core.emulator.FakeTagEndpointHandler
+import mba.vm.onhit.core.emulator.FakeTagSession
+import mba.vm.onhit.core.model.TagTechSpec
+import mba.vm.onhit.core.model.TagTechnology
 import java.lang.reflect.Proxy
-import java.security.SecureRandom
 
 abstract class BaseFakeTag {
-    open val name: String
-        get() = this::class.java.simpleName
-    abstract fun init(uid: ByteArray, bytes: ByteArray): BaseFakeTag
-    abstract fun makeEndpoint(nfcClassloader: ClassLoader, tagEndpointInterface: Class<*>): Any
+
+    abstract var uid: ByteArray
+
+    abstract val technologies: List<TagTechSpec>
+
+    open var ndef: NdefMessage? = null
+
+    val techList: IntArray
+        get() = TagTechnology.arrayOfTagTechnology(*technologies.map { it.tech }.toTypedArray())
+
+    val techExtras: Array<Bundle>
+        get() = technologies.map { it.extras }.toTypedArray()
+
+    abstract fun init(uid: ByteArray, bytes: ByteArray)
+
+    open fun transceive(
+        data: ByteArray,
+        raw: Boolean,
+        returnCode: IntArray
+    ): ByteArray? = null
+
+    fun makeEndpoint(
+        nfcClassloader: ClassLoader,
+        tagEndpointInterface: Class<*>
+    ): Any {
+        return Proxy.newProxyInstance(
+            nfcClassloader,
+            arrayOf(tagEndpointInterface),
+            FakeTagEndpointHandler(this, FakeTagSession())
+        )
+    }
 
     companion object {
-        val random = SecureRandom()
-        val TAG_TYPE_MAPPING = mapOf(
-            Pair("ndef", Ndef::class.java),
-            Pair("mfc", MifareClassic::class.java)
-        )
-
-        var lastConnectedTechnology = TagTechnology.Unknown
-        var lastHandle: Int = -1
-
-        fun create(tech: String): BaseFakeTag? {
-            return TAG_TYPE_MAPPING[tech]?.getDeclaredConstructor()?.newInstance()
-        }
-
-        fun createTagEndpoint(
-            nfcClassloader: ClassLoader,
-            tagEndpointInterface: Class<*>,
-            uid: ByteArray,
-            techList: IntArray,
-            techExtras: Array<Bundle>,
-            transceive: (cmd: ByteArray) -> ByteArray?,
-            ndef: NdefMessage? = null
-        ): Any {
-            lastHandle = random.nextInt(Int.MAX_VALUE) + 1
-            lastConnectedTechnology = TagTechnology.Unknown
-            return Proxy.newProxyInstance(nfcClassloader, arrayOf(tagEndpointInterface)) { _, method, args ->
-                when (method.name) {
-                    "getUid" -> uid
-                    "findAndReadNdef" -> ndef
-                    "getNdef" -> ndef
-                    "readNdef" -> ndef?.toByteArray() ?: byteArrayOf()
-                    "connect" -> {
-                        lastConnectedTechnology = TagTechnology.fromInt(args?.get(0) as? Int ?: 0)
-                        true
-                    }
-                    "disconnect" -> false
-                    "transceive" -> {
-                        val data = args?.firstOrNull { it is ByteArray } as? ByteArray
-                        val raw = args?.firstOrNull { it is Boolean } as? Boolean
-                        val returnCode = args?.firstOrNull { it is IntArray } as? IntArray
-                        if (data != null && raw != null && returnCode != null) {
-                            returnCode[0] = 0
-                            if (raw) {
-                                null
-                            } else {
-                                transceive(data)
-                            }
-                        } else {
-                            returnCode?.set(0, 0)
-                            null
-                        }
-                    }
-                    "getConnectedTechnology" -> lastConnectedTechnology.flag
-                    "getTechList" -> techList
-                    "getTechExtras" -> techExtras
-                    "isPresent" -> true
-                    "getHandle" -> lastHandle
-                    "getTechHandles" -> IntArray(techList.size) { lastHandle }
-                    else -> {
-                        when (method.returnType) {
-                            Boolean::class.javaPrimitiveType -> true
-                            Int::class.javaPrimitiveType -> 0
-                            Void.TYPE -> null
-                            else -> {
-                                if (method.returnType.isArray && method.returnType.componentType == Byte::class.javaPrimitiveType) {
-                                    byteArrayOf()
-                                } else if (method.returnType.isArray && method.returnType.componentType == Int::class.javaPrimitiveType) {
-                                    intArrayOf()
-                                } else null
-                            }
-                        }
-                    }
-                }
-            }
+        fun create(type: String): BaseFakeTag? = when (type.lowercase()) {
+            "mfc" -> MifareClassic()
+            "ndef" -> Ndef()
+            "trace" -> TraceReplay()
+            else -> null
         }
     }
 }

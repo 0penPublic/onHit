@@ -1,4 +1,4 @@
-package mba.vm.onhit.core
+package mba.vm.onhit.core.model
 
 @Suppress("unused")
 enum class TagTechnology(val flag: Int) {

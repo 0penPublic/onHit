@@ -1,10 +1,10 @@
-package mba.vm.onhit.core.mfc
+package mba.vm.onhit.core.tag.mfc
 
 import mba.vm.onhit.Constant.Companion.MIFARE_CLASSICAL_BLOCK_SIZE
 
 
 data class MifareClassicSector(
-    val dataBlocks: List<MifareBlock>,
+    val dataBlocks: List<MifareDataBlock>,
     val trailerBlock: MifareTrailerBlock
 ) {
     data class MifareTrailerBlock(
@@ -21,7 +21,7 @@ data class MifareClassicSector(
 
         @Suppress("unused")
         fun toByteArray(): ByteArray {
-            val result = ByteArray(16)
+            val result = ByteArray(MIFARE_CLASSICAL_BLOCK_SIZE)
             System.arraycopy(keyA, 0, result, 0, 6)
             System.arraycopy(accessBits, 0, result, 6, 3)
             result[9] = userData
@@ -30,7 +30,7 @@ data class MifareClassicSector(
         }
 
         fun toMaskedByteArray(): ByteArray {
-            val result = ByteArray(16)
+            val result = ByteArray(MIFARE_CLASSICAL_BLOCK_SIZE)
             System.arraycopy(accessBits, 0, result, 6, 3)
             result[9] = userData
             return result
@@ -38,7 +38,7 @@ data class MifareClassicSector(
 
         companion object {
             fun fromByteArray(bytes: ByteArray): MifareTrailerBlock {
-                require(bytes.size == 16) { "Trailer block bytes must be 16 bytes" }
+                require(bytes.size == MIFARE_CLASSICAL_BLOCK_SIZE) { "Trailer block bytes must be $MIFARE_CLASSICAL_BLOCK_SIZE bytes" }
                 return MifareTrailerBlock(
                     keyA = bytes.copyOfRange(0, 6),
                     accessBits = bytes.copyOfRange(6, 9),
@@ -67,9 +67,9 @@ data class MifareClassicSector(
     }
 
     @JvmInline
-    value class MifareBlock(val data: ByteArray) {
+    value class MifareDataBlock(val data: ByteArray) {
         init {
-            require(data.size == MIFARE_CLASSICAL_BLOCK_SIZE) { "Block size must be 16" }
+            require(data.size == MIFARE_CLASSICAL_BLOCK_SIZE) { "Block size must be $MIFARE_CLASSICAL_BLOCK_SIZE" }
         }
     }
 

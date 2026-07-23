@@ -2,6 +2,7 @@ package mba.vm.onhit.ui
 
 import android.app.Activity
 import android.content.Intent
+import android.content.IntentFilter
 import android.net.Uri
 import android.nfc.NdefMessage
 import android.nfc.NdefRecord
@@ -13,23 +14,30 @@ import android.text.TextWatcher
 import android.view.View
 import android.view.WindowInsets
 import android.view.inputmethod.InputMethodManager
-import android.widget.PopupMenu
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.PopupMenu
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import android.window.OnBackInvokedDispatcher
+import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.documentfile.provider.DocumentFile
 import mba.vm.onhit.Constant
+import mba.vm.onhit.Constant.Companion.BROADCAST_START_TAG_RECORDER_REQUEST
 import mba.vm.onhit.Constant.Companion.MAX_OF_BROADCAST_SIZE
+import mba.vm.onhit.Constant.Companion.REQUEST_CROP_BACKGROUND
+import mba.vm.onhit.Constant.Companion.REQUEST_SELECT_BACKGROUND
 import mba.vm.onhit.R
-import mba.vm.onhit.core.ConfigManager
 import mba.vm.onhit.databinding.ActivityMainBinding
 import mba.vm.onhit.helper.DialogHelper
+import mba.vm.onhit.ui.broadcast.ResponseBroadcastReceiver
+import mba.vm.onhit.ui.config.ConfigManager
 import mba.vm.onhit.ui.handler.NfcHandler
 import mba.vm.onhit.ui.model.FileData
 import mba.vm.onhit.utils.FileUtils
@@ -38,48 +46,41 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.Executors
 import kotlin.system.exitProcess
-import androidx.core.view.isVisible
-import androidx.core.view.isGone
-import mba.vm.onhit.Constant.Companion.REQUEST_CROP_BACKGROUND
-import mba.vm.onhit.Constant.Companion.REQUEST_SELECT_BACKGROUND
 
 class MainActivity : Activity() {
-
     private lateinit var binding: ActivityMainBinding
     private var allFiles = listOf<FileData>()
     private lateinit var adapter: FileAdapter
-
     private var currentDir: DocumentFile? = null
     private var rootDir: DocumentFile? = null
-
     private lateinit var nfcHandler: NfcHandler
-    
     private val executor = Executors.newSingleThreadExecutor()
     private var isRefreshing = false
-
     private var pendingImportUri: Uri? = null
     private var pendingCroppedBackgroundUri: Uri? = null
+    private val responseBroadcastReceiver: ResponseBroadcastReceiver = ResponseBroadcastReceiver()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
+        ContextCompat.registerReceiver(
+            this,
+            responseBroadcastReceiver,
+            IntentFilter().apply {
+                addAction(Constant.BROADCAST_TAG_RECORDER_STATE_RESPONSE)
+                addAction(Constant.BROADCAST_TAG_RECORDER_RESPONSE)
+            }
+            , ContextCompat.RECEIVER_EXPORTED)
         setContentView(binding.root)
-
         applyCustomBackground()
-
         handleIntent(intent)
-
         WindowCompat.setDecorFitsSystemWindows(window, false)
-
         setupBackNavigation()
-
         nfcHandler = NfcHandler(this).apply {
             onNdefRead = { data -> showNdefSaveDialog(data) }
         }
-
         adapter = FileAdapter(this, emptyList(), ::onFileClick, ::showItemPopupMenu)
         binding.rvFiles.adapter = adapter
-
         setupListeners()
         if (!restoreLastDirectory()) {
             Toast.makeText(this, R.string.toast_no_valid_storage, Toast.LENGTH_LONG).show()
@@ -294,6 +295,10 @@ class MainActivity : Activity() {
             pendingImportUri ?: run {
                 simulateTag(fileData, "mfc")
             }
+        } else if (fileData.isTraceFile) {
+            pendingImportUri ?: run {
+                simulateTag(fileData, "trace")
+            }
         } else {
             pendingImportUri ?: run {
                 Toast.makeText(this, R.string.toast_not_ndef_file, Toast.LENGTH_SHORT).show()
@@ -338,7 +343,10 @@ class MainActivity : Activity() {
         popup.menu.add(0, 1, 0, R.string.menu_add_folder)
         popup.menu.add(0, 3, 1, R.string.menu_build_ndef)
         if (nfcHandler.isEnabled() &&
-            pendingImportUri == null) popup.menu.add(0, 2, 2, R.string.import_ndef)
+            pendingImportUri == null) {
+            popup.menu.add(1, 2, 2, R.string.import_ndef)
+            popup.menu.add(1, 4, 3, "Start Recording")
+        }
 
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
@@ -348,6 +356,14 @@ class MainActivity : Activity() {
                 }
                 2 -> nfcHandler.startRead()
                 3 -> showBuildNdefDialog()
+                4 -> {
+                    sendBroadcast(
+                        Intent(BROADCAST_START_TAG_RECORDER_REQUEST)
+                    )
+                    sendBroadcast(
+                        Intent(Constant.BROADCAST_TAG_RECORDER_STATE_REQUEST)
+                    )
+                }
             }
             true
         }

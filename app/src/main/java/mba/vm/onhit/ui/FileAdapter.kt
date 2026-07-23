@@ -39,6 +39,7 @@ class FileAdapter(
             item.isDirectory -> R.drawable.baseline_folder_24
             item.isNdef -> R.drawable.baseline_nfc_24
             item.isMfcData -> R.drawable.baseline_card_24
+            item.isTraceFile -> R.drawable.baseline_payment_card_24
             else -> R.drawable.baseline_article_24
         }
         holder.ivIcon.setImageResource(iconRes)

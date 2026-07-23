@@ -7,6 +7,7 @@ import android.provider.OpenableColumns
 import androidx.documentfile.provider.DocumentFile
 import mba.vm.onhit.Constant.Companion.MAX_OF_BROADCAST_SIZE
 import mba.vm.onhit.R
+import mba.vm.onhit.core.recorder.trace.TagTraceCodec
 import mba.vm.onhit.ui.model.FileData
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -21,14 +22,16 @@ object FileUtils {
         }
         val items = dir.listFiles().map { file ->
             val isDir = file.isDirectory
+            val bytes = if (!isDir) readBytesFromDocumentFile(context, file) else null
             FileData(
                 name = file.name ?: "Unknown",
                 isDirectory = isDir,
                 documentFile = file,
                 size = if (isDir) 0 else file.length(),
                 lastModified = file.lastModified(),
-                isNdef = !isDir && isNdefFile(context, file),
-                isMfcData = !isDir && isMfcData(context, file)
+                isNdef = !isDir && isNdefFile(bytes),
+                isMfcData = !isDir && isMfcData(bytes),
+                isTraceFile = !isDir && isTraceFile(bytes)
             )
         }.sortedWith(compareBy({ !it.isDirectory }, { it.name.lowercase() }))
 
@@ -36,33 +39,41 @@ object FileUtils {
         return list
     }
 
-    private fun isMfcData(context: Context, file: DocumentFile): Boolean {
-        val len = file.length()
-        if (len != 1024L && len != 4096L && len != 320L) return false
-        return try {
-            context.contentResolver.openInputStream(file.uri)?.use { input ->
-                val buffer = ByteArray(16)
-                if (input.skip(48) != 48L) return false
-                if (input.read(buffer) != 16) return false
-                if (buffer.all { it == 0.toByte() }) return false
-                val isLikelyAccessBits = !(buffer[6] == 0.toByte() && buffer[7] == 0.toByte() && buffer[8] == 0.toByte())
-                isLikelyAccessBits
-            } ?: false
-        } catch (_: Exception) {
-            false
-        }
+
+    fun isTraceFile(bytes: ByteArray?): Boolean {
+        val len = bytes?.size ?: return false
+        if (len < 6) return false
+        val first6 = bytes.copyOfRange(0, 6)
+        return first6.contentEquals(TagTraceCodec.MAGIC_HEADER)
     }
 
-    private fun isNdefFile(context: Context, file: DocumentFile): Boolean {
-        if (file.length() > MAX_OF_BROADCAST_SIZE) return false
-        return try {
-            context.contentResolver.openInputStream(file.uri)?.use { input ->
-                val bytes = input.readBytes()
+    fun isMfcData(bytes: ByteArray?): Boolean {
+        val len = bytes?.size ?: return false
+        if (len != 1024 && len != 4096 && len != 320) return false
+        val buffer = bytes.copyOfRange(48, 64)
+        if (buffer.all { it == 0.toByte() }) return false
+        return !(buffer[6] == 0.toByte() && buffer[7] == 0.toByte() && buffer[8] == 0.toByte())
+    }
+
+    fun isNdefFile(bytes: ByteArray?): Boolean {
+        bytes?.let {
+            if (bytes.size > MAX_OF_BROADCAST_SIZE) return false
+            return try {
                 NdefMessage(bytes)
                 true
-            } ?: false
+            } catch (_: Exception) {
+                false
+            }
+        }
+        return false
+    }
+    private fun readBytesFromDocumentFile(context: Context, file: DocumentFile): ByteArray? {
+        return try {
+            context.contentResolver.openInputStream(file.uri)?.use { input ->
+                input.readBytes()
+            }
         } catch (_: Exception) {
-            false
+            null
         }
     }
 

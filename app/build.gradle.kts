@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "mba.vm.onhit"
-        minSdk = 26
+        minSdk = 27
         targetSdk = 37
         versionCode = getGitCommitCount()
         versionName = "1.1.8-$currentGitHash"

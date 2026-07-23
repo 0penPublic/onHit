@@ -1,8 +1,11 @@
-package mba.vm.onhit.core
+package mba.vm.onhit.ui.config
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.content.edit
+import androidx.core.net.toUri
 import mba.vm.onhit.Constant.Companion.MAX_OF_BROADCAST_SIZE
+import mba.vm.onhit.Constant.Companion.PREF_BACKGROUND_URI
 import mba.vm.onhit.Constant.Companion.PREF_FIXED_UID
 import mba.vm.onhit.Constant.Companion.PREF_FIXED_UID_VALUE
 import mba.vm.onhit.Constant.Companion.PREF_RANDOM_UID_LEN
@@ -10,9 +13,6 @@ import mba.vm.onhit.Constant.Companion.SHARED_PREFERENCES_CHOSEN_FOLDER
 import mba.vm.onhit.Constant.Companion.SHARED_PREFERENCES_NAME
 import mba.vm.onhit.utils.HexUtils
 import java.security.SecureRandom
-import mba.vm.onhit.Constant.Companion.PREF_BACKGROUND_URI
-import androidx.core.content.edit
-import androidx.core.net.toUri
 
 object ConfigManager {
     fun getRootUri(context: Context): Uri? {
