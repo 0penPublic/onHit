@@ -24,6 +24,7 @@
     
     <string name="menu_rename">Rename</string>
     <string name="menu_delete">Delete</string>
+    <string name="menu_edit_ndef">Edit NDEF</string>
     <string name="menu_write_to_tag">Write to Tag</string>
     <string name="dialog_title_path">Path</string>
     <string name="toast_send_broadcast_failed">Failed to send broadcast, reason: %s</string>
@@ -53,6 +54,9 @@
     
     <string name="toast_import_success">Imported: %s</string>
     <string name="toast_import_failed">Import failed: %s</string>
+    <string name="menu_cancel_import">Cancel Import</string>
+    <string name="dialog_title_confirm_cancel_import">Cancel Import</string>
+    <string name="confirm_cancel_import_hint">Are you sure you want to cancel the current import?</string>
 
     <string name="title_save_to">Save %s to…</string>
 
@@ -62,32 +66,48 @@
     <string name="settings_background_custom">Using custom background</string>
     <string name="unknown_error">unknow error</string>
 
-    <string name="menu_build_ndef">Build NDEF(beta)</string>
+    <string name="menu_build_ndef">Build NDEF</string>
 
-    <string name="build_ndef_title">Build NDEF(beta)</string>
+    <string name="build_ndef_title">Build NDEF</string>
     <string name="build_ndef_type">Type</string>
     <string name="build_ndef_value">Value</string>
     <string name="build_ndef_value_hint">Enter website, phone number or text</string>
     <string name="build_ndef_add_record">Add record</string>
     <string name="build_ndef_clear_records">Clear</string>
+    <string name="build_ndef_update_record">Update</string>
+    <string name="build_ndef_cancel_edit">Cancel Edit</string>
+    <string name="build_ndef_editing_index">Editing Record #%d</string>
     <string name="build_ndef_generate">Generate</string>
     <string name="build_ndef_empty_records">No records</string>
-    <string name="build_ndef_record_status">Records: %1$d, NDEF size: %2$d bytes%3$s</string>
+    <string name="build_ndef_record_status">Records: %1$d, NDEF size: %2$d bytes</string>
+    <string name="build_ndef_record_status_with_capacity">Records: %1$d, NDEF size: %2$d bytes, approx. %3$s capacity</string>
     <string name="build_ndef_record_item">%1$d. %2$s: %3$s</string>
 
     <string name="build_ndef_type_website">Website</string>
     <string name="build_ndef_type_phone">Phone</string>
     <string name="build_ndef_type_text">Text</string>
+    <string name="build_ndef_type_aar">Android App (AAR)</string>
+    <string name="build_ndef_type_mime">MIME Type</string>
+    <string name="build_ndef_type_external">External Type</string>
+    <string name="build_ndef_type_unknown">Unknown (%s)</string>
 
     <string name="build_ndef_error_empty_value">Value cannot be empty</string>
     <string name="build_ndef_error_add_failed">Failed to add record: %s</string>
     <string name="build_ndef_error_empty_records">Please add at least one record</string>
     <string name="build_ndef_error_build_failed">Failed to build NDEF: %s</string>
     <string name="build_ndef_error_create_file_failed">Failed to create NDEF file</string>
+    <string name="build_ndef_error_file_too_large">File is too large to edit (limit 1KB)</string>
     <string name="build_ndef_saved">Created: %s</string>
 
-    <string name="build_ndef_ntag_213">, fits NTAG213 approximately</string>
-    <string name="build_ndef_ntag_215_216">, may require NTAG215/216</string>
-    <string name="build_ndef_ntag_216">, may require NTAG216</string>
-    <string name="build_ndef_ntag_too_large">, may exceed common NTAG capacity</string>
+    <string name="dialog_title_confirm_clear">Confirm Clear</string>
+    <string name="confirm_clear_ndef_hint">Are you sure you want to clear all records?</string>
+
+    <string name="toast_tag_read_only">This tag is read-only.</string>
+    <string name="toast_tag_trace_received">Tag trace received, length: %d</string>
+
+    <string name="recorder_state">Recorder: %s</string>
+    <string name="recorder_state_recording">Recording</string>
+    <string name="recorder_state_waiting">Waiting for tag</string>
+    <string name="recorder_state_idle">Idle</string>
+    <string name="unknown">Unknown</string>
 </resources>

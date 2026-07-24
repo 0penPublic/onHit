@@ -23,6 +23,7 @@
 
     <string name="menu_rename">重命名</string>
     <string name="menu_delete">删除</string>
+    <string name="menu_edit_ndef">修改 NDEF</string>
     <string name="menu_write_to_tag">写入标签</string>
     <string name="dialog_title_path">路径</string>
     <string name="toast_send_broadcast_failed">广播发送失败，原因: %s</string>
@@ -53,6 +54,9 @@
     
     <string name="toast_import_success">已导入: %s</string>
     <string name="toast_import_failed">导入失败: %s</string>
+    <string name="menu_cancel_import">取消当前导入</string>
+    <string name="dialog_title_confirm_cancel_import">取消导入</string>
+    <string name="confirm_cancel_import_hint">确定要取消当前导入吗？</string>
     <string name="title_save_to">将 %s 保存至…</string>
 
     <string name="settings_change_background">更换背景图片</string>
@@ -61,32 +65,48 @@
     <string name="settings_background_custom">当前使用自定义背景</string>
     <string name="unknown_error">未知错误</string>
 
-    <string name="menu_build_ndef">构建 NDEF （beta）</string>
+    <string name="menu_build_ndef">构建 NDEF</string>
 
-    <string name="build_ndef_title">构建 NDEF （beta）</string>
+    <string name="build_ndef_title">构建 NDEF</string>
     <string name="build_ndef_type">类别</string>
     <string name="build_ndef_value">记录值</string>
     <string name="build_ndef_value_hint">记录值</string>
     <string name="build_ndef_add_record">添加记录</string>
     <string name="build_ndef_clear_records">清空</string>
+    <string name="build_ndef_update_record">更新记录</string>
+    <string name="build_ndef_cancel_edit">取消修改</string>
+    <string name="build_ndef_editing_index">正在修改第 %d 条记录</string>
     <string name="build_ndef_generate">生成</string>
     <string name="build_ndef_empty_records">暂无记录</string>
-    <string name="build_ndef_record_status">记录数：%1$d，NDEF大小：%2$d bytes%3$s</string>
+    <string name="build_ndef_record_status">记录数：%1$d，NDEF大小：%2$d 字节</string>
+    <string name="build_ndef_record_status_with_capacity">记录数：%1$d，NDEF大小：%2$d 字节，约需 %3$s 容量</string>
     <string name="build_ndef_record_item">%1$d. %2$s：%3$s</string>
 
     <string name="build_ndef_type_website">网站</string>
     <string name="build_ndef_type_phone">电话</string>
     <string name="build_ndef_type_text">文本</string>
+    <string name="build_ndef_type_aar">安卓应用 (AAR)</string>
+    <string name="build_ndef_type_mime">MIME 类型</string>
+    <string name="build_ndef_type_external">外部类型</string>
+    <string name="build_ndef_type_unknown">未知类型 (%s)</string>
 
     <string name="build_ndef_error_empty_value">记录值不能为空</string>
     <string name="build_ndef_error_add_failed">添加记录失败：%s</string>
     <string name="build_ndef_error_empty_records">请至少添加一条记录</string>
     <string name="build_ndef_error_build_failed">构建 NDEF 失败：%s</string>
     <string name="build_ndef_error_create_file_failed">创建 NDEF 文件失败</string>
+    <string name="build_ndef_error_file_too_large">文件太大，无法编辑（上限 1KB）</string>
     <string name="build_ndef_saved">已创建：%s</string>
 
-    <string name="build_ndef_ntag_213">，约可放入 NTAG213</string>
-    <string name="build_ndef_ntag_215_216">，约需 NTAG215/216</string>
-    <string name="build_ndef_ntag_216">，约需 NTAG216</string>
-    <string name="build_ndef_ntag_too_large">，可能超过常见 NTAG 容量</string>
+    <string name="dialog_title_confirm_clear">确认清空</string>
+    <string name="confirm_clear_ndef_hint">确定要清空所有记录吗？</string>
+
+    <string name="toast_tag_read_only">标签为只读</string>
+    <string name="toast_tag_trace_received">已收到标签追踪，长度：%d</string>
+
+    <string name="recorder_state">记录器: %s</string>
+    <string name="recorder_state_recording">记录中</string>
+    <string name="recorder_state_waiting">等待标签</string>
+    <string name="recorder_state_idle">空闲</string>
+    <string name="unknown">未知</string>
 </resources>

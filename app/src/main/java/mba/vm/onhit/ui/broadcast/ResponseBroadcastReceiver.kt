@@ -9,29 +9,28 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import mba.vm.onhit.BuildConfig
 import mba.vm.onhit.Constant
+import mba.vm.onhit.R
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class ResponseBroadcastReceiver : BroadcastReceiver() {
+    var onStateReceived: ((String?) -> Unit)? = null
+
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
             Constant.BROADCAST_TAG_RECORDER_STATE_RESPONSE -> {
                 val state = intent.getStringExtra("state")
-                Toast.makeText(context, "Current state: $state", Toast.LENGTH_SHORT)
-                    .show()
+                onStateReceived?.invoke(state)
             }
 
             Constant.BROADCAST_TAG_RECORDER_RESPONSE -> {
                 intent.getByteArrayExtra("data")?.let { bytes ->
                     Toast.makeText(
                         context,
-                        "Get TagTrace, length: ${bytes.size}",
+                        context.getString(R.string.toast_tag_trace_received, bytes.size),
                         Toast.LENGTH_SHORT
                     ).show()
                     val fileName =
-                        "${SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(Date())}.ohtt"
+                        "tag_trace.ohtt"
                     val tempFile = File(context.filesDir, fileName).apply {
                         writeBytes(bytes)
                     }
@@ -47,6 +46,7 @@ class ResponseBroadcastReceiver : BroadcastReceiver() {
                         )
                         setDataAndType(contentUri, "application/octet-stream")
                         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        putExtra("is_internal", true)
 
                         if (context !is Activity) {
                             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

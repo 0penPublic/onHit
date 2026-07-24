@@ -101,6 +101,14 @@ object TagRecorder {
         }
     }
 
+    fun toggleRecorder() {
+        if (state == TagRecorderState.IDLE) {
+            startRecorder()
+        } else {
+            stopRecorder()
+        }
+    }
+
     fun stopRecorder() {
         logI("Stopping recorder. Recorded ${currentTagTrace?.transceiveData?.size ?: 0} exchanges.")
         currentTagTrace?.let {

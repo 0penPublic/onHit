@@ -6,8 +6,6 @@ import android.content.Intent
 import mba.vm.onhit.BuildConfig
 import mba.vm.onhit.Constant
 import mba.vm.onhit.core.recorder.TagRecorder
-import mba.vm.onhit.core.recorder.TagRecorder.startRecorder
-import mba.vm.onhit.core.recorder.TagRecorder.stopRecorder
 import mba.vm.onhit.core.tag.BaseFakeTag
 import mba.vm.onhit.hook.nfc.NfcServiceHook.dispatchFakeTag
 import mba.vm.onhit.utils.HexUtils.encodeHex
@@ -43,14 +41,14 @@ class NfcHookBroadcastReceiver : BroadcastReceiver() {
                 context.sendBroadcast(responseIntent)
             }
 
-            Constant.BROADCAST_START_TAG_RECORDER_REQUEST -> {
-                logI("Starting Tag Recorder")
-                startRecorder()
-            }
-
-            Constant.BROADCAST_STOP_TAG_RECORDER_REQUEST -> {
-                logI("Stopping Tag Recorder")
-                stopRecorder()
+            Constant.BROADCAST_TOGGLE_TAG_RECORDER_REQUEST -> {
+                logI("Toggling Tag Recorder")
+                TagRecorder.toggleRecorder()
+                val responseIntent = Intent(Constant.BROADCAST_TAG_RECORDER_STATE_RESPONSE).apply {
+                    `package` = BuildConfig.APPLICATION_ID
+                    putExtra("state", TagRecorder.state.toString())
+                }
+                context.sendBroadcast(responseIntent)
             }
         }
     }

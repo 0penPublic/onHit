@@ -85,28 +85,32 @@ class NfcHandler(private val activity: Activity) {
         try {
             val message = NdefMessage(data)
             val ndef = Ndef.get(tag)
-            if (ndef != null) {
-                ndef.connect()
-                if (!ndef.isWritable) {
-                    Toast.makeText(activity, "Tag is not writable", Toast.LENGTH_SHORT).show()
-                    closeAction()
-                    return
-                }
-                if (ndef.maxSize < data.size) {
-                    Toast.makeText(activity, R.string.toast_file_too_large, Toast.LENGTH_SHORT).show()
-                    closeAction()
-                    return
-                }
-                ndef.writeNdefMessage(message)
-                Toast.makeText(activity, R.string.toast_write_success, Toast.LENGTH_SHORT).show()
-                closeAction()
-            } else {
-                val formatAble = NdefFormatable.get(tag)
-                if (formatAble != null) {
-                    formatAble.connect()
-                    formatAble.format(message)
+            ndef?.let {
+                it.use { ndefSession ->
+                    ndefSession.connect()
+                    if (!ndefSession.isWritable) {
+                        Toast.makeText(activity, R.string.toast_tag_read_only, Toast.LENGTH_SHORT).show()
+                        closeAction()
+                        return
+                    }
+                    if (ndefSession.maxSize < data.size) {
+                        Toast.makeText(activity, R.string.toast_file_too_large, Toast.LENGTH_SHORT).show()
+                        closeAction()
+                        return
+                    }
+                    ndefSession.writeNdefMessage(message)
                     Toast.makeText(activity, R.string.toast_write_success, Toast.LENGTH_SHORT).show()
                     closeAction()
+                }
+            } ?: run {
+                val formatAble = NdefFormatable.get(tag)
+                if (formatAble != null) {
+                    formatAble.use {
+                        it.connect()
+                        it.format(message)
+                        Toast.makeText(activity, R.string.toast_write_success, Toast.LENGTH_SHORT).show()
+                        closeAction()
+                    }
                 } else {
                     Toast.makeText(activity, R.string.toast_tag_not_support_ndef_format, Toast.LENGTH_SHORT).show()
                     closeAction()

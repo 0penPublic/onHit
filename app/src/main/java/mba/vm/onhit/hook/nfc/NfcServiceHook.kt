@@ -88,7 +88,7 @@ object NfcServiceHook : BaseHook() {
                     if (BuildConfig.DEBUG) nfcService.objectHelper().setObject("DBG", true)
                     ContextCompat.registerReceiver(nfcApplication, receiver, IntentFilter().apply {
                         addAction(Constant.BROADCAST_TAG_EMULATOR_REQUEST)
-                        addAction(Constant.BROADCAST_START_TAG_RECORDER_REQUEST)
+                        addAction(Constant.BROADCAST_TOGGLE_TAG_RECORDER_REQUEST)
                         addAction(Constant.BROADCAST_TAG_RECORDER_STATE_REQUEST)
                     }, ContextCompat.RECEIVER_EXPORTED)
                     logI("initialized successfully.")

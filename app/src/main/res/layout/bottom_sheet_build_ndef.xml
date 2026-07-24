@@ -11,6 +11,7 @@
         android:padding="24dp">
 
         <TextView
+            android:id="@+id/tv_build_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/build_ndef_title"
@@ -19,71 +20,81 @@
             android:textColor="?android:attr/textColorPrimary"
             android:layout_marginBottom="16dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/build_ndef_type"
-            android:textSize="14sp"
-            android:textColor="?android:attr/textColorSecondary"
-            android:layout_marginBottom="6dp" />
-
-        <Spinner
-            android:id="@+id/spinner_ndef_type"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/build_ndef_value"
-            android:textSize="14sp"
-            android:textColor="?android:attr/textColorSecondary"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="6dp" />
-
-        <EditText
-            android:id="@+id/et_ndef_value"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/build_ndef_value_hint"
-            android:inputType="textMultiLine"
-            android:minLines="1"
-            android:maxLines="4"
-            android:importantForAutofill="no" />
-
         <LinearLayout
+            android:id="@+id/layout_editor_inputs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="end"
-            android:layout_marginTop="12dp">
+            android:orientation="vertical">
 
-            <Button
-                android:id="@+id/btn_add_ndef_record"
+            <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="44dp"
-                android:minWidth="112dp"
-                android:paddingHorizontal="24dp"
-                android:background="@drawable/bg_button_text_ripple"
-                android:text="@string/build_ndef_add_record"
-                android:textSize="15sp"
-                android:textColor="#DCE4FF"
-                android:stateListAnimator="@null"
-                android:textAllCaps="false" />
+                android:layout_height="wrap_content"
+                android:text="@string/build_ndef_type"
+                android:textSize="14sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:layout_marginBottom="6dp" />
 
-            <Button
-                android:id="@+id/btn_clear_ndef_records"
+            <Spinner
+                android:id="@+id/spinner_ndef_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:minWidth="96dp"
-                android:layout_marginStart="12dp"
-                android:paddingHorizontal="24dp"
-                android:background="@drawable/bg_button_text_ripple"
-                android:text="@string/build_ndef_clear_records"
-                android:textSize="16sp"
-                android:textColor="#DCE4FF"
-                android:stateListAnimator="@null"
-                android:textAllCaps="false" />
+                android:layout_height="wrap_content"
+                android:text="@string/build_ndef_value"
+                android:textSize="14sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="6dp" />
+
+            <EditText
+                android:id="@+id/et_ndef_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/build_ndef_value_hint"
+                android:inputType="textMultiLine"
+                android:minLines="1"
+                android:maxLines="4"
+                android:importantForAutofill="no" />
+
+            <LinearLayout
+                style="?android:attr/buttonBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="end"
+                android:layout_marginTop="12dp">
+
+                <Button
+                    android:id="@+id/btn_add_ndef_record"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:minWidth="112dp"
+                    android:paddingHorizontal="24dp"
+                    android:background="@drawable/bg_button_text_ripple"
+                    android:text="@string/build_ndef_add_record"
+                    android:textSize="15sp"
+                    android:textColor="#DCE4FF"
+                    android:stateListAnimator="@null"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:id="@+id/btn_clear_ndef_records"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:minWidth="96dp"
+                    android:layout_marginStart="12dp"
+                    android:paddingHorizontal="24dp"
+                    android:background="@drawable/bg_button_text_ripple"
+                    android:text="@string/build_ndef_clear_records"
+                    android:textSize="16sp"
+                    android:textColor="#DCE4FF"
+                    android:stateListAnimator="@null"
+                    android:textAllCaps="false" />
+            </LinearLayout>
         </LinearLayout>
 
         <TextView
@@ -95,19 +106,27 @@
             android:textColor="?android:attr/textColorSecondary"
             android:layout_marginTop="18dp" />
 
-        <TextView
-            android:id="@+id/tv_ndef_record_list"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_ndef_records"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="72dp"
+            android:minHeight="120dp"
+            android:maxHeight="300dp"
             android:layout_marginTop="8dp"
-            android:padding="12dp"
+            android:background="@android:color/transparent" />
+
+        <TextView
+            android:id="@+id/tv_ndef_empty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="24dp"
             android:text="@string/build_ndef_empty_records"
-            android:textSize="14sp"
             android:textColor="?android:attr/textColorSecondary"
-            android:background="?android:attr/colorBackground" />
+            android:visibility="gone" />
 
         <LinearLayout
+            style="?android:attr/buttonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="end"
@@ -116,6 +135,7 @@
 
             <Button
                 android:id="@+id/btn_ndef_cancel"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
                 android:minWidth="96dp"
@@ -129,6 +149,7 @@
 
             <Button
                 android:id="@+id/btn_ndef_ok"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
                 android:minWidth="96dp"
