@@ -1,8 +1,10 @@
-package mba.vm.onhit.hook
+package mba.vm.onhit.hook.nfc
 
 import io.github.kyuubiran.ezxhelper.core.finder.MethodFinder
 import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createHook
 import mba.vm.onhit.BuildConfig
+import mba.vm.onhit.hook.BaseHook
+import mba.vm.onhit.utils.LogUtils.logI
 
 /**
  * Hook for Oplus NFC Dispatch Manager (ColorOS)
@@ -16,7 +18,7 @@ object NfcDispatchManagerHook : BaseHook() {
         val clazz = try {
             Class.forName("com.oplus.nfc.dispatch.NfcDispatchManager", false, classLoader)
         } catch (_: ClassNotFoundException) {
-            log("NfcDispatchManager not found, skip hook")
+            logI("NfcDispatchManager not found, skip hook")
             return
         }
         MethodFinder.fromClass(clazz)

@@ -10,5 +10,6 @@ data class FileData(
     val size: Long = 0,
     val lastModified: Long = 0,
     val isNdef: Boolean = false,
-    val isMfcData: Boolean = false
+    val isMfcData: Boolean = false,
+    val isTraceFile: Boolean = false
 )

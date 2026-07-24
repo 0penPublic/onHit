@@ -20,7 +20,7 @@ import android.widget.TextView
 import androidx.core.net.toUri
 import mba.vm.onhit.Constant
 import mba.vm.onhit.R
-import mba.vm.onhit.core.ConfigManager
+import mba.vm.onhit.ui.config.ConfigManager
 import mba.vm.onhit.utils.HexUtils
 
 object DialogHelper {

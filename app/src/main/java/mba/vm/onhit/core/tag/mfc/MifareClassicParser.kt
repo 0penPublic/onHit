@@ -1,9 +1,10 @@
-package mba.vm.onhit.core.mfc
+package mba.vm.onhit.core.tag.mfc
 
 import android.nfc.NdefMessage
-import android.util.Log
 import mba.vm.onhit.Constant.Companion.MIFARE_CLASSICAL_BLOCK_SIZE
 import mba.vm.onhit.utils.HexUtils.encodeHex
+import mba.vm.onhit.utils.LogUtils.logE
+import mba.vm.onhit.utils.LogUtils.logI
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 
@@ -63,11 +64,11 @@ object MifareClassicParser {
                 }
             }
             ndefBytes?.let {
-                Log.i("MifareClassicParser", "NDEF Data: ${encodeHex(it)}")
+                logI("NDEF Data: ${encodeHex(it)}")
                 NdefMessage(it)
             }
         }.onFailure { e ->
-            Log.e("MifareClassicParser", "Parsing NDEF failed", e)
+            logE("Parsing NDEF failed", e)
         }.getOrNull()
     }
 
@@ -84,7 +85,7 @@ object MifareClassicParser {
             val dataBlocks = List(blocksInThisSector - 1) {
                 val blockBytes = ByteArray(MIFARE_CLASSICAL_BLOCK_SIZE)
                 buffer.get(blockBytes)
-                MifareClassicSector.MifareBlock(blockBytes)
+                MifareClassicSector.MifareDataBlock(blockBytes)
             }
             val trailerBytes = ByteArray(MIFARE_CLASSICAL_BLOCK_SIZE)
             buffer.get(trailerBytes)
