@@ -20,31 +20,35 @@
 
 ## Introduction / 简介
 
-onHit is an Xposed module designed to simulate NFC tag events at the system level. By injecting data into the Android NFC framework, it enables the system to parse and dispatch NDEF data as if a physical tag were present.
+onHit is an Xposed module designed to simulate NFC tag events at the system level. By injecting data into the Android NFC framework, it enables the system to parse and dispatch NDEF and protocol-level data as if a physical tag were present.
 
-onHit 是一个用于在系统层面模拟 NFC 标签事件的 Xposed 模块。通过向 Android NFC 框架注入数据，它使系统能够像处理实体标签一样解析和分发 NDEF 数据。
+---
+
+onHit 是一个用于在系统层面模拟 NFC 标签事件的 Xposed 模块。通过向 Android NFC 框架注入数据，它使系统能够像处理实体标签一样解析和分发 NDEF 及协议层数据。
 
 
 
 ## Core Features / 核心功能
 
-- **NFC Replay**: Simulates system-level NFC touch events via Xposed, triggering NDEF dispatch without physical tags.
+- **Multi-Protocol NFC Replay**: Simulates system-level NFC touch events via Xposed. Supports NDEF, Mifare Classic (MFC), and Trace-based protocol emulation.
+- **Trace Reverse Simulation**: Replays previously recorded interaction traces to emulate complex tag behaviors.
 - **NDEF Management**: Read from physical tags, save as files, and write back to tags using public Android APIs.
 - **NDEF Editor**: Built-in editor to create or modify NDEF records directly within the app.
 - **Tag Recorder**: Captures raw data streams during NFC tag interactions for local analysis.
 - **Tag Trace**: View and analyze local NFC tag trace files.
-- **File Manager**: Built-in manager for organizing NDEF files, supporting renaming, deletion, and folder categorization.
+- **File Manager**: Built-in manager for organizing data files, supporting renaming, deletion, and folder categorization.
 - **Personalization**: Supports custom application backgrounds with built-in cropping.
-- **Quick Search**: Real-time keyword filtering for local NDEF files.
-
-- **NFC 重放**: 通过 Xposed 模拟系统级 NFC 触碰事件，无需实体标签即可触发 NDEF 分发流程。
+- **Quick Search**: Real-time keyword filtering for local files.
+---
+- **多协议 NFC 重放**: 通过 Xposed 模拟系统级 NFC 触碰事件。支持 NDEF、Mifare Classic (MFC) 以及基于轨迹的多种协议模拟。
+- **轨迹反向模拟**: 通过回放之前记录的交互轨迹，模拟复杂的标签行为。
 - **NDEF 管理**: 从实体标签读取数据并保存为文件，或通过 Android 官方 API 将文件写回标签。
 - **NDEF 编辑器**: 内置编辑器，支持直接在应用内创建或修改 NDEF 记录。
 - **Tag Recorder**: 记录 NFC 标签交互过程中的原始数据流，仅用于本地分析。
 - **Tag Trace**: 支持查看和分析本地存储的 NFC 标签轨迹文件。
 - **文件管理**: 内置文件管理器，支持重命名、删除及文件夹分类管理。
 - **个性化**: 支持自定义应用背景，内置裁剪功能。
-- **快速搜索**: 对本地 NDEF 文件进行实时关键词过滤。
+- **快速搜索**: 对本地文件进行实时关键词过滤。
 
 
 
@@ -53,15 +57,32 @@ onHit 是一个用于在系统层面模拟 NFC 标签事件的 Xposed 模块。�
 ### System Injection / 系统注入
 The module hooks the `NfcApplication` within the `com.android.nfc` process. It retrieves internal references to the `NfcService` and its associated `Handler` to interact with the system's NFC logic.
 
+---
+
 模块 Hook 了 `com.android.nfc` 进程中的 `NfcApplication`，并获取了内部 `NfcService` 及其关联 `Handler` 的引用，从而实现与系统 NFC 逻辑的交互。
 
-### Event Simulation / 事件模拟
-NDEF replay is achieved by reflectively invoking the `dispatchTagEndpoint` method on the NFC service handler. This bypasses hardware-level constraints and directly injects a custom `TagEndpoint` into the Android dispatch system.
+### Protocol Emulation / 协议仿真
+- **NDEF**: Directly injects NDEF messages into the dispatch system.
+- **Mifare Classic**: Emulates the storage structure and protocol interaction logic of MFC tags.
+- **TagTrace**: Accurate replay of specific interaction flows by matching historical transceive commands with captured response data.
 
-NDEF 重放通过反射调用 NFC 服务 Handler 的 `dispatchTagEndpoint` 方法实现。这绕过了硬件层面的限制，直接向 Android 分发系统注入自定义的 `TagEndpoint`。
+---
+
+- **NDEF**: 直接向分发系统注入 NDEF 消息。
+- **Mifare Classic**: 模拟 MFC 标签的存储结构与协议交互逻辑。
+- **TagTrace**: 通过匹配历史 Transceive 指令及其响应数据，实现对特定交互流程的精准回放。
+
+### Event Simulation / 事件模拟
+Tag replay is achieved by reflectively invoking the `dispatchTagEndpoint` method on the NFC service handler. This bypasses hardware-level constraints and directly injects a custom `TagEndpoint` into the Android dispatch system.
+
+---
+
+标签重放通过反射调用 NFC 服务 Handler 的 `dispatchTagEndpoint` 方法实现。这绕过了硬件层面的限制，直接向 Android 分发系统注入自定义的 `TagEndpoint`。
 
 ### Data Collection / 数据采集
 The **Tag Recorder** intercepts `TagEndpoint` objects before they are dispatched by the system, allowing the module to log raw interaction data. All captured data is stored locally on the device and is not uploaded to any server.
+
+---
 
 **Tag Recorder** 在系统分发前拦截 `TagEndpoint` 对象，从而实现对原始交互数据的记录。所有采集到的数据均仅保存在设备本地，不会上传至任何服务器。
 
@@ -69,6 +90,8 @@ The **Tag Recorder** intercepts `TagEndpoint` objects before they are dispatched
 - **Oplus (ColorOS)**: Specialized hooks for `NfcDispatchManager` to bypass foreground whitelist restrictions and clear the system's internal UID database cache via `DatabaseManager`.
 - **System Features**: Hooks `ApplicationPackageManager` to ensure `hasSystemFeature` correctly reports NFC capabilities.
 - **Hardware Dependency**: Strongly dependent on Android version and vendor NFC implementation. Some OEM frameworks may restrict NFC internals.
+
+---
 
 - **Oplus (ColorOS)**: 针对 `NfcDispatchManager` 进行专项 Hook，以绕过前台白名单限制，并清理系统内部 UID 数据库缓存。
 - **系统特征**: Hook 了 `ApplicationPackageManager`，确保系统特征正确返回 NFC 支持状态。
@@ -79,16 +102,18 @@ The **Tag Recorder** intercepts `TagEndpoint` objects before they are dispatched
 ## How to Use / 如何使用
 
 1. **Install & Enable**: Install onHit and enable the module in your Xposed manager. Scope it to **NFC Service** (`com.android.nfc`).
-2. **Setup Storage**: Open onHit and grant necessary permissions to select a working directory.
-3. **Capture/Import**: Use the built-in tools to read from physical tags or import existing NDEF files.
+2. **Setup Storage**: Open onHit and select a working directory.
+3. **Capture/Import**: From the "Add" menu, choose to read from physical tags, record a trace, or import existing files.
 4. **Edit**: Use the NDEF Editor to modify records if necessary.
-5. **Replay**: Click an NDEF file in the list to trigger the system-level dispatch.
+5. **Replay**: Click a data file in the list to trigger the system-level dispatch.
+
+---
 
 1. **安装并启用**: 安装 onHit 并在 Xposed 管理器中启用模块，作用域勾选 **NFC 服务** (`com.android.nfc`)。
 2. **设置存储**: 打开 onHit 并选择一个工作目录。
-3. **采集/导入**: 从实体标签读取数据或导入已有的 NDEF 文件。
+3. **采集/导入**: 在“添加”菜单中选择从实体标签读取、记录轨迹或导入已有文件。
 4. **编辑**: 如有需要，使用内置编辑器修改记录。
-5. **重放**: 在文件列表中点击 NDEF 文件，即可触发系统级分发。
+5. **重放**: 在文件列表中点击数据文件，即可触发系统级分发。
 
 
 
