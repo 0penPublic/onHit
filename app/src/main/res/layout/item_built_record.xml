@@ -3,24 +3,75 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="12dp"
     android:layout_marginBottom="8dp"
-    android:background="@drawable/bg_file_item">
+    android:background="@drawable/bg_record_item"
+    android:padding="4dp">
 
-    <TextView
-        android:id="@+id/tv_record_type"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        android:textColor="?android:attr/textColorSecondary" />
-
-    <TextView
-        android:id="@+id/tv_record_value"
+    <!-- Summary State -->
+    <LinearLayout
+        android:id="@+id/layout_record_summary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:textSize="14sp"
-        android:textColor="?android:attr/textColorPrimary" />
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:id="@+id/tv_record_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <TextView
+            android:id="@+id/tv_record_value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            android:textColor="?android:attr/textColorPrimary" />
+    </LinearLayout>
+
+    <!-- Editor State -->
+    <LinearLayout
+        android:id="@+id/layout_record_editor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:visibility="gone">
+
+        <include layout="@layout/layout_ndef_record_editor" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:layout_marginTop="12dp">
+
+            <Button
+                android:id="@+id/btn_delete_record"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/menu_delete"
+                android:textSize="14sp"
+                android:textColor="#FFB4AB"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/btn_save_record"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@android:string/ok"
+                android:textSize="14sp"
+                android:textColor="?android:attr/colorAccent"
+                android:textAllCaps="false" />
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>

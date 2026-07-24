@@ -1,12 +1,13 @@
-package mba.vm.onhit.ui.manager
+package mba.vm.onhit.ui.controller
 
 import android.app.Activity
 import android.net.Uri
+import android.view.View
 import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
 import mba.vm.onhit.R
 import mba.vm.onhit.databinding.ActivityMainBinding
-import mba.vm.onhit.helper.DialogHelper
+import mba.vm.onhit.ui.dialog.DialogHelper
 import mba.vm.onhit.utils.FileUtils
 import java.util.Locale
 
@@ -26,7 +27,7 @@ class ImportController(
         val fileName = FileUtils.getFileName(activity, uri) ?: String.format(Locale.getDefault(), "imported_%d.ndef", System.currentTimeMillis())
         binding.tvAppTitle.text = activity.getString(R.string.title_save_to, fileName)
         binding.fabSettings.setImageResource(R.drawable.baseline_save_24)
-        binding.btnSearch.visibility = android.view.View.GONE
+        binding.btnSearch.visibility = View.GONE
     }
 
     fun performImportSave(currentDir: DocumentFile?) {
@@ -42,10 +43,10 @@ class ImportController(
                 DialogHelper.showInputBottomSheet(activity, activity.getString(R.string.dialog_title_save_ndef), fileName) { name ->
                     val file = currentDir.createFile("application/octet-stream", name)
                     file?.uri?.let { destUri ->
-                        activity.contentResolver.openOutputStream(destUri)?.use { it.write(data) }
+                        activity.contentResolver.openOutputStream(destUri, "rwt")?.use { it.write(data) }
                     }
                     Toast.makeText(activity, activity.getString(R.string.toast_import_success, fileName), Toast.LENGTH_SHORT).show()
-                    
+
                     if (isInternalImport) {
                         resetImportMode()
                     } else {
@@ -64,7 +65,7 @@ class ImportController(
         isInternalImport = false
         binding.tvAppTitle.text = activity.getString(R.string.app_name)
         binding.fabSettings.setImageResource(R.drawable.baseline_settings_24)
-        binding.btnSearch.visibility = android.view.View.VISIBLE
+        binding.btnSearch.visibility = View.VISIBLE
         onReset()
     }
 }

@@ -7,6 +7,7 @@ import mba.vm.onhit.core.model.TagTechnology
 import mba.vm.onhit.core.recorder.trace.TagTrace
 import mba.vm.onhit.core.recorder.trace.TagTraceCodec
 import mba.vm.onhit.core.recorder.trace.TraceKey
+import mba.vm.onhit.utils.LogUtils.logE
 
 class TraceReplay : BaseFakeTag() {
     private lateinit var trace: TagTrace
@@ -18,9 +19,14 @@ class TraceReplay : BaseFakeTag() {
     override val technologies: List<TagTechSpec>
         get() = internalTechnologies
 
-    override fun init(uid: ByteArray, bytes: ByteArray) {
-        this.uid = uid
-        trace = TagTraceCodec.decode(bytes)
+    override fun init(uid: ByteArray?, bytes: ByteArray) {
+        runCatching {
+            trace = TagTraceCodec.decode(bytes)
+        }.exceptionOrNull()?.let { e ->
+            logE("Failed to decode trace", e)
+            return
+        }
+        this.uid = uid ?: trace.uid
         trace.technologies.forEach(internalTechnologies::add)
         trace.transceiveData.forEach {
             val key = TraceKey(it.cmd, it.raw, it.returnCodes)

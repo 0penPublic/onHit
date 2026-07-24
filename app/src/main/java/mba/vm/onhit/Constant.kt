@@ -12,9 +12,10 @@ class Constant {
         const val BROADCAST_TAG_RECORDER_STATE_REQUEST = "${BuildConfig.APPLICATION_ID}.BROADCAST_TAG_RECORDER_STATE_REQUEST"
         const val BROADCAST_TAG_RECORDER_STATE_RESPONSE = "${BuildConfig.APPLICATION_ID}.TAG_RECORDER_STATE_RESPONSE"
         const val BROADCAST_TAG_RECORDER_RESPONSE = "${BuildConfig.APPLICATION_ID}.TAG_RECORDER_RESPONSE"
+        const val BROADCAST_RESTART_NFC_SERVICE = "${BuildConfig.APPLICATION_ID}.RESTART_NFC_SERVICE"
         const val SHARED_PREFERENCES_NAME = BuildConfig.APPLICATION_ID
         const val SHARED_PREFERENCES_CHOSEN_FOLDER = "chosen_folder"
-        const val PREF_FIXED_UID = "pref_fixed_uid"
+        const val PREF_UID_MODE = "pref_uid_mode"
         const val PREF_FIXED_UID_VALUE = "pref_fixed_uid_value"
         const val PREF_RANDOM_UID_LEN = "pref_random_uid_len"
 
@@ -23,8 +24,13 @@ class Constant {
         const val GITHUB_URL = "https://github.com/0penPublic/onHit"
         const val TELEGRAM_URL = "https://t.me/on_hit"
 
+        const val REQUEST_SELECT_DIRECTORY = 1001
         const val REQUEST_SELECT_BACKGROUND = 1002
         const val REQUEST_CROP_BACKGROUND = 1003
+        const val REQUEST_SELECT_NDEF_FILE = 1004
+        const val REQUEST_SAVE_FILE = 1005
+        const val REQUEST_EDIT_NDEF = 1006
+
         const val MIFARE_CLASSICAL_BLOCK_SIZE = 16
         val PACKAGE_MANAGER_SYSTEM_NFC_FEATURES = setOf(PackageManager.FEATURE_NFC, PACKAGE_MANAGER_FEATURE_NFC_ANY)
     }

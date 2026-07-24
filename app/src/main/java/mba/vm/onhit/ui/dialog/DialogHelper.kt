@@ -1,5 +1,6 @@
-package mba.vm.onhit.helper
+package mba.vm.onhit.ui.dialog
 
+import android.app.Activity
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
@@ -13,17 +14,48 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Switch
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.core.net.toUri
+import androidx.core.view.isVisible
 import mba.vm.onhit.Constant
 import mba.vm.onhit.R
 import mba.vm.onhit.ui.config.ConfigManager
 import mba.vm.onhit.utils.HexUtils
 
 object DialogHelper {
+
+    fun showNdefEditorDialog(
+        activity: Activity,
+        isReadOnly: Boolean = false,
+        initialBytes: ByteArray? = null,
+        onResult: (ByteArray) -> Unit
+    ): NdefEditorDialog {
+        val dialog = NdefEditorDialog(activity, isReadOnly, initialBytes, onResult)
+        dialog.show()
+        return dialog
+    }
+
+    fun requestPickFile(activity: Activity) {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "*/*"
+        }
+        activity.startActivityForResult(intent, Constant.REQUEST_SELECT_NDEF_FILE)
+    }
+
+    fun requestSaveFile(activity: Activity, filename: String) {
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "application/octet-stream"
+            putExtra(Intent.EXTRA_TITLE, "${filename.replace("/", "_")}_payload.bin")
+        }
+        activity.startActivityForResult(intent, Constant.REQUEST_SAVE_FILE)
+    }
 
     fun createBottomDialog(context: Context, layoutRes: Int): Dialog {
         val dialog = Dialog(context, android.R.style.Theme_DeviceDefault_Dialog_NoActionBar)
@@ -124,9 +156,10 @@ object DialogHelper {
         val dialog = createBottomDialog(context, R.layout.bottom_sheet_settings)
 
         val btnChangeDir = dialog.findViewById<View>(R.id.btn_change_dir)
+        val btnRestartNfc = dialog.findViewById<View>(R.id.btn_restart_nfc)
         val btnGithub = dialog.findViewById<View>(R.id.btn_github)
         val btnTelegram = dialog.findViewById<View>(R.id.btn_telegram)
-        val switchFixedUid = dialog.findViewById<Switch>(R.id.switch_fixed_uid)
+        val spinnerUidMode = dialog.findViewById<Spinner>(R.id.spinner_uid_mode)
         val uidConfigSummary = dialog.findViewById<TextView>(R.id.tv_uid_config_summary)
         val etUidConfig = dialog.findViewById<EditText>(R.id.et_uid_config)
 
@@ -163,6 +196,17 @@ object DialogHelper {
             onChangeDir()
         }
 
+        btnRestartNfc.setOnClickListener {
+            showConfirmBottomSheet(
+                context,
+                context.getString(R.string.dialog_title_confirm_restart_nfc),
+                context.getString(R.string.confirm_restart_nfc_hint)
+            ) {
+                context.sendBroadcast(Intent(Constant.BROADCAST_RESTART_NFC_SERVICE))
+                dialog.dismiss()
+            }
+        }
+
         btnGithub.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW, Constant.GITHUB_URL.toUri())
             context.startActivity(intent)
@@ -173,13 +217,31 @@ object DialogHelper {
             context.startActivity(intent)
         }
 
-        val isFixed = ConfigManager.isFixedUid(context)
-        switchFixedUid.isChecked = isFixed
-        updateUidEditText(uidConfigSummary, etUidConfig, isFixed, context)
+        val uidModes = listOf(
+            context.getString(R.string.settings_uid_mode_file),
+            context.getString(R.string.settings_uid_mode_len),
+            context.getString(R.string.settings_uid_mode_fixed)
+        )
 
-        switchFixedUid.setOnCheckedChangeListener { _, isChecked ->
-            ConfigManager.setFixedUid(context, isChecked)
-            updateUidEditText(uidConfigSummary, etUidConfig, isChecked, context)
+        spinnerUidMode.adapter = ArrayAdapter(
+            context,
+            android.R.layout.simple_spinner_item,
+            uidModes
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+
+        val currentMode = ConfigManager.getUidMode(context)
+        spinnerUidMode.setSelection(currentMode)
+        updateUidEditText(uidConfigSummary, etUidConfig, currentMode, context)
+
+        spinnerUidMode.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                ConfigManager.setUidMode(context, position)
+                updateUidEditText(uidConfigSummary, etUidConfig, position, context)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
         etUidConfig.addTextChangedListener(object : TextWatcher {
@@ -187,14 +249,15 @@ object DialogHelper {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 val input = s.toString()
-                if (ConfigManager.isFixedUid(context)) {
+                val mode = ConfigManager.getUidMode(context)
+                if (mode == ConfigManager.UID_MODE_FIXED) {
                     val hex = HexUtils.filterHex(input)
                     if (hex != input) {
                         etUidConfig.setText(hex)
                         etUidConfig.setSelection(hex.length)
                     }
                     ConfigManager.setFixedUidValue(context, hex)
-                } else {
+                } else if (mode == ConfigManager.UID_MODE_LEN) {
                     val len = input.toIntOrNull()
                     if (len != null && len in 0..65535) {
                         setNormalTextColor(etUidConfig, context)
@@ -215,19 +278,30 @@ object DialogHelper {
         et.setTextColor(typedValue.data)
     }
 
-    private fun updateUidEditText(summary: TextView, et: EditText, isFixed: Boolean, context: Context) {
-        if (isFixed) {
-            et.hint = context.getString(R.string.settings_hint_fixed_uid)
-            summary.text = context.getString(R.string.settings_hint_fixed_uid)
-            et.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
-            et.setText(ConfigManager.getFixedUidValue(context))
-        } else {
-            et.hint = context.getString(R.string.settings_hint_random_uid_len)
-            summary.text = context.getString(R.string.settings_hint_random_uid_len)
-            et.inputType = InputType.TYPE_CLASS_NUMBER
-            et.setText(ConfigManager.getRandomUidLen(context))
+    private fun updateUidEditText(summary: TextView, et: EditText, mode: Int, context: Context) {
+        when (mode) {
+            ConfigManager.UID_MODE_FILE -> {
+                summary.text = context.getString(R.string.settings_uid_mode_file)
+                et.visibility = View.GONE
+            }
+            ConfigManager.UID_MODE_FIXED -> {
+                et.visibility = View.VISIBLE
+                et.hint = context.getString(R.string.settings_hint_fixed_uid)
+                summary.text = context.getString(R.string.settings_hint_fixed_uid)
+                et.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+                et.setText(ConfigManager.getFixedUidValue(context))
+            }
+            ConfigManager.UID_MODE_LEN -> {
+                et.visibility = View.VISIBLE
+                et.hint = context.getString(R.string.settings_hint_random_uid_len)
+                summary.text = context.getString(R.string.settings_hint_random_uid_len)
+                et.inputType = InputType.TYPE_CLASS_NUMBER
+                et.setText(ConfigManager.getRandomUidLen(context))
+            }
         }
         setNormalTextColor(et, context)
-        et.setSelection(et.text.length)
+        if (et.isVisible) {
+            et.setSelection(et.text.length)
+        }
     }
 }

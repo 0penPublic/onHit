@@ -31,7 +31,7 @@ class ResponseBroadcastReceiver : BroadcastReceiver() {
                     ).show()
                     val fileName =
                         "tag_trace.ohtt"
-                    val tempFile = File(context.filesDir, fileName).apply {
+                    val tempFile = File(context.cacheDir, fileName).apply {
                         writeBytes(bytes)
                     }
                     val contentUri = FileProvider.getUriForFile(

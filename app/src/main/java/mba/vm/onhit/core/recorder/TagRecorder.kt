@@ -14,7 +14,6 @@ import mba.vm.onhit.core.model.TagTechnology
 import mba.vm.onhit.core.recorder.trace.TagTrace
 import mba.vm.onhit.core.recorder.trace.TagTraceCodec
 import mba.vm.onhit.hook.nfc.NfcServiceHook.sendBroadcast
-import mba.vm.onhit.utils.HexUtils.encodeHex
 import mba.vm.onhit.utils.LogUtils.logI
 import kotlin.reflect.KClass
 
@@ -81,10 +80,10 @@ object TagRecorder {
                                     resp
                                 )
                                 logI("Recorded exchange { " +
-                                        "cmd=${encodeHex(cmd)}, " +
+                                        "cmd=${cmd.toHexString()}, " +
                                         "raw=$raw, " +
                                         "returnCode=${returnCode.contentToString()}, " +
-                                        "resp=${encodeHex(resp)} }")
+                                        "resp=${resp?.toHexString() ?: "<no response>"} }")
                             }
                         }
                     }

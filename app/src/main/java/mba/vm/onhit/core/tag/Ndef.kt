@@ -13,8 +13,8 @@ class Ndef : BaseFakeTag() {
 
     override var ndef: NdefMessage? = null
 
-    override fun init(uid: ByteArray, bytes: ByteArray) {
-        this.uid = uid
+    override fun init(uid: ByteArray?, bytes: ByteArray) {
+        this.uid = uid ?: byteArrayOf()
         this.ndef = runCatching { NdefMessage(bytes) }.getOrNull()
         internalTechnologies.clear()
         internalTechnologies.add(

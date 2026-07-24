@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_ndef_value_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/build_ndef_label_type"
+        android:textSize="14sp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:layout_marginBottom="6dp" />
+
+    <EditText
+        android:id="@+id/et_ndef_value"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/build_ndef_value_hint"
+        android:inputType="text"
+        android:maxLines="1"
+        android:importantForAutofill="no" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
+
+        <Button
+            android:id="@+id/btn_select_file"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/bg_button_text_ripple"
+            android:text="@string/build_ndef_select_file"
+            android:textSize="14sp"
+            android:textColor="#DCE4FF"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/btn_export_payload"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_button_text_ripple"
+            android:text="@string/build_ndef_export_payload"
+            android:textSize="14sp"
+            android:textColor="#DCE4FF"
+            android:textAllCaps="false" />
+    </LinearLayout>
+
+</LinearLayout>

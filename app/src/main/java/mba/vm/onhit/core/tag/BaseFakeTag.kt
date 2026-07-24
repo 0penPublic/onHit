@@ -22,7 +22,7 @@ abstract class BaseFakeTag {
     val techExtras: Array<Bundle>
         get() = technologies.map { it.extras }.toTypedArray()
 
-    abstract fun init(uid: ByteArray, bytes: ByteArray)
+    abstract fun init(uid: ByteArray?, bytes: ByteArray)
 
     open fun transceive(
         data: ByteArray,
@@ -42,11 +42,10 @@ abstract class BaseFakeTag {
     }
 
     companion object {
-        fun create(type: String): BaseFakeTag? = when (type.lowercase()) {
-            "mfc" -> MifareClassic()
-            "ndef" -> Ndef()
-            "trace" -> TraceReplay()
-            else -> null
+        fun create(type: TagType): BaseFakeTag = when (type) {
+            TagType.MFC -> MifareClassic()
+            TagType.NDEF -> Ndef()
+            TagType.TRACE -> TraceReplay()
         }
     }
 }
