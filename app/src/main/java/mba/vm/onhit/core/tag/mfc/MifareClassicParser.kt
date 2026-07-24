@@ -2,7 +2,6 @@ package mba.vm.onhit.core.tag.mfc
 
 import android.nfc.NdefMessage
 import mba.vm.onhit.Constant.Companion.MIFARE_CLASSICAL_BLOCK_SIZE
-import mba.vm.onhit.utils.HexUtils.encodeHex
 import mba.vm.onhit.utils.LogUtils.logE
 import mba.vm.onhit.utils.LogUtils.logI
 import java.io.ByteArrayOutputStream
@@ -64,7 +63,7 @@ object MifareClassicParser {
                 }
             }
             ndefBytes?.let {
-                logI("NDEF Data: ${encodeHex(it)}")
+                logI("NDEF Data: ${it.toHexString()}")
                 NdefMessage(it)
             }
         }.onFailure { e ->

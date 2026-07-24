@@ -1,4 +1,4 @@
-package mba.vm.onhit.ui
+package mba.vm.onhit.ui.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -34,7 +34,7 @@ class FileAdapter(
         val item = fileList[position]
         holder.tvName.text = item.name
         holder.tvDetails.text = FileUtils.formatDetails(context, item)
-        
+
         val iconRes = when {
             item.isDirectory -> R.drawable.baseline_folder_24
             item.isNdef -> R.drawable.baseline_nfc_24

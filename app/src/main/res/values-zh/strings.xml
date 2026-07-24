@@ -2,14 +2,19 @@
     <string name="xposed_desc">无需实体卡即可触发系统信任的 NFC 事件。</string>
 
     <string name="setting">设置</string>
-    <string name="add">添加…</string>
+    <string name="add">添加</string>
     <string name="saving_ndef_prompt">请将标签靠近 NFC 感应区以保存 NDEF 数据。</string>
     <string name="writing_ndef_prompt">请将标签靠近 NFC 感应区以将 NDEF 数据写入标签。</string>
     <string name="toast_tag_not_support_ndef_format">此标签不支持 NDEF 格式或读取失败。</string>
     <string name="delete_file_hint">确定要删除 "%s" 吗？</string>
 
     <string name="settings_title">设置</string>
+    <string name="settings_uid_mode">UID 配置</string>
+    <string name="settings_uid_mode_file">从文件读取</string>
+    <string name="settings_uid_mode_len">随机长度</string>
+    <string name="settings_uid_mode_fixed">固定值</string>
     <string name="settings_enable_fixed_uid">启用固定 UID</string>
+
     <string name="settings_hint_fixed_uid">固定 UID (十六进制)</string>
     <string name="settings_hint_random_uid_len">随机 UID 长度</string>
     <string name="settings_reselect_directory">更改存储文件夹</string>
@@ -17,8 +22,11 @@
     <string name="settings_github_repo_summary">如果你觉得好用，欢迎点个 Star！</string>
     <string name="settings_telegram_community">Telegram 群组</string>
     <string name="settings_telegram_community_summary">加入我们的 Telegram 群组以沟通交流以及获取更新。</string>
+    <string name="settings_restart_nfc">重启 NFC 服务</string>
+    <string name="settings_restart_nfc_summary">重启 NFC 进程以应用更改或修复问题。</string>
 
     <string name="menu_add_folder">新建文件夹</string>
+
     <string name="dialog_title_add_options">添加</string>
 
     <string name="menu_rename">重命名</string>
@@ -70,13 +78,27 @@
     <string name="build_ndef_title">构建 NDEF</string>
     <string name="build_ndef_type">类别</string>
     <string name="build_ndef_value">记录值</string>
+    <string name="build_ndef_label_url">链接</string>
+    <string name="build_ndef_label_phone">电话号码</string>
+    <string name="build_ndef_label_content">文本内容</string>
+    <string name="build_ndef_label_package">应用包名</string>
+    <string name="build_ndef_label_type">类型标识</string>
+    <string name="build_ndef_lang">语言</string>
+
+    <string name="build_ndef_lang_hint">例如 en, zh</string>
+    <string name="build_ndef_select_file">选择文件</string>
+    <string name="build_ndef_export_payload">导出 Payload</string>
     <string name="build_ndef_value_hint">记录值</string>
+
+    <string name="build_ndef_mime_value_hint">MIME 类型 (如 image/png)</string>
+    <string name="build_ndef_external_value_hint">域名:类型 (如 example.com:foo)</string>
     <string name="build_ndef_add_record">添加记录</string>
     <string name="build_ndef_clear_records">清空</string>
     <string name="build_ndef_update_record">更新记录</string>
     <string name="build_ndef_cancel_edit">取消修改</string>
     <string name="build_ndef_editing_index">正在修改第 %d 条记录</string>
     <string name="build_ndef_generate">生成</string>
+    <string name="build_ndef_save_changes">保存修改</string>
     <string name="build_ndef_empty_records">暂无记录</string>
     <string name="build_ndef_record_status">记录数：%1$d，NDEF大小：%2$d 字节</string>
     <string name="build_ndef_record_status_with_capacity">记录数：%1$d，NDEF大小：%2$d 字节，约需 %3$s 容量</string>
@@ -88,18 +110,49 @@
     <string name="build_ndef_type_aar">安卓应用 (AAR)</string>
     <string name="build_ndef_type_mime">MIME 类型</string>
     <string name="build_ndef_type_external">外部类型</string>
+    <string name="build_ndef_type_wifi">WiFi (WPS)</string>
     <string name="build_ndef_type_unknown">未知类型 (%s)</string>
+
+    <string name="build_ndef_wifi_ssid">SSID</string>
+    <string name="build_ndef_wifi_password">密码</string>
+    <string name="build_ndef_wifi_security">安全 (认证)</string>
+    <string name="build_ndef_wifi_encryption">加密方式</string>
+    <string name="build_ndef_wifi_sec_none">无 / 开放</string>
+    <string name="build_ndef_wifi_sec_wpa_personal">WPA 个人</string>
+    <string name="build_ndef_wifi_sec_wpa2_personal">WPA2 个人</string>
+    <string name="build_ndef_wifi_sec_wpa_wpa2_personal">WPA/WPA2 个人</string>
+    <string name="build_ndef_wifi_sec_wpa3_personal">WPA3 个人</string>
+    <string name="build_ndef_wifi_sec_wpa_enterprise">WPA 企业</string>
+    <string name="build_ndef_wifi_sec_wpa2_enterprise">WPA2 企业</string>
+    <string name="build_ndef_wifi_sec_wpa_wpa2_enterprise">WPA/WPA2 企业</string>
+
+    <string name="build_ndef_wifi_enc_none">无</string>
+    <string name="build_ndef_wifi_enc_wep">WEP</string>
+    <string name="build_ndef_wifi_enc_tkip">TKIP</string>
+    <string name="build_ndef_wifi_enc_aes">AES</string>
+    <string name="build_ndef_wifi_enc_aes_tkip">AES/TKIP</string>
 
     <string name="build_ndef_error_empty_value">记录值不能为空</string>
     <string name="build_ndef_error_add_failed">添加记录失败：%s</string>
     <string name="build_ndef_error_empty_records">请至少添加一条记录</string>
     <string name="build_ndef_error_build_failed">构建 NDEF 失败：%s</string>
     <string name="build_ndef_error_create_file_failed">创建 NDEF 文件失败</string>
-    <string name="build_ndef_error_file_too_large">文件太大，无法编辑（上限 1KB）</string>
     <string name="build_ndef_saved">已创建：%s</string>
 
     <string name="dialog_title_confirm_clear">确认清空</string>
+    <string name="dialog_title_confirm_delete_record">确认删除</string>
+    <string name="dialog_title_confirm_restart_nfc">重启 NFC 服务</string>
     <string name="confirm_clear_ndef_hint">确定要清空所有记录吗？</string>
+    <string name="confirm_delete_ndef_record_hint">确定要删除这条记录吗？</string>
+    <string name="confirm_restart_nfc_hint">确定要重启 NFC 服务吗？这可能会中断当前正在进行的 NFC 操作。</string>
+
+    <string name="build_ndef_uri_prefix_none">自定义 (完整 URI)</string>
+    <string name="build_ndef_uri_prefix_http_www">http://www.</string>
+    <string name="build_ndef_uri_prefix_https_www">https://www.</string>
+    <string name="build_ndef_uri_prefix_http">http://</string>
+    <string name="build_ndef_uri_prefix_https">https://</string>
+    <string name="build_ndef_uri_prefix_tel">tel:</string>
+    <string name="build_ndef_uri_prefix_mailto">mailto:</string>
 
     <string name="toast_tag_read_only">标签为只读</string>
     <string name="toast_tag_trace_received">已收到标签追踪，长度：%d</string>
@@ -109,4 +162,19 @@
     <string name="recorder_state_waiting">等待标签</string>
     <string name="recorder_state_idle">空闲</string>
     <string name="unknown">未知</string>
+    <string name="zoom">放大</string>
+    <string name="error_read_file">读取文件失败：%s</string>
+    <string name="error_save_file">保存文件失败：%s</string>
+    <string name="confirm_exit_ndef_editor">确定要退出吗？未保存的更改将会丢失。</string>
+    <string name="menu_view_trace">查看 Trace 详情</string>
+    <string name="trace_details_title">Trace 详情</string>
+    <string name="trace_uid_label">UID:</string>
+    <string name="trace_techs_label">技术列表:</string>
+    <string name="trace_log_label">通信日志:</string>
+    <string name="trace_error_open">无法打开 Trace: %s</string>
+    <string name="trace_tx">发送:</string>
+    <string name="trace_rx">接收:</string>
+    <string name="trace_no_resp">无响应</string>
+    <string name="trace_extra_info">原始数据: %1$b, 状态: %2$s</string>
+    <string name="ssid">SSID</string>
 </resources>

@@ -7,10 +7,11 @@ import mba.vm.onhit.BuildConfig
 import mba.vm.onhit.Constant
 import mba.vm.onhit.core.recorder.TagRecorder
 import mba.vm.onhit.core.tag.BaseFakeTag
+import mba.vm.onhit.core.tag.TagType
 import mba.vm.onhit.hook.nfc.NfcServiceHook.dispatchFakeTag
-import mba.vm.onhit.utils.HexUtils.encodeHex
 import mba.vm.onhit.utils.LogUtils.logE
 import mba.vm.onhit.utils.LogUtils.logI
+import kotlin.system.exitProcess
 
 class NfcHookBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -19,17 +20,17 @@ class NfcHookBroadcastReceiver : BroadcastReceiver() {
             Constant.BROADCAST_TAG_EMULATOR_REQUEST -> {
                 val uid = intent.getByteArrayExtra("uid")
                 val data = intent.getByteArrayExtra("data")
-                val tagType = intent.getStringExtra("tagType") ?: "ndef"
+                val tagTypeByte = intent.getByteExtra("tagType", TagType.NDEF.value)
+                val tagType = TagType.fromByte(tagTypeByte)
                 try {
-                    logI("Emulator { uid=${encodeHex(uid)}, tagType=$tagType }}")
-                    if (uid != null && data != null) {
-                        BaseFakeTag.create(tagType)?.let { tag ->
-                            tag.init(uid, data)
-                            dispatchFakeTag(tag)
-                        }
-                    }
+                    logI("Emulator { uid=${uid?.toHexString() ?: "<no provided>"}, tagType=$tagType }}")
+                    data?.let {
+                        val tag = BaseFakeTag.create(tagType)
+                        tag.init(uid, it)
+                        dispatchFakeTag(tag)
+                    } ?: logE("No data provided")
                 } catch (e: Exception) {
-                    logE("Failed to dispatchFakeTag: $e")
+                    logE("Failed to dispatchFakeTag: $e", e)
                 }
             }
 
@@ -49,6 +50,11 @@ class NfcHookBroadcastReceiver : BroadcastReceiver() {
                     putExtra("state", TagRecorder.state.toString())
                 }
                 context.sendBroadcast(responseIntent)
+            }
+
+            Constant.BROADCAST_RESTART_NFC_SERVICE -> {
+                logI("Restarting NFC Service process...")
+                exitProcess(0)
             }
         }
     }

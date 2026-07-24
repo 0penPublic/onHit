@@ -18,14 +18,15 @@ class MifareClassic : BaseFakeTag() {
     override val technologies: List<TagTechSpec>
         get() = internalTechnologies
 
-    override fun init(uid: ByteArray, bytes: ByteArray) {
-        this.uid = uid
+    override fun init(uid: ByteArray?, bytes: ByteArray) {
         val sectors = MifareClassicParser.parse(bytes)
         if (sectors.isNotEmpty()) {
             val cardInfo = MifareClassicParser.getTagInfo(sectors[0])
             val atqa = cardInfo.first ?: byteArrayOf(0x00, 0x04)
             val sak = cardInfo.second?.toShort() ?: 0x08
-            val mfcTag = MifareClassicTag(uid, sectors, atqa, sak)
+            
+            this.uid = uid ?: sectors[0].dataBlocks[0].data.copyOfRange(0, 4)
+            val mfcTag = MifareClassicTag(this.uid, sectors, atqa, sak)
             this.tagData = mfcTag
             this.protocol = MifareClassicProtocol(mfcTag)
 

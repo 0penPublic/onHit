@@ -16,7 +16,6 @@ import mba.vm.onhit.core.recorder.TagRecorder
 import mba.vm.onhit.core.tag.BaseFakeTag
 import mba.vm.onhit.hook.BaseHook
 import mba.vm.onhit.hook.broadcast.NfcHookBroadcastReceiver
-import mba.vm.onhit.utils.HexUtils.encodeHex
 import mba.vm.onhit.utils.LogUtils.logE
 import mba.vm.onhit.utils.LogUtils.logI
 import java.lang.reflect.Method
@@ -90,6 +89,7 @@ object NfcServiceHook : BaseHook() {
                         addAction(Constant.BROADCAST_TAG_EMULATOR_REQUEST)
                         addAction(Constant.BROADCAST_TOGGLE_TAG_RECORDER_REQUEST)
                         addAction(Constant.BROADCAST_TAG_RECORDER_STATE_REQUEST)
+                        addAction(Constant.BROADCAST_RESTART_NFC_SERVICE)
                     }, ContextCompat.RECEIVER_EXPORTED)
                     logI("initialized successfully.")
                 }
@@ -106,8 +106,11 @@ object NfcServiceHook : BaseHook() {
     ) {
         if (!isInitialized) return
         val targetClassLoader = tagEndpointInterface.classLoader ?: nfcClassLoader
-        logI("Try to dispatch ${encodeHex(fakeTag.uid)}...")
-        logI("TechList ${fakeTag.techList.contentToString()}")
+        logI("Try to dispatch { uid=${fakeTag.uid.toHexString()}, techList=${fakeTag.techList.contentToString()} }...")
+        NfcDispatchManagerHook.databaseManager ?.let {
+            logI("Oplus Database Mangaer find, try to delete tag cache...")
+            NfcDispatchManagerHook.deleteTagCache(fakeTag.uid)
+        }
         val tag = fakeTag.makeEndpoint(targetClassLoader, tagEndpointInterface)
         nfcServiceHandler.post {
             dispatchTagEndpoint.invoke(

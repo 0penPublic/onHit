@@ -9,6 +9,7 @@ import mba.vm.onhit.Constant.Companion.MAX_OF_BROADCAST_SIZE
 import mba.vm.onhit.R
 import mba.vm.onhit.core.recorder.trace.TagTraceCodec
 import mba.vm.onhit.ui.model.FileData
+import mba.vm.onhit.core.tag.TagType
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -31,7 +32,7 @@ object FileUtils {
                 lastModified = file.lastModified(),
                 isNdef = !isDir && isNdefFile(bytes),
                 isMfcData = !isDir && isMfcData(bytes),
-                isTraceFile = !isDir && isTraceFile(bytes)
+                isTraceFile = !isDir && (file.name?.endsWith(".ohtt", true) == true || isTraceFile(bytes))
             )
         }.sortedWith(compareBy({ !it.isDirectory }, { it.name.lowercase() }))
 
@@ -66,6 +67,14 @@ object FileUtils {
             }
         }
         return false
+    }
+
+    fun detectTagType(bytes: ByteArray?): TagType {
+        return when {
+            isTraceFile(bytes) -> TagType.TRACE
+            isMfcData(bytes) -> TagType.MFC
+            else -> TagType.NDEF
+        }
     }
     private fun readBytesFromDocumentFile(context: Context, file: DocumentFile): ByteArray? {
         return try {
