@@ -24,7 +24,7 @@ onHit is an Xposed module designed to simulate NFC tag events at the system leve
 
 onHit 是一个用于在系统层面模拟 NFC 标签事件的 Xposed 模块。通过向 Android NFC 框架注入数据，它使系统能够像处理实体标签一样解析和分发 NDEF 数据。
 
----
+
 
 ## Core Features / 核心功能
 
@@ -46,7 +46,7 @@ onHit 是一个用于在系统层面模拟 NFC 标签事件的 Xposed 模块。�
 - **个性化**: 支持自定义应用背景，内置裁剪功能。
 - **快速搜索**: 对本地 NDEF 文件进行实时关键词过滤。
 
----
+
 
 ## Technical Principles / 技术实现
 
@@ -74,7 +74,7 @@ The **Tag Recorder** intercepts `TagEndpoint` objects before they are dispatched
 - **系统特征**: Hook 了 `ApplicationPackageManager`，确保系统特征正确返回 NFC 支持状态。
 - **硬件依赖**: 运行效果高度依赖 Android 版本和厂商的 NFC 实现，部分定制 ROM 可能会对 NFC 内部逻辑进行修改或限制。
 
----
+
 
 ## How to Use / 如何使用
 
@@ -90,7 +90,7 @@ The **Tag Recorder** intercepts `TagEndpoint` objects before they are dispatched
 4. **编辑**: 如有需要，使用内置编辑器修改记录。
 5. **重放**: 在文件列表中点击 NDEF 文件，即可触发系统级分发。
 
----
+
 
 ## Acknowledgments / 致谢
 Special thanks to the following projects:
@@ -99,7 +99,7 @@ Special thanks to the following projects:
 - [AndroidX](https://developer.android.com/jetpack/androidx)
 - [Material Symbols](https://fonts.google.com/icons)
 
----
+
 
 ## Legal & Ethical Notice / 法律与道德声明
 
@@ -109,7 +109,7 @@ The user is solely responsible for any actions taken using this software. Do not
 本项目仅用于**研究、学习与测试**。
 用户对使用本软件所采取的任何行为承担全部责任。请勿使用本工具绕过安全机制或违反隐私政策。
 
----
+
 
 ## License / 许可证
 
@@ -117,7 +117,7 @@ This project is licensed under the **GNU General Public License v2.0 (GPLv2)**.
 
 本项目采用 **GNU General Public License v2.0 (GPLv2)** 许可证。
 
----
+
 
 ## Star History
 
