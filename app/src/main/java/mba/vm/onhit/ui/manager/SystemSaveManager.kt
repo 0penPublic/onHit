@@ -21,7 +21,7 @@ class SystemSaveManager(private val activity: Activity) {
             activity.contentResolver.openOutputStream(uri, "rwt")?.use { output ->
                 output.write(bytes)
             }
-            Toast.makeText(activity, R.string.toast_write_success, Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, R.string.toast_save_success, Toast.LENGTH_SHORT).show()
             pendingDataToSave = null
             true
         } catch (e: Exception) {

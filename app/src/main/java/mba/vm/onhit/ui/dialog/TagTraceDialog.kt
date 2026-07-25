@@ -3,6 +3,9 @@ package mba.vm.onhit.ui.dialog
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
+import android.content.ClipboardManager
+import android.content.ClipData
+import android.content.Context
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -10,17 +13,22 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import mba.vm.onhit.R
 import mba.vm.onhit.core.recorder.trace.TagTrace
 import mba.vm.onhit.core.recorder.trace.TagTraceCodec
+import mba.vm.onhit.ui.decorator.SpacingItemDecoration
+import mba.vm.onhit.utils.HexUtils
+import org.json.JSONArray
+import org.json.JSONObject
 
 
 class TagTraceDialog(
     private val activity: Activity,
     traceBytes: ByteArray
-) : Dialog(activity, R.style.Theme_OnHit) {
+) : Dialog(activity, android.R.style.Theme_DeviceDefault_Dialog_NoActionBar) {
 
     init {
         @SuppressLint("InflateParams")
@@ -47,6 +55,7 @@ class TagTraceDialog(
             params.width = WindowManager.LayoutParams.MATCH_PARENT
             params.height = WindowManager.LayoutParams.WRAP_CONTENT
             win.attributes = params
+            // Animation is fine
             win.setWindowAnimations(android.R.style.Animation_InputMethod)
         }
     }
@@ -58,6 +67,7 @@ class TagTraceDialog(
         val rv = view.findViewById<RecyclerView>(R.id.rv_transceive_data)
         rv.layoutManager = LinearLayoutManager(activity)
         rv.adapter = TransceiveAdapter(trace.transceiveData)
+        rv.addItemDecoration(SpacingItemDecoration(0, 3))
     }
 
     private class TransceiveAdapter(private val items: List<TagTrace.TransceiveData>) :
@@ -72,17 +82,36 @@ class TagTraceDialog(
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.item_transceive_data, parent, false)
+            view.clipToOutline = true
             return ViewHolder(view)
         }
 
-        @SuppressLint("SetTextI18n")
+
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = items[position]
+            @SuppressLint("SetTextI18n")
             holder.tvIndex.text = "#$position"
-            holder.tvCmd.text = item.cmd.toHexString().chunked(2).joinToString(" ")
-            holder.tvResp.text = item.resp?.toHexString()?.chunked(2)?.joinToString(" ") ?: holder.itemView.context.getString(
-                R.string.trace_no_resp)
+            holder.tvCmd.text = HexUtils.toHexString(item.cmd).chunked(2).joinToString(" ")
+            holder.tvResp.text = item.resp?.let { HexUtils.toHexString(it).chunked(2).joinToString(" ") } 
+                ?: holder.itemView.context.getString(R.string.trace_no_resp)
             holder.tvExtra.text = holder.itemView.context.getString(R.string.trace_extra_info, item.raw, item.returnCodes.contentToString())
+
+            holder.itemView.setOnClickListener {
+                copyToClipboard(holder.itemView.context, item)
+            }
+        }
+
+        private fun copyToClipboard(context: Context, item: TagTrace.TransceiveData) {
+            val json = JSONObject().apply {
+                put("cmd", HexUtils.toHexString(item.cmd))
+                put("resp", item.resp?.let { HexUtils.toHexString(it) } ?: "")
+                put("raw", item.raw)
+                put("returnCodes", JSONArray(item.returnCodes))
+            }.toString()
+            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("Transceive Data", json)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(context, context.getString(R.string.toast_copy_success), Toast.LENGTH_SHORT).show()
         }
 
         override fun getItemCount() = items.size

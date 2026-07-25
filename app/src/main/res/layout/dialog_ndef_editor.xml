@@ -2,8 +2,13 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/dialog_container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#99000000">
+    android:layout_height="match_parent">
+
+    <View
+        android:id="@+id/dialog_scrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no" />
 
     <LinearLayout
         android:id="@+id/layout_root"
@@ -15,7 +20,8 @@
         android:paddingStart="24dp"
         android:paddingEnd="24dp"
         android:paddingBottom="16dp"
-        android:background="@drawable/bg_bottom_sheet">
+        android:background="@drawable/bg_bottom_sheet"
+        android:elevation="12dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -45,6 +51,7 @@
                 android:textStyle="bold"
                 android:ellipsize="end"
                 android:maxLines="1"
+                android:textIsSelectable="true"
                 android:textColor="?android:attr/textColorPrimary" />
         </RelativeLayout>
 
@@ -68,6 +75,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:textSize="13sp"
+                    android:textIsSelectable="true"
                     android:textColor="?android:attr/textColorSecondary" />
 
                 <ImageButton
@@ -76,7 +84,6 @@
                     android:layout_height="40dp"
                     android:background="?android:attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/baseline_add_24"
-                    android:tint="?android:attr/colorAccent"
                     android:contentDescription="@string/add" />
             </LinearLayout>
 
@@ -84,7 +91,8 @@
                 android:id="@+id/rv_ndef_records"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:clipToPadding="false" />
+                android:clipToPadding="false"
+                android:paddingBottom="4dp"/>
 
             <TextView
                 android:id="@+id/tv_ndef_empty"

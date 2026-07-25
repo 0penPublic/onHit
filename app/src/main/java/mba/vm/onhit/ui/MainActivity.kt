@@ -29,6 +29,7 @@ import mba.vm.onhit.ui.manager.BackgroundManager
 import mba.vm.onhit.ui.manager.DirectoryManager
 import mba.vm.onhit.ui.adapter.FileAdapter
 import mba.vm.onhit.ui.controller.ImportController
+import mba.vm.onhit.ui.decorator.SpacingItemDecoration
 import mba.vm.onhit.ui.manager.MainIntentHandler
 import mba.vm.onhit.ui.manager.SystemSaveManager
 import mba.vm.onhit.ui.manager.TagEmulatorManager
@@ -105,6 +106,7 @@ class MainActivity : Activity() {
 
         adapter = FileAdapter(this, emptyList(), ::onFileClick, ::showItemPopupMenu)
         binding.rvFiles.adapter = adapter
+        binding.rvFiles.addItemDecoration(SpacingItemDecoration(6, 3))
 
         setupListeners()
     }
@@ -132,7 +134,7 @@ class MainActivity : Activity() {
             contentResolver.openOutputStream(fileToEdit!!.uri, "rwt")?.use { outputStream ->
                 outputStream.write(bytes)
             }
-            Toast.makeText(this, R.string.toast_write_success, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.toast_save_success, Toast.LENGTH_SHORT).show()
             directoryManager.refreshCurrentDir()
         } else {
             showNdefSaveDialog(bytes)

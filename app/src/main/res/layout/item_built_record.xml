@@ -3,9 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:layout_marginBottom="8dp"
-    android:background="@drawable/bg_record_item"
-    android:padding="4dp">
+    android:background="@drawable/bg_rounded_card"
+    android:backgroundTint="@color/custom_fab_background">
 
     <!-- Summary State -->
     <LinearLayout
@@ -13,9 +12,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="12dp"
+        android:padding="16dp"
         android:clickable="true"
-        android:focusable="true">
+        android:focusable="true"
+        android:background="?android:attr/selectableItemBackground">
 
         <TextView
             android:id="@+id/tv_record_type"
@@ -69,7 +69,6 @@
                 android:layout_marginStart="8dp"
                 android:text="@android:string/ok"
                 android:textSize="14sp"
-                android:textColor="?android:attr/colorAccent"
                 android:textAllCaps="false" />
         </LinearLayout>
     </LinearLayout>
