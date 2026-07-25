@@ -54,6 +54,8 @@
     <string name="toast_not_ndef_file">这不是有效的 NDEF 文件。</string>
     <string name="hint_search">搜索文件…</string>
     <string name="toast_write_success">写入成功！</string>
+    <string name="toast_save_success">保存成功！</string>
+    <string name="toast_copy_success">已复制到剪贴板！</string>
     <string name="toast_write_failed">写入失败: %s</string>
     <string name="toast_storage_unavailable">选定的存储目录不可用。</string>
 
@@ -64,6 +66,7 @@
     <string name="toast_import_failed">导入失败: %s</string>
     <string name="menu_cancel_import">取消当前导入</string>
     <string name="dialog_title_confirm_cancel_import">取消导入</string>
+    <string name="dialog_title_confirm_cancel_edit">取消保存</string>
     <string name="confirm_cancel_import_hint">确定要取消当前导入吗？</string>
     <string name="title_save_to">将 %s 保存至…</string>
 
@@ -172,8 +175,8 @@
     <string name="trace_techs_label">技术列表:</string>
     <string name="trace_log_label">通信日志:</string>
     <string name="trace_error_open">无法打开 Trace: %s</string>
-    <string name="trace_tx">发送:</string>
-    <string name="trace_rx">接收:</string>
+    <string name="trace_tx">指令:</string>
+    <string name="trace_rx">响应:</string>
     <string name="trace_no_resp">无响应</string>
     <string name="trace_extra_info">原始数据: %1$b, 状态: %2$s</string>
     <string name="ssid">SSID</string>

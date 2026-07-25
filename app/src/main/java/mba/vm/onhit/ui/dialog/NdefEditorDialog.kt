@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.Dialog
 import android.net.Uri
 import android.transition.TransitionManager
-import android.util.TypedValue
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -22,6 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import mba.vm.onhit.R
 import mba.vm.onhit.ui.adapter.NdefRecordAdapter
+import mba.vm.onhit.ui.decorator.SpacingItemDecoration
 import mba.vm.onhit.ui.model.BuiltRecord
 import mba.vm.onhit.ui.nfc.NdefEditor
 
@@ -30,7 +30,7 @@ class NdefEditorDialog(
     private val isReadOnly: Boolean = false,
     private val initialBytes: ByteArray? = null,
     private val onResult: (ByteArray) -> Unit
-) : Dialog(activity, R.style.Theme_OnHit) {
+) : Dialog(activity, android.R.style.Theme_DeviceDefault_Dialog_NoActionBar) {
 
     private val builtRecords: MutableList<BuiltRecord> = mutableListOf()
     private lateinit var recordAdapter: NdefRecordAdapter
@@ -39,13 +39,8 @@ class NdefEditorDialog(
     private var lastPickedIndex: Int? = null
     private var isFullScreen = false
     private var isModified = false
-    private val themeBackgroundColor: Int
 
     init {
-        val typedValue = TypedValue()
-        activity.theme.resolveAttribute(android.R.attr.colorBackgroundFloating, typedValue, true)
-        themeBackgroundColor = typedValue.data
-
         @Suppress("InflateParams")
         val view = LayoutInflater.from(activity).inflate(R.layout.dialog_ndef_editor, null)
         setContentView(view)
@@ -86,7 +81,7 @@ class NdefEditorDialog(
         }
         DialogHelper.showConfirmBottomSheet(
             activity,
-            activity.getString(R.string.dialog_title_confirm_cancel_import),
+            activity.getString(R.string.dialog_title_confirm_cancel_edit),
             activity.getString(R.string.confirm_exit_ndef_editor)
         ) {
             dismiss()
@@ -99,18 +94,16 @@ class NdefEditorDialog(
             setBackgroundDrawableResource(android.R.color.transparent)
             val params = attributes
             params.width = WindowManager.LayoutParams.MATCH_PARENT
-            params.height = WindowManager.LayoutParams.MATCH_PARENT // Always full screen window to allow expansion
+            params.height = WindowManager.LayoutParams.MATCH_PARENT
             attributes = params
             setWindowAnimations(android.R.style.Animation_InputMethod)
         }
     }
 
     private fun setupUI() {
-        val container = findViewById<View>(R.id.dialog_container)
-        val root = findViewById<View>(R.id.layout_root)
+        val scrim = findViewById<View>(R.id.dialog_scrim)
         
-        container.setOnClickListener { handleExitRequest() }
-        root.setOnClickListener { /* Consume clicks to prevent dialog closing */ }
+        scrim.setOnClickListener { handleExitRequest() }
 
         val tvTitle = findViewById<TextView>(R.id.tv_title)
         if (isReadOnly) {
@@ -153,10 +146,30 @@ class NdefEditorDialog(
 
         rvRecords.layoutManager = LinearLayoutManager(activity)
         rvRecords.adapter = recordAdapter
+        rvRecords.addItemDecoration(SpacingItemDecoration(0, 3))
 
         if (!isReadOnly) {
             val itemTouchHelper = ItemTouchHelper(object :
                 ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
+                
+                override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+                    super.onSelectedChanged(viewHolder, actionState)
+                    if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+                        viewHolder?.itemView?.apply {
+                            animate().scaleX(1.03f).scaleY(1.03f).alpha(0.9f).setDuration(150).start()
+                            elevation = 10f
+                        }
+                    }
+                }
+
+                override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+                    super.clearView(recyclerView, viewHolder)
+                    viewHolder.itemView.apply {
+                        animate().scaleX(1.0f).scaleY(1.0f).alpha(1.0f).setDuration(150).start()
+                        elevation = 0f
+                    }
+                }
+
                 override fun onMove(
                     recyclerView: RecyclerView,
                     viewHolder: RecyclerView.ViewHolder,
@@ -338,7 +351,7 @@ class NdefEditorDialog(
             activity.contentResolver.openOutputStream(uri, "rwt")?.use { outputStream ->
                 outputStream.write(payload)
             }
-            Toast.makeText(activity, R.string.toast_write_success, Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, R.string.toast_save_success, Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Toast.makeText(activity, activity.getString(R.string.error_save_file, e.localizedMessage), Toast.LENGTH_SHORT).show()
         }

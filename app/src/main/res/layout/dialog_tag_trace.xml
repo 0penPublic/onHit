@@ -4,7 +4,8 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="20dp"
-    android:background="@drawable/bg_bottom_sheet">
+    android:background="@drawable/bg_bottom_sheet"
+    android:elevation="12dp">
 
     <TextView
         android:id="@+id/tv_title"
@@ -32,6 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
+            android:textIsSelectable="true"
             android:textColor="?android:attr/textColorPrimary"/>
     </LinearLayout>
 
@@ -51,6 +53,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text=""
+            android:textIsSelectable="true"
             android:textColor="?android:attr/textColorPrimary"/>
     </LinearLayout>
 
@@ -66,7 +69,9 @@
         android:id="@+id/rv_transceive_data"
         android:layout_width="match_parent"
         android:layout_height="300dp"
-        android:scrollbars="vertical"/>
+        android:scrollbars="vertical"
+        android:clipToPadding="false"
+        android:paddingBottom="4dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -84,5 +89,4 @@
             android:textColor="?android:attr/colorAccent"
             android:textAllCaps="false" />
     </LinearLayout>
-
 </LinearLayout>

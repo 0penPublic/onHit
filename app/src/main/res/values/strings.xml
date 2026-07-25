@@ -54,6 +54,8 @@
     <string name="toast_not_ndef_file">This is not a valid NDEF file.</string>
     <string name="hint_search">Search files…</string>
     <string name="toast_write_success">Write successful!</string>
+    <string name="toast_save_success">Save successful!</string>
+    <string name="toast_copy_success">Copied to clipboard!</string>
     <string name="toast_write_failed">Write failed: %s</string>
     <string name="toast_storage_unavailable">Selected storage directory is unavailable.</string>
     <string name="intent_import_file">Import File to onHit</string>
@@ -63,6 +65,7 @@
     <string name="toast_import_failed">Import failed: %s</string>
     <string name="menu_cancel_import">Cancel Import</string>
     <string name="dialog_title_confirm_cancel_import">Cancel Import</string>
+    <string name="dialog_title_confirm_cancel_edit">Cancel Save</string>
     <string name="confirm_cancel_import_hint">Are you sure you want to cancel the current import?</string>
 
     <string name="title_save_to">Save %s to…</string>

@@ -27,6 +27,7 @@ class FileAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.list_item_file, parent, false)
+        view.clipToOutline = true
         return ViewHolder(view)
     }
 
