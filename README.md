@@ -26,7 +26,25 @@ onHit is an Xposed module designed to simulate NFC tag events at the system leve
 
 onHit 是一个用于在系统层面模拟 NFC 标签事件的 Xposed 模块。通过向 Android NFC 框架注入数据，它使系统能够像处理实体标签一样解析和分发 NDEF 及协议层数据。
 
+## How to Use / 如何使用
 
+1. **Install & Enable**: Install onHit and enable the module in your Xposed manager. Scope it to **NFC Service** (`com.android.nfc`).
+2. **Setup Storage**: Open onHit and select a working directory.
+3. **Capture/Import**: From the "Add" menu, choose to read from physical tags, record a trace, or import existing files.
+4. **Edit**: Use the NDEF Editor to modify records if necessary.
+5. **Replay**: Click a data file in the list to trigger the system-level dispatch.
+
+---
+
+1. **安装并启用**: 安装 onHit 并在 Xposed 管理器中启用模块，作用域勾选 **NFC 服务** (`com.android.nfc`)。
+2. **设置存储**: 打开 onHit 并选择一个工作目录。
+3. **采集/导入**: 在“添加”菜单中选择从实体标签读取、记录轨迹或导入已有文件。
+4. **编辑**: 如有需要，使用内置编辑器修改记录。
+5. **重放**: 在文件列表中点击数据文件，即可触发系统级分发。
+
+## Demonstration Videos / 演示视频
+- [［Xposed模块］在无实体卡片的情况下用系统钱包app模拟一张特定UID的卡片](https://www.bilibili.com/video/BV168zDBGEzT/)
+- [onHit TagRecorder 标签记录器使用方式案例](https://www.bilibili.com/video/BV1os3M67EHS/)
 
 ## Core Features / 核心功能
 
@@ -96,25 +114,6 @@ The **Tag Recorder** intercepts `TagEndpoint` objects before they are dispatched
 - **Oplus (ColorOS)**: 针对 `NfcDispatchManager` 进行专项 Hook，以绕过前台白名单限制，并清理系统内部 UID 数据库缓存。
 - **系统特征**: Hook 了 `ApplicationPackageManager`，确保系统特征正确返回 NFC 支持状态。
 - **硬件依赖**: 运行效果高度依赖 Android 版本和厂商的 NFC 实现，部分定制 ROM 可能会对 NFC 内部逻辑进行修改或限制。
-
-
-
-## How to Use / 如何使用
-
-1. **Install & Enable**: Install onHit and enable the module in your Xposed manager. Scope it to **NFC Service** (`com.android.nfc`).
-2. **Setup Storage**: Open onHit and select a working directory.
-3. **Capture/Import**: From the "Add" menu, choose to read from physical tags, record a trace, or import existing files.
-4. **Edit**: Use the NDEF Editor to modify records if necessary.
-5. **Replay**: Click a data file in the list to trigger the system-level dispatch.
-
----
-
-1. **安装并启用**: 安装 onHit 并在 Xposed 管理器中启用模块，作用域勾选 **NFC 服务** (`com.android.nfc`)。
-2. **设置存储**: 打开 onHit 并选择一个工作目录。
-3. **采集/导入**: 在“添加”菜单中选择从实体标签读取、记录轨迹或导入已有文件。
-4. **编辑**: 如有需要，使用内置编辑器修改记录。
-5. **重放**: 在文件列表中点击数据文件，即可触发系统级分发。
-
 
 
 ## Acknowledgments / 致谢
