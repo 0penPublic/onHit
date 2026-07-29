@@ -55,10 +55,13 @@ def get_latest_commit(branch: str = "main") -> tuple[str, str]:
     ).strip()
     return full_hash, commit_msg
 
-def truncate_caption(text: str, limit: int = 1024) -> str:
-    if len(text) <= limit:
-        return text
-    return text[:limit - 3] + "..."
+
+def truncate_text(text: str, limit: int) -> str:
+    """截断指定文本，如果超长则加上 '...'"""
+    if len(text) > limit:
+        return text[:limit - 3] + "..."
+    return text
+
 
 async def send_files(
         bot: Bot,
@@ -91,6 +94,7 @@ async def main(argv: List[str]) -> None:
         apk_path: List[Path] = []
         for build_type in BUILD_TYPES:
             apk_path.append(get_apk_path(build_type))
+        
         caption: str
         if argv:
             version_code: str = escape_markdown_v2(argv[0])
@@ -99,7 +103,10 @@ async def main(argv: List[str]) -> None:
             caption = CAPTION_TEMPLATE.format(version_code, latest_hash,
                                               release_markdown, ON_HIT_URL_CAPTION)
         else:
-            caption = truncate_caption(CAPTION_TEMPLATE.format(latest_hash, latest_message, ON_HIT_URL_CAPTION))
+            MAX_COMMIT_MSG_LEN: Final[int] = 640
+            truncated_commit_msg = truncate_text(latest_message, MAX_COMMIT_MSG_LEN)
+            caption = CAPTION_TEMPLATE.format(latest_hash, truncated_commit_msg, ON_HIT_URL_CAPTION)
+
         messages = await send_files(bot, TARGET_CHAT, TARGET_TOPIC_ID, apk_path, caption)
         if argv:
             if await messages[-1].pin():
