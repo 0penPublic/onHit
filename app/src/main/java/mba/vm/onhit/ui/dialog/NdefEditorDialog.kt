@@ -22,7 +22,7 @@ import androidx.recyclerview.widget.RecyclerView
 import mba.vm.onhit.R
 import mba.vm.onhit.ui.adapter.NdefRecordAdapter
 import mba.vm.onhit.ui.decorator.SpacingItemDecoration
-import mba.vm.onhit.ui.model.BuiltRecord
+import mba.vm.onhit.model.BuiltRecord
 import mba.vm.onhit.ui.nfc.NdefEditor
 
 class NdefEditorDialog(
@@ -270,8 +270,8 @@ class NdefEditorDialog(
         val defaultType = activity.getString(R.string.build_ndef_type_website)
         val newRecord = BuiltRecord(
             type = defaultType,
-            value = "https://",
-            record = ndefEditorHelper.buildNdefRecord(defaultType, "https://", null, null)
+            value = "",
+            record = ndefEditorHelper.buildNdefRecord(defaultType, "", null, null)
         )
         recordAdapter.addRecord(newRecord)
         recordAdapter.setExpanded(recordAdapter.itemCount - 1)

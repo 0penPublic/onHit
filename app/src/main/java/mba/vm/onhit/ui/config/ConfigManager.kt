@@ -75,25 +75,22 @@ object ConfigManager {
             }
     }
 
-    fun getUid(context: Context): ByteArray? {
+    fun genUid(context: Context): ByteArray? {
         val mode = getUidMode(context)
-        
-        if (mode == UID_MODE_FILE) {
-            return null
-        }
-        
-        if (mode == UID_MODE_FIXED) {
-            val hex = getFixedUidValue(context)
-            val bytes = HexUtils.decodeHex(hex)
-            if (bytes.isNotEmpty()) return bytes
-        }
-        
-        val lenStr = getRandomUidLen(context)
-        val len: Int = lenStr.toIntOrNull() ?: 4
-        val actualLen = len.coerceIn(0, MAX_OF_BROADCAST_SIZE)
-        
-        return ByteArray(actualLen).apply {
-            SecureRandom().nextBytes(this)
+        return when (mode) {
+            UID_MODE_FILE -> null
+            UID_MODE_FIXED -> {
+                val hex = getFixedUidValue(context)
+                HexUtils.decodeHex(hex)
+            }
+            else -> {
+                val lenStr = getRandomUidLen(context)
+                val len: Int = lenStr.toIntOrNull() ?: 4
+                val actualLen = len.coerceIn(0, MAX_OF_BROADCAST_SIZE)
+                ByteArray(actualLen).apply {
+                    SecureRandom().nextBytes(this)
+                }
+            }
         }
     }
 }

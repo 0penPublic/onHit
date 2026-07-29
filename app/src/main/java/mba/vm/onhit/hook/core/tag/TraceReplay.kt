@@ -1,0 +1,55 @@
+package mba.vm.onhit.hook.core.tag
+
+import android.nfc.NdefMessage
+import androidx.core.os.BundleCompat
+import mba.vm.onhit.model.TagTechSpec
+import mba.vm.onhit.model.TagTechnology
+import mba.vm.onhit.model.trace.TagTrace
+import mba.vm.onhit.model.trace.TagTraceCodec
+import mba.vm.onhit.model.trace.TraceKey
+import mba.vm.onhit.utils.LogUtils.logE
+
+class TraceReplay : BaseFakeTag() {
+    private lateinit var trace: TagTrace
+    private val traceIndex = mutableMapOf<TraceKey, Int>()
+    private val traceMap = mutableMapOf<TraceKey, MutableList<TagTrace.TransceiveData>>()
+    override lateinit var uid: ByteArray
+    override var ndef: NdefMessage? = null
+    private val internalTechnologies = mutableListOf<TagTechSpec>()
+    override val technologies: List<TagTechSpec>
+        get() = internalTechnologies
+
+    override fun init(uid: ByteArray?, bytes: ByteArray) {
+        runCatching {
+            trace = TagTraceCodec.decode(bytes)
+        }.exceptionOrNull()?.let { e ->
+            logE("Failed to decode trace", e)
+            return
+        }
+        this.uid = uid ?: trace.uid
+        trace.technologies.forEach(internalTechnologies::add)
+        trace.transceiveData.forEach {
+            val key = TraceKey(it.cmd, it.raw, it.returnCodes)
+            traceMap.getOrPut(key) { mutableListOf() }.add(it)
+        }
+        ndef = trace.technologies
+            .firstOrNull { it.tech == TagTechnology.NDEF }
+            ?.extras
+            ?.let { BundleCompat.getParcelable(it, "ndefmsg", NdefMessage::class.java) }
+    }
+
+    override fun transceive(
+        data: ByteArray,
+        raw: Boolean,
+        returnCode: IntArray
+    ): ByteArray? {
+        val key = TraceKey(data, raw, returnCode)
+        val matches = traceMap[key] ?: return null
+        val index = traceIndex[key] ?: 0
+        val actualIndex = minOf(index, matches.lastIndex)
+        if (actualIndex < matches.lastIndex) {
+            traceIndex[key] = actualIndex + 1
+        }
+        return matches[actualIndex].resp
+    }
+}

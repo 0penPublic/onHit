@@ -32,23 +32,14 @@ object LogUtils {
             return "Unknown".center(TAG_WIDTH)
         }
 
-    fun logI(msg: String, thr: Throwable? = null) {
-        if (BuildConfig.DEBUG) Logger.i("[ onHit ] [ $currentCallerClassName ] [I] $msg", thr)
+    private fun printLog(tag: String, msg: String, thr: Throwable?, action: (String, Throwable?) -> Unit) {
+        if (!BuildConfig.DEBUG) return
+        action("[ onHit ] [ $currentCallerClassName ] [$tag] $msg", thr)
     }
 
-    fun logD(msg: String, thr: Throwable? = null) {
-        if (BuildConfig.DEBUG) Logger.d("[ onHit ] [ $currentCallerClassName ] [D] $msg", thr)
-    }
-
-    fun logW(msg: String, thr: Throwable? = null) {
-        if (BuildConfig.DEBUG) Logger.w("[ onHit ] [ $currentCallerClassName ] [W] $msg", thr)
-    }
-
-    fun logE(msg: String, thr: Throwable? = null) {
-        if (BuildConfig.DEBUG) Logger.e("[ onHit ] [ $currentCallerClassName ] [E] $msg", thr)
-    }
-
-    fun logV(msg: String, thr: Throwable? = null) {
-        if (BuildConfig.DEBUG) Logger.v("[ onHit ] [ $currentCallerClassName ] [V] $msg", thr)
-    }
+    fun logI(msg: String, thr: Throwable? = null) = printLog("I", msg, thr, Logger::i)
+    fun logD(msg: String, thr: Throwable? = null) = printLog("D", msg, thr, Logger::d)
+    fun logW(msg: String, thr: Throwable? = null) = printLog("W", msg, thr, Logger::w)
+    fun logE(msg: String, thr: Throwable? = null) = printLog("E", msg, thr, Logger::e)
+    fun logV(msg: String, thr: Throwable? = null) = printLog("V", msg, thr, Logger::v)
 }

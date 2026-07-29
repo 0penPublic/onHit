@@ -12,10 +12,10 @@ import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createHook
 import mba.vm.onhit.BuildConfig
 import mba.vm.onhit.Constant
 import mba.vm.onhit.Constant.Companion.NFC_SERVICE_PACKAGE_NAME
-import mba.vm.onhit.core.recorder.TagRecorder
-import mba.vm.onhit.core.tag.BaseFakeTag
+import mba.vm.onhit.hook.core.recorder.TagRecorder
+import mba.vm.onhit.hook.core.tag.BaseFakeTag
 import mba.vm.onhit.hook.BaseHook
-import mba.vm.onhit.hook.broadcast.NfcHookBroadcastReceiver
+import mba.vm.onhit.broadcast.NfcHookBroadcastReceiver
 import mba.vm.onhit.utils.LogUtils.logE
 import mba.vm.onhit.utils.LogUtils.logI
 import java.lang.reflect.Method
@@ -108,7 +108,7 @@ object NfcServiceHook : BaseHook() {
         val targetClassLoader = tagEndpointInterface.classLoader ?: nfcClassLoader
         logI("Try to dispatch { uid=${fakeTag.uid.toHexString()}, techList=${fakeTag.techList.contentToString()} }...")
         NfcDispatchManagerHook.databaseManager ?.let {
-            logI("Oplus Database Mangaer find, try to delete tag cache...")
+            logI("Oplus Database Manager find, try to delete tag cache...")
             NfcDispatchManagerHook.deleteTagCache(fakeTag.uid)
         }
         val tag = fakeTag.makeEndpoint(targetClassLoader, tagEndpointInterface)

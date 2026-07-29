@@ -7,9 +7,10 @@ import android.provider.OpenableColumns
 import androidx.documentfile.provider.DocumentFile
 import mba.vm.onhit.Constant.Companion.MAX_OF_BROADCAST_SIZE
 import mba.vm.onhit.R
-import mba.vm.onhit.core.recorder.trace.TagTraceCodec
-import mba.vm.onhit.ui.model.FileData
-import mba.vm.onhit.core.tag.TagType
+import mba.vm.onhit.model.trace.TagTraceCodec
+import mba.vm.onhit.model.FileData
+import mba.vm.onhit.hook.core.tag.TagType
+import mba.vm.onhit.model.FileType
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -19,25 +20,32 @@ object FileUtils {
         val list = mutableListOf<FileData>()
         
         if (rootDir != null && dir.uri != rootDir.uri) {
-            list.add(FileData("..", true, dir.parentFile, isParent = true))
+            list.add(FileData("..", FileType.Folder, dir.parentFile, isParent = true))
         }
         val items = dir.listFiles().map { file ->
             val isDir = file.isDirectory
             val bytes = if (!isDir) readBytesFromDocumentFile(context, file) else null
             FileData(
                 name = file.name ?: "Unknown",
-                isDirectory = isDir,
+                type = getFileType(file, bytes),
                 documentFile = file,
                 size = if (isDir) 0 else file.length(),
-                lastModified = file.lastModified(),
-                isNdef = !isDir && isNdefFile(bytes),
-                isMfcData = !isDir && isMfcData(bytes),
-                isTraceFile = !isDir && (file.name?.endsWith(".ohtt", true) == true || isTraceFile(bytes))
+                lastModified = file.lastModified()
             )
         }.sortedWith(compareBy({ !it.isDirectory }, { it.name.lowercase() }))
 
         list.addAll(items)
         return list
+    }
+
+    fun getFileType(file: DocumentFile, bytes: ByteArray?): FileType {
+        if (file.isDirectory) return FileType.Folder
+        return when {
+            isTraceFile(bytes) || file.name?.endsWith(".ohtt", true) == true -> FileType.TagTrace
+            isMfcData(bytes) -> FileType.MifareClassic
+            isNdefFile(bytes) -> FileType.NDEF
+            else -> FileType.Unknown
+        }
     }
 
 
@@ -93,8 +101,8 @@ object FileUtils {
         return if (item.isDirectory) {
             "${context.getString(R.string.label_folder)} | $date"
         } else {
-            val type = if (item.isNdef) "NDEF " else ""
-            "${type}${item.size} ${context.getString(R.string.label_bytes)} | $date"
+            val typeStr = if (item.type == FileType.NDEF) "NDEF " else ""
+            "${typeStr}${item.size} ${context.getString(R.string.label_bytes)} | $date"
         }
     }
 
