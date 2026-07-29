@@ -13,7 +13,6 @@
     <string name="settings_uid_mode_file">从文件读取</string>
     <string name="settings_uid_mode_len">随机长度</string>
     <string name="settings_uid_mode_fixed">固定值</string>
-    <string name="settings_enable_fixed_uid">启用固定 UID</string>
 
     <string name="settings_hint_fixed_uid">固定 UID (十六进制)</string>
     <string name="settings_hint_random_uid_len">随机 UID 长度</string>
@@ -95,17 +94,15 @@
 
     <string name="build_ndef_mime_value_hint">MIME 类型 (如 image/png)</string>
     <string name="build_ndef_external_value_hint">域名:类型 (如 example.com:foo)</string>
-    <string name="build_ndef_add_record">添加记录</string>
-    <string name="build_ndef_clear_records">清空</string>
-    <string name="build_ndef_update_record">更新记录</string>
-    <string name="build_ndef_cancel_edit">取消修改</string>
-    <string name="build_ndef_editing_index">正在修改第 %d 条记录</string>
     <string name="build_ndef_generate">生成</string>
     <string name="build_ndef_save_changes">保存修改</string>
     <string name="build_ndef_empty_records">暂无记录</string>
-    <string name="build_ndef_record_status">记录数：%1$d，NDEF大小：%2$d 字节</string>
-    <string name="build_ndef_record_status_with_capacity">记录数：%1$d，NDEF大小：%2$d 字节，约需 %3$s 容量</string>
-    <string name="build_ndef_record_item">%1$d. %2$s：%3$s</string>
+    <plurals name="build_ndef_record_status">
+        <item quantity="other">记录数：%1$d，NDEF 大小：%2$d 字节</item>
+    </plurals>
+    <plurals name="build_ndef_record_status_with_capacity">
+        <item quantity="other">记录数：%1$d，NDEF 大小：%2$d 字节，约需 %3$s 容量</item>
+    </plurals>
 
     <string name="build_ndef_type_website">网站</string>
     <string name="build_ndef_type_phone">电话</string>
@@ -120,43 +117,17 @@
     <string name="build_ndef_wifi_password">密码</string>
     <string name="build_ndef_wifi_security">安全 (认证)</string>
     <string name="build_ndef_wifi_encryption">加密方式</string>
-    <string name="build_ndef_wifi_sec_none">无 / 开放</string>
-    <string name="build_ndef_wifi_sec_wpa_personal">WPA 个人</string>
-    <string name="build_ndef_wifi_sec_wpa2_personal">WPA2 个人</string>
-    <string name="build_ndef_wifi_sec_wpa_wpa2_personal">WPA/WPA2 个人</string>
-    <string name="build_ndef_wifi_sec_wpa3_personal">WPA3 个人</string>
-    <string name="build_ndef_wifi_sec_wpa_enterprise">WPA 企业</string>
-    <string name="build_ndef_wifi_sec_wpa2_enterprise">WPA2 企业</string>
-    <string name="build_ndef_wifi_sec_wpa_wpa2_enterprise">WPA/WPA2 企业</string>
-
-    <string name="build_ndef_wifi_enc_none">无</string>
-    <string name="build_ndef_wifi_enc_wep">WEP</string>
-    <string name="build_ndef_wifi_enc_tkip">TKIP</string>
-    <string name="build_ndef_wifi_enc_aes">AES</string>
-    <string name="build_ndef_wifi_enc_aes_tkip">AES/TKIP</string>
 
     <string name="build_ndef_error_empty_value">记录值不能为空</string>
-    <string name="build_ndef_error_add_failed">添加记录失败：%s</string>
     <string name="build_ndef_error_empty_records">请至少添加一条记录</string>
     <string name="build_ndef_error_build_failed">构建 NDEF 失败：%s</string>
-    <string name="build_ndef_error_create_file_failed">创建 NDEF 文件失败</string>
-    <string name="build_ndef_saved">已创建：%s</string>
 
-    <string name="dialog_title_confirm_clear">确认清空</string>
     <string name="dialog_title_confirm_delete_record">确认删除</string>
     <string name="dialog_title_confirm_restart_nfc">重启 NFC 服务</string>
-    <string name="confirm_clear_ndef_hint">确定要清空所有记录吗？</string>
     <string name="confirm_delete_ndef_record_hint">确定要删除这条记录吗？</string>
     <string name="confirm_restart_nfc_hint">确定要重启 NFC 服务吗？这可能会中断当前正在进行的 NFC 操作。</string>
 
     <string name="build_ndef_uri_prefix_none">自定义 (完整 URI)</string>
-    <string name="build_ndef_uri_prefix_http_www">http://www.</string>
-    <string name="build_ndef_uri_prefix_https_www">https://www.</string>
-    <string name="build_ndef_uri_prefix_http">http://</string>
-    <string name="build_ndef_uri_prefix_https">https://</string>
-    <string name="build_ndef_uri_prefix_tel">tel:</string>
-    <string name="build_ndef_uri_prefix_mailto">mailto:</string>
-
     <string name="toast_tag_read_only">标签为只读</string>
     <string name="toast_tag_trace_received">已收到标签追踪，长度：%d</string>
 
@@ -175,8 +146,8 @@
     <string name="trace_techs_label">技术列表:</string>
     <string name="trace_log_label">通信日志:</string>
     <string name="trace_error_open">无法打开 Trace: %s</string>
-    <string name="trace_tx">指令:</string>
-    <string name="trace_rx">响应:</string>
+    <string name="trace_cmd">指令:</string>
+    <string name="trace_resp">响应:</string>
     <string name="trace_no_resp">无响应</string>
     <string name="trace_extra_info">原始数据: %1$b, 状态: %2$s</string>
     <string name="ssid">SSID</string>

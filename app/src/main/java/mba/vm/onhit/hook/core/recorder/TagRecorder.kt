@@ -35,7 +35,17 @@ object TagRecorder {
 
     @Volatile
     var state: TagRecorderState = TagRecorderState.IDLE
-        private set
+        private set(value) {
+            if (field != value) {
+                field = value
+                runCatching {
+                    sendBroadcast(Intent(Constant.BROADCAST_TAG_RECORDER_STATE_RESPONSE).apply {
+                        `package` = BuildConfig.APPLICATION_ID
+                        putExtra("state", value.toString())
+                    })
+                }
+            }
+        }
     private val hookedClassNames = mutableSetOf<String>()
 
     @Volatile

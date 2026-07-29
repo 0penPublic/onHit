@@ -2,6 +2,5 @@
 <resources>
     <color name="custom_background_scrim">#22FFFFFF</color>
     <color name="custom_panel_background">#AAFFFFFF</color>
-    <color name="custom_chip_background">#66FFFFFF</color>
     <color name="custom_fab_background">#CCFFFFFF</color>
 </resources>

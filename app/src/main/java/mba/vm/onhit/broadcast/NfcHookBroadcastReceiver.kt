@@ -45,11 +45,6 @@ class NfcHookBroadcastReceiver : BroadcastReceiver() {
             Constant.BROADCAST_TOGGLE_TAG_RECORDER_REQUEST -> {
                 logI("Toggling Tag Recorder")
                 TagRecorder.toggleRecorder()
-                val responseIntent = Intent(Constant.BROADCAST_TAG_RECORDER_STATE_RESPONSE).apply {
-                    `package` = BuildConfig.APPLICATION_ID
-                    putExtra("state", TagRecorder.state.toString())
-                }
-                context.sendBroadcast(responseIntent)
             }
 
             Constant.BROADCAST_RESTART_NFC_SERVICE -> {
