@@ -20,10 +20,10 @@ import androidx.core.view.isVisible
 import androidx.documentfile.provider.DocumentFile
 import mba.vm.onhit.Constant
 import mba.vm.onhit.R
-import mba.vm.onhit.core.recorder.TagRecorderStateHelper
+import mba.vm.onhit.ui.helper.TagRecorderStateHelper
 import mba.vm.onhit.databinding.ActivityMainBinding
 import mba.vm.onhit.ui.dialog.DialogHelper
-import mba.vm.onhit.ui.broadcast.ResponseBroadcastReceiver
+import mba.vm.onhit.broadcast.ResponseBroadcastReceiver
 import mba.vm.onhit.ui.config.ConfigManager
 import mba.vm.onhit.ui.manager.BackgroundManager
 import mba.vm.onhit.ui.manager.DirectoryManager
@@ -34,9 +34,10 @@ import mba.vm.onhit.ui.manager.MainIntentHandler
 import mba.vm.onhit.ui.manager.SystemSaveManager
 import mba.vm.onhit.ui.manager.TagEmulatorManager
 import mba.vm.onhit.ui.dialog.TagTraceDialog
-import mba.vm.onhit.ui.model.FileData
-import mba.vm.onhit.ui.nfc.NdefEditor
+import mba.vm.onhit.model.FileData
+import mba.vm.onhit.model.FileType
 import mba.vm.onhit.ui.dialog.NdefEditorDialog
+import mba.vm.onhit.ui.nfc.NdefEditor
 import mba.vm.onhit.ui.nfc.NfcHandler
 import mba.vm.onhit.utils.FileUtils
 import java.text.SimpleDateFormat
@@ -338,9 +339,9 @@ class MainActivity : Activity() {
         val popup = PopupMenu(this, view)
         popup.menu.add(0, 1, 0, R.string.menu_rename)
         popup.menu.add(0, 2, 1, R.string.menu_delete)
-        if (fileData.isNdef && nfcHandler.isEnabled() && !importController.isImportMode()) popup.menu.add(0, 3, 2, R.string.menu_write_to_tag)
-        if (fileData.isNdef) popup.menu.add(0, 4, 3, R.string.menu_edit_ndef)
-        if (fileData.isTraceFile) popup.menu.add(0, 5, 4, R.string.menu_view_trace)
+        if (fileData.type == FileType.NDEF && nfcHandler.isEnabled() && !importController.isImportMode()) popup.menu.add(0, 3, 2, R.string.menu_write_to_tag)
+        if (fileData.type == FileType.NDEF) popup.menu.add(0, 4, 3, R.string.menu_edit_ndef)
+        if (fileData.type == FileType.TagTrace) popup.menu.add(0, 5, 4, R.string.menu_view_trace)
 
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {

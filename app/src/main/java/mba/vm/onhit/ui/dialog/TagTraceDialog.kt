@@ -17,8 +17,8 @@ import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import mba.vm.onhit.R
-import mba.vm.onhit.core.recorder.trace.TagTrace
-import mba.vm.onhit.core.recorder.trace.TagTraceCodec
+import mba.vm.onhit.model.trace.TagTrace
+import mba.vm.onhit.model.trace.TagTraceCodec
 import mba.vm.onhit.ui.decorator.SpacingItemDecoration
 import mba.vm.onhit.utils.HexUtils
 import org.json.JSONArray
@@ -94,7 +94,8 @@ class TagTraceDialog(
             holder.tvCmd.text = HexUtils.toHexString(item.cmd).chunked(2).joinToString(" ")
             holder.tvResp.text = item.resp?.let { HexUtils.toHexString(it).chunked(2).joinToString(" ") } 
                 ?: holder.itemView.context.getString(R.string.trace_no_resp)
-            holder.tvExtra.text = holder.itemView.context.getString(R.string.trace_extra_info, item.raw, item.returnCodes.contentToString())
+            holder.tvExtra.text = holder.itemView.context
+                .getString(R.string.trace_extra_info, item.raw, item.returnCodes.contentToString())
 
             holder.itemView.setOnClickListener {
                 copyToClipboard(holder.itemView.context, item)
@@ -104,7 +105,7 @@ class TagTraceDialog(
         private fun copyToClipboard(context: Context, item: TagTrace.TransceiveData) {
             val json = JSONObject().apply {
                 put("cmd", HexUtils.toHexString(item.cmd))
-                put("resp", item.resp?.let { HexUtils.toHexString(it) } ?: "")
+                put("resp", item.resp?.let { HexUtils.toHexString(it) })
                 put("raw", item.raw)
                 put("returnCodes", JSONArray(item.returnCodes))
             }.toString()

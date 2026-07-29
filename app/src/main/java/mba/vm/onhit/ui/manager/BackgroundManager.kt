@@ -3,6 +3,7 @@ package mba.vm.onhit.ui.manager
 import android.app.Activity
 import android.content.ClipData
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
@@ -78,7 +79,7 @@ class BackgroundManager(private val activity: Activity, private val binding: Act
 
         val resInfoList = activity.packageManager.queryIntentActivities(
             cropIntent,
-            android.content.pm.PackageManager.MATCH_DEFAULT_ONLY
+            PackageManager.MATCH_DEFAULT_ONLY
         )
 
         for (resolveInfo in resInfoList) {
