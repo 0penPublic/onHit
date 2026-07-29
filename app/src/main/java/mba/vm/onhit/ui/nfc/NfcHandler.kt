@@ -7,19 +7,31 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.Ndef
 import android.nfc.tech.NdefFormatable
+import android.util.Log
 import android.widget.Toast
 import mba.vm.onhit.R
 import mba.vm.onhit.ui.dialog.DialogHelper
 
 class NfcHandler(private val activity: Activity) {
-    private val nfcAdapter: NfcAdapter? = NfcAdapter.getDefaultAdapter(activity)
+    private var nfcAdapter: NfcAdapter? = NfcAdapter.getDefaultAdapter(activity)
     private var nfcDialog: Dialog? = null
     private var pendingNdefData: ByteArray? = null
     private var isWritingMode = false
 
     var onNdefRead: ((ByteArray) -> Unit)? = null
 
-    fun isEnabled() = nfcAdapter?.isEnabled == true
+    fun isEnabled(): Boolean {
+        return try {
+            nfcAdapter?.isEnabled == true
+        } catch (_: RuntimeException) {
+            nfcAdapter = NfcAdapter.getDefaultAdapter(activity)
+            try {
+                nfcAdapter?.isEnabled == true
+            } catch (_: Exception) {
+                false
+            }
+        }
+    }
 
     fun startRead() {
         if (!isEnabled()) {
@@ -33,10 +45,14 @@ class NfcHandler(private val activity: Activity) {
             activity.getString(R.string.saving_ndef_prompt)
         ) { stopDiscovery() }
 
-        nfcAdapter?.enableReaderMode(activity, ::onTagDiscovered,
-            NfcAdapter.FLAG_READER_NFC_A or NfcAdapter.FLAG_READER_NFC_B or
-            NfcAdapter.FLAG_READER_NFC_F or NfcAdapter.FLAG_READER_NFC_V or
-            NfcAdapter.FLAG_READER_NFC_BARCODE, null)
+        try {
+            nfcAdapter?.enableReaderMode(activity, ::onTagDiscovered,
+                NfcAdapter.FLAG_READER_NFC_A or NfcAdapter.FLAG_READER_NFC_B or
+                NfcAdapter.FLAG_READER_NFC_F or NfcAdapter.FLAG_READER_NFC_V or
+                NfcAdapter.FLAG_READER_NFC_BARCODE, null)
+        } catch (_: Exception) {
+            Toast.makeText(activity, R.string.toast_nfc_not_supported, Toast.LENGTH_SHORT).show()
+        }
     }
 
     fun startWrite(data: ByteArray) {
@@ -55,10 +71,14 @@ class NfcHandler(private val activity: Activity) {
             isWritingMode = false
         }
 
-        nfcAdapter?.enableReaderMode(activity, ::onTagDiscovered,
-            NfcAdapter.FLAG_READER_NFC_A or NfcAdapter.FLAG_READER_NFC_B or
-            NfcAdapter.FLAG_READER_NFC_F or NfcAdapter.FLAG_READER_NFC_V or
-            NfcAdapter.FLAG_READER_NFC_BARCODE, null)
+        try {
+            nfcAdapter?.enableReaderMode(activity, ::onTagDiscovered,
+                NfcAdapter.FLAG_READER_NFC_A or NfcAdapter.FLAG_READER_NFC_B or
+                NfcAdapter.FLAG_READER_NFC_F or NfcAdapter.FLAG_READER_NFC_V or
+                NfcAdapter.FLAG_READER_NFC_BARCODE, null)
+        } catch (_: Exception) {
+            Toast.makeText(activity, R.string.toast_nfc_not_supported, Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun onTagDiscovered(tag: Tag?) {
@@ -129,6 +149,10 @@ class NfcHandler(private val activity: Activity) {
     }
 
     fun stopDiscovery() {
-        nfcAdapter?.disableReaderMode(activity)
+        try {
+            nfcAdapter?.disableReaderMode(activity)
+        } catch (e: Exception) {
+            Log.e("NfcHandler", "Error disabling reader mode", e)
+        }
     }
 }

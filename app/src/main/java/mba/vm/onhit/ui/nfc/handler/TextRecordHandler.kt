@@ -2,8 +2,11 @@ package mba.vm.onhit.ui.nfc.handler
 
 import android.content.Context
 import android.nfc.NdefRecord
+import android.view.ViewGroup
+import android.widget.EditText
+import androidx.core.widget.doAfterTextChanged
 import mba.vm.onhit.R
-import mba.vm.onhit.ui.model.BuiltRecord
+import mba.vm.onhit.model.BuiltRecord
 import java.util.Locale
 
 class TextRecordHandler(context: Context) : NdefRecordHandler(context) {
@@ -38,5 +41,43 @@ class TextRecordHandler(context: Context) : NdefRecordHandler(context) {
     override fun build(value: String, lang: String?, payload: ByteArray?, existingRecord: NdefRecord?): NdefRecord {
         val language = lang ?: Locale.getDefault().language.ifBlank { "en" }
         return NdefRecord.createTextRecord(language, value)
+    }
+
+    override fun getLayoutId(type: String): Int = R.layout.layout_ndef_input_text
+
+    override fun bindView(
+        container: ViewGroup,
+        record: BuiltRecord,
+        type: String,
+        onUpdate: () -> Unit,
+        onPickFile: () -> Unit,
+        onExportPayload: (String) -> Unit
+    ) {
+        val etValue = container.findViewById<EditText>(R.id.et_ndef_value)
+        val etLang = container.findViewById<EditText>(R.id.et_ndef_lang)
+
+        etValue?.setText(record.value)
+        etLang?.setText(record.lang ?: "")
+
+        etValue?.doAfterTextChanged { onUpdate() }
+        etLang?.doAfterTextChanged { onUpdate() }
+    }
+
+    override fun updateRecordFromUI(
+        container: ViewGroup,
+        oldRecord: BuiltRecord,
+        type: String,
+        buildNdefRecord: (String, String, String?, ByteArray?) -> NdefRecord
+    ): BuiltRecord {
+        val value = container.findViewById<EditText>(R.id.et_ndef_value)?.text?.toString()?.trim() ?: ""
+        val lang = container.findViewById<EditText>(R.id.et_ndef_lang)?.text?.toString()?.trim()?.ifEmpty { null }
+
+        val newNdefRecord = try {
+            buildNdefRecord(type, value, lang, null)
+        } catch (_: Exception) {
+            oldRecord.record
+        }
+
+        return BuiltRecord(type, value, newNdefRecord, lang, null)
     }
 }

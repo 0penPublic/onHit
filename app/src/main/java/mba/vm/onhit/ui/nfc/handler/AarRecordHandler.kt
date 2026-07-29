@@ -2,8 +2,12 @@ package mba.vm.onhit.ui.nfc.handler
 
 import android.content.Context
 import android.nfc.NdefRecord
+import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.TextView
+import androidx.core.widget.doAfterTextChanged
 import mba.vm.onhit.R
-import mba.vm.onhit.ui.model.BuiltRecord
+import mba.vm.onhit.model.BuiltRecord
 
 class AarRecordHandler(context: Context) : NdefRecordHandler(context) {
     override fun canHandle(record: NdefRecord): Boolean {
@@ -25,5 +29,40 @@ class AarRecordHandler(context: Context) : NdefRecordHandler(context) {
 
     override fun build(value: String, lang: String?, payload: ByteArray?, existingRecord: NdefRecord?): NdefRecord {
         return NdefRecord.createApplicationRecord(value.trim())
+    }
+
+    override fun getLayoutId(type: String): Int = R.layout.layout_ndef_input_common
+
+    override fun bindView(
+        container: ViewGroup,
+        record: BuiltRecord,
+        type: String,
+        onUpdate: () -> Unit,
+        onPickFile: () -> Unit,
+        onExportPayload: (String) -> Unit
+    ) {
+        val etValue = container.findViewById<EditText>(R.id.et_ndef_value)
+        val tvLabel = container.findViewById<TextView>(R.id.tv_ndef_value_label)
+
+        tvLabel?.text = context.getString(R.string.build_ndef_label_package)
+        etValue?.setText(record.value)
+        etValue?.doAfterTextChanged { onUpdate() }
+    }
+
+    override fun updateRecordFromUI(
+        container: ViewGroup,
+        oldRecord: BuiltRecord,
+        type: String,
+        buildNdefRecord: (String, String, String?, ByteArray?) -> NdefRecord
+    ): BuiltRecord {
+        val value = container.findViewById<EditText>(R.id.et_ndef_value)?.text?.toString()?.trim() ?: ""
+
+        val newNdefRecord = try {
+            buildNdefRecord(type, value, null, null)
+        } catch (_: Exception) {
+            oldRecord.record
+        }
+
+        return BuiltRecord(type, value, newNdefRecord, null, null)
     }
 }

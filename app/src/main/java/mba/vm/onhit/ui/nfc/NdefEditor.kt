@@ -3,8 +3,15 @@ package mba.vm.onhit.ui.nfc
 import android.content.Context
 import android.nfc.NdefMessage
 import android.nfc.NdefRecord
-import mba.vm.onhit.ui.model.BuiltRecord
-import mba.vm.onhit.ui.nfc.handler.*
+import mba.vm.onhit.model.BuiltRecord
+import mba.vm.onhit.ui.nfc.handler.AarRecordHandler
+import mba.vm.onhit.ui.nfc.handler.ExternalRecordHandler
+import mba.vm.onhit.ui.nfc.handler.MimeRecordHandler
+import mba.vm.onhit.ui.nfc.handler.NdefRecordHandler
+import mba.vm.onhit.ui.nfc.handler.TextRecordHandler
+import mba.vm.onhit.ui.nfc.handler.UnknownRecordHandler
+import mba.vm.onhit.ui.nfc.handler.UriRecordHandler
+import mba.vm.onhit.ui.nfc.handler.WifiRecordHandler
 
 class NdefEditor(context: Context) {
     private val handlers = listOf(

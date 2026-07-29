@@ -9,7 +9,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import mba.vm.onhit.R
-import mba.vm.onhit.ui.model.FileData
+import mba.vm.onhit.model.FileData
+import mba.vm.onhit.model.FileType
 import mba.vm.onhit.utils.FileUtils
 
 class FileAdapter(
@@ -36,11 +37,11 @@ class FileAdapter(
         holder.tvName.text = item.name
         holder.tvDetails.text = FileUtils.formatDetails(context, item)
 
-        val iconRes = when {
-            item.isDirectory -> R.drawable.baseline_folder_24
-            item.isNdef -> R.drawable.baseline_nfc_24
-            item.isMfcData -> R.drawable.baseline_card_24
-            item.isTraceFile -> R.drawable.baseline_payment_card_24
+        val iconRes = when (item.type) {
+            FileType.Folder -> R.drawable.baseline_folder_24
+            FileType.NDEF -> R.drawable.baseline_nfc_24
+            FileType.MifareClassic -> R.drawable.baseline_card_24
+            FileType.TagTrace -> R.drawable.baseline_payment_card_24
             else -> R.drawable.baseline_article_24
         }
         holder.ivIcon.setImageResource(iconRes)

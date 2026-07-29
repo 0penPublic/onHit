@@ -6,7 +6,7 @@ import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
 import mba.vm.onhit.R
 import mba.vm.onhit.ui.config.ConfigManager
-import mba.vm.onhit.ui.model.FileData
+import mba.vm.onhit.model.FileData
 import mba.vm.onhit.utils.FileUtils
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors

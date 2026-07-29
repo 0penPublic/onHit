@@ -6,9 +6,10 @@ import android.os.Parcel
 import android.widget.Toast
 import mba.vm.onhit.Constant
 import mba.vm.onhit.R
-import mba.vm.onhit.core.tag.TagType
+import mba.vm.onhit.hook.core.tag.TagType
 import mba.vm.onhit.ui.config.ConfigManager
-import mba.vm.onhit.ui.model.FileData
+import mba.vm.onhit.model.FileData
+import mba.vm.onhit.model.FileType
 
 class TagEmulatorManager(private val activity: Activity) {
 
@@ -16,10 +17,10 @@ class TagEmulatorManager(private val activity: Activity) {
         if (fileData.isParent || fileData.isDirectory) return false
         
         if (!isImportMode) {
-            when {
-                fileData.isNdef -> simulateTag(fileData, TagType.NDEF)
-                fileData.isMfcData -> simulateTag(fileData, TagType.MFC)
-                fileData.isTraceFile -> simulateTag(fileData, TagType.TRACE)
+            when (fileData.type) {
+                FileType.NDEF -> simulateTag(fileData, TagType.NDEF)
+                FileType.MifareClassic -> simulateTag(fileData, TagType.MFC)
+                FileType.TagTrace -> simulateTag(fileData, TagType.TRACE)
                 else -> Toast.makeText(activity, R.string.toast_not_ndef_file, Toast.LENGTH_SHORT).show()
             }
             return true
@@ -40,7 +41,7 @@ class TagEmulatorManager(private val activity: Activity) {
     }
 
     fun sendEmulateBroadcast(data: ByteArray, tagType: TagType) {
-        val uid = ConfigManager.getUid(activity)
+        val uid = ConfigManager.genUid(activity)
         val intent = Intent(Constant.BROADCAST_TAG_EMULATOR_REQUEST).apply {
             if (uid != null) {
                 putExtra("uid", uid)
