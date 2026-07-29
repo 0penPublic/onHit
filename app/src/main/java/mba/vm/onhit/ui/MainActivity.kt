@@ -281,7 +281,6 @@ class MainActivity : Activity() {
     }
 
     private fun showAddPopupMenu(view: View) {
-        sendBroadcast(Intent(Constant.BROADCAST_TAG_RECORDER_STATE_REQUEST))
         val popup = PopupMenu(this, view)
         activePopupMenu = popup
         popup.setOnDismissListener { activePopupMenu = null }
@@ -395,6 +394,7 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         directoryManager.refreshCurrentDir()
+        sendBroadcast(Intent(Constant.BROADCAST_TAG_RECORDER_STATE_REQUEST))
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

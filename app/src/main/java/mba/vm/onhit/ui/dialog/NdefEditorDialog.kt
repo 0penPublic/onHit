@@ -255,9 +255,9 @@ class NdefEditorDialog(
                 bytesSize <= 888 -> "NTAG216"
                 else -> "> NTAG216"
             }
-            activity.getString(R.string.build_ndef_record_status_with_capacity, currentRecords.size, bytesSize, capacity)
+            activity.resources.getQuantityString(R.plurals.build_ndef_record_status_with_capacity, currentRecords.size, currentRecords.size, bytesSize, capacity)
         } else {
-            activity.getString(R.string.build_ndef_record_status, currentRecords.size, 0)
+            activity.resources.getQuantityString(R.plurals.build_ndef_record_status, currentRecords.size, currentRecords.size, 0)
         }
 
         val isEmpty = currentRecords.isEmpty()
