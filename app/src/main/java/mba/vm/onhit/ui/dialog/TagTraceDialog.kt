@@ -105,7 +105,7 @@ class TagTraceDialog(
         private fun copyToClipboard(context: Context, item: TagTrace.TransceiveData) {
             val json = JSONObject().apply {
                 put("cmd", HexUtils.toHexString(item.cmd))
-                put("resp", item.resp?.let { HexUtils.toHexString(it) })
+                put("resp", item.resp?.let { HexUtils.toHexString(it) } ?: JSONObject.NULL)
                 put("raw", item.raw)
                 put("returnCodes", JSONArray(item.returnCodes))
             }.toString()
