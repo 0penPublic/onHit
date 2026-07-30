@@ -2,7 +2,6 @@ package mba.vm.onhit.ui
 
 import android.app.Activity
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -13,17 +12,17 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.PopupMenu
 import android.widget.Toast
 import android.window.OnBackInvokedDispatcher
-import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.documentfile.provider.DocumentFile
+import mba.vm.onhit.BuildConfig
 import mba.vm.onhit.Constant
 import mba.vm.onhit.R
+import mba.vm.onhit.service.Service
 import mba.vm.onhit.ui.helper.TagRecorderStateHelper
 import mba.vm.onhit.databinding.ActivityMainBinding
 import mba.vm.onhit.ui.dialog.DialogHelper
-import mba.vm.onhit.broadcast.ResponseBroadcastReceiver
 import mba.vm.onhit.ui.config.ConfigManager
 import mba.vm.onhit.ui.manager.BackgroundManager
 import mba.vm.onhit.ui.manager.DirectoryManager
@@ -60,7 +59,6 @@ class MainActivity : Activity() {
 
     private var activeNdefDialog: NdefEditorDialog? = null
     private var fileToEdit: DocumentFile? = null
-    private val responseBroadcastReceiver = ResponseBroadcastReceiver()
     private var recorderState: String? = null
     private var activePopupMenu: PopupMenu? = null
 
@@ -81,6 +79,16 @@ class MainActivity : Activity() {
             Toast.makeText(this, R.string.toast_no_valid_storage, Toast.LENGTH_LONG).show()
             directoryManager.requestSelectDirectory()
         }
+
+        checkHookStatus()
+    }
+
+    private fun checkHookStatus() {
+        binding.root.postDelayed({
+            if (!Service.isHookConnected()) {
+                Toast.makeText(this, R.string.toast_hook_not_active, Toast.LENGTH_LONG).show()
+            }
+        }, 1000)
     }
 
     private fun setupManagers() {
@@ -157,22 +165,43 @@ class MainActivity : Activity() {
     }
 
     private fun setupBroadcastReceiver() {
-        responseBroadcastReceiver.onStateReceived = { state ->
-            if (recorderState != null && recorderState != state) {
-                Toast.makeText(this, getString(R.string.recorder_state, TagRecorderStateHelper.toRecorderStateText(this, state)), Toast.LENGTH_SHORT).show()
+        Service.onStateReceived = { state ->
+            runOnUiThread {
+                if (recorderState != null && recorderState != state) {
+                    Toast.makeText(this, getString(R.string.recorder_state, TagRecorderStateHelper.toRecorderStateText(this, state)), Toast.LENGTH_SHORT).show()
+                }
+                recorderState = state
+                activePopupMenu?.menu?.findItem(4)?.title = getString(R.string.recorder_state, TagRecorderStateHelper.toRecorderStateText(this, state))
             }
-            recorderState = state
-            activePopupMenu?.menu?.findItem(4)?.title = getString(R.string.recorder_state, TagRecorderStateHelper.toRecorderStateText(this, state))
         }
-        ContextCompat.registerReceiver(
-            this,
-            responseBroadcastReceiver,
-            IntentFilter().apply {
-                addAction(Constant.BROADCAST_TAG_RECORDER_STATE_RESPONSE)
-                addAction(Constant.BROADCAST_TAG_RECORDER_RESPONSE)
-            },
-            ContextCompat.RECEIVER_EXPORTED
-        )
+        Service.onDataReceived = { bytes ->
+            runOnUiThread {
+                Toast.makeText(
+                    this,
+                    getString(R.string.toast_tag_trace_received, bytes.size),
+                    Toast.LENGTH_SHORT
+                ).show()
+                val fileName = "tag_trace.ohtt"
+                val tempFile = java.io.File(cacheDir, fileName).apply {
+                    writeBytes(bytes)
+                }
+                val contentUri = androidx.core.content.FileProvider.getUriForFile(
+                    this,
+                    "${BuildConfig.APPLICATION_ID}.fileprovider",
+                    tempFile
+                )
+                val viewIntent = Intent(Intent.ACTION_VIEW).apply {
+                    component = android.content.ComponentName(
+                        this@MainActivity,
+                        "${packageName}.ImportHandler"
+                    )
+                    setDataAndType(contentUri, "application/octet-stream")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    putExtra("is_internal", true)
+                }
+                startActivity(viewIntent)
+            }
+        }
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -303,7 +332,7 @@ class MainActivity : Activity() {
                 }
                 2 -> nfcHandler.startRead()
                 3 -> launchNdefEditor()
-                4 -> sendBroadcast(Intent(Constant.BROADCAST_TOGGLE_TAG_RECORDER_REQUEST))
+                4 -> Service.toggleRecorder()
                 5 -> DialogHelper.showConfirmBottomSheet(
                     this,
                     getString(R.string.dialog_title_confirm_cancel_import),
@@ -394,7 +423,8 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         directoryManager.refreshCurrentDir()
-        sendBroadcast(Intent(Constant.BROADCAST_TAG_RECORDER_STATE_REQUEST))
+        checkHookStatus()
+        Service.requestRecorderState()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

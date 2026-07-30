@@ -1,11 +1,9 @@
 package mba.vm.onhit.ui.manager
 
 import android.app.Activity
-import android.content.Intent
-import android.os.Parcel
 import android.widget.Toast
-import mba.vm.onhit.Constant
 import mba.vm.onhit.R
+import mba.vm.onhit.service.Service
 import mba.vm.onhit.hook.core.tag.TagType
 import mba.vm.onhit.ui.config.ConfigManager
 import mba.vm.onhit.model.FileData
@@ -33,32 +31,15 @@ class TagEmulatorManager(private val activity: Activity) {
         try {
             activity.contentResolver.openInputStream(file.uri)?.use { input ->
                 val bytes = input.readBytes()
-                sendEmulateBroadcast(bytes, tagType)
+                sendEmulateRequest(bytes, tagType)
             }
         } catch (e: Exception) {
-            Toast.makeText(activity, activity.getString(R.string.toast_send_broadcast_failed, e.message), Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, activity.getString(R.string.toast_emulate_failed, e.message), Toast.LENGTH_SHORT).show()
         }
     }
 
-    fun sendEmulateBroadcast(data: ByteArray, tagType: TagType) {
+    fun sendEmulateRequest(data: ByteArray, tagType: TagType) {
         val uid = ConfigManager.genUid(activity)
-        val intent = Intent(Constant.BROADCAST_TAG_EMULATOR_REQUEST).apply {
-            if (uid != null) {
-                putExtra("uid", uid)
-            }
-            putExtra("data", data)
-            putExtra("tagType", tagType.value)
-        }
-        val parcel = Parcel.obtain()
-        try {
-            intent.writeToParcel(parcel, 0)
-            if (parcel.dataSize() > Constant.MAX_OF_BROADCAST_SIZE) {
-                Toast.makeText(activity, R.string.toast_file_too_large, Toast.LENGTH_SHORT).show()
-                return
-            }
-        } finally {
-            parcel.recycle()
-        }
-        activity.sendBroadcast(intent)
+        Service.emulateTag(uid, data, tagType.value)
     }
 }

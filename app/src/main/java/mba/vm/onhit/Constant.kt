@@ -7,17 +7,12 @@ class Constant {
         const val NFC_SERVICE_PACKAGE_NAME = "com.android.nfc"
         // Hide on Android API
         const val PACKAGE_MANAGER_FEATURE_NFC_ANY = "android.hardware.nfc.any"
-        const val BROADCAST_TAG_EMULATOR_REQUEST = "${BuildConfig.APPLICATION_ID}.TAG_EMULATOR_REQUEST"
-        const val BROADCAST_TOGGLE_TAG_RECORDER_REQUEST = "${BuildConfig.APPLICATION_ID}.TOGGLE_TAG_RECORDER_REQUEST"
-        const val BROADCAST_TAG_RECORDER_STATE_REQUEST = "${BuildConfig.APPLICATION_ID}.BROADCAST_TAG_RECORDER_STATE_REQUEST"
-        const val BROADCAST_TAG_RECORDER_STATE_RESPONSE = "${BuildConfig.APPLICATION_ID}.TAG_RECORDER_STATE_RESPONSE"
-        const val BROADCAST_TAG_RECORDER_RESPONSE = "${BuildConfig.APPLICATION_ID}.TAG_RECORDER_RESPONSE"
-        const val BROADCAST_RESTART_NFC_SERVICE = "${BuildConfig.APPLICATION_ID}.RESTART_NFC_SERVICE"
         const val SHARED_PREFERENCES_NAME = BuildConfig.APPLICATION_ID
         const val SHARED_PREFERENCES_CHOSEN_FOLDER = "chosen_folder"
         const val PREF_UID_MODE = "pref_uid_mode"
         const val PREF_FIXED_UID_VALUE = "pref_fixed_uid_value"
         const val PREF_RANDOM_UID_LEN = "pref_random_uid_len"
+        const val SERVICE_CLASS_NAME = "${BuildConfig.APPLICATION_ID}.service.Service"
 
         const val PREF_BACKGROUND_URI = "pref_background_uri"
         const val MAX_OF_BROADCAST_SIZE = 1048576

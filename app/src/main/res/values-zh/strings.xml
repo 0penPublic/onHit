@@ -33,8 +33,9 @@
     <string name="menu_edit_ndef">修改 NDEF</string>
     <string name="menu_write_to_tag">写入标签</string>
     <string name="dialog_title_path">路径</string>
-    <string name="toast_send_broadcast_failed">广播发送失败，原因: %s</string>
+    <string name="toast_emulate_failed">模拟失败: %s</string>
     <string name="toast_nfc_not_supported">NFC 不可用。某些功能可能会受到限制。</string>
+    <string name="toast_hook_not_active">NFC 服务无应答。请确保模块已启用并已重启设备。</string>
 
     <string name="toast_no_valid_storage">未配置有效存储目录，请在文件管理器中选择或创建一个文件夹作为存储目录。</string>
     <string name="import_ndef">从标签导入 NDEF</string>
@@ -59,7 +60,7 @@
     <string name="toast_storage_unavailable">选定的存储目录不可用。</string>
 
     <string name="intent_import_file">将文件导入至 onHit</string>
-    <string name="intent_send_broadcast">发送 onHit 广播</string>
+    <string name="intent_emulate_tag">模拟标签</string>
     
     <string name="toast_import_success">已导入: %s</string>
     <string name="toast_import_failed">导入失败: %s</string>

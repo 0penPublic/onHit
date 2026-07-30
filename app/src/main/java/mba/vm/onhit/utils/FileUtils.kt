@@ -5,12 +5,11 @@ import android.net.Uri
 import android.nfc.NdefMessage
 import android.provider.OpenableColumns
 import androidx.documentfile.provider.DocumentFile
-import mba.vm.onhit.Constant.Companion.MAX_OF_BROADCAST_SIZE
 import mba.vm.onhit.R
-import mba.vm.onhit.model.trace.TagTraceCodec
-import mba.vm.onhit.model.FileData
 import mba.vm.onhit.hook.core.tag.TagType
+import mba.vm.onhit.model.FileData
 import mba.vm.onhit.model.FileType
+import mba.vm.onhit.model.trace.TagTraceCodec
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -66,7 +65,6 @@ object FileUtils {
 
     fun isNdefFile(bytes: ByteArray?): Boolean {
         bytes?.let {
-            if (bytes.size > MAX_OF_BROADCAST_SIZE) return false
             return try {
                 NdefMessage(bytes)
                 true

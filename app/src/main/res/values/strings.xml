@@ -33,8 +33,9 @@
     <string name="menu_edit_ndef">Edit NDEF</string>
     <string name="menu_write_to_tag">Write to Tag</string>
     <string name="dialog_title_path">Path</string>
-    <string name="toast_send_broadcast_failed">Failed to send broadcast, reason: %s</string>
+    <string name="toast_emulate_failed">Emulation failed: %s</string>
     <string name="toast_nfc_not_supported">NFC is not available. Some features may be limited.</string>
+    <string name="toast_hook_not_active">NFC service is not responding. Please ensure the module is enabled and the device has been restarted.</string>
     <string name="toast_no_valid_storage">Storage directory is not set or invalid. Please select or create a folder.</string>
 
     <string name="import_ndef">Import NDEF from Tag</string>
@@ -58,7 +59,7 @@
     <string name="toast_write_failed">Write failed: %s</string>
     <string name="toast_storage_unavailable">Selected storage directory is unavailable.</string>
     <string name="intent_import_file">Import File to onHit</string>
-    <string name="intent_send_broadcast">Send NDEF Broadcast</string>
+    <string name="intent_emulate_tag">Emulate Tag</string>
     
     <string name="toast_import_success">Imported: %s</string>
     <string name="toast_import_failed">Import failed: %s</string>

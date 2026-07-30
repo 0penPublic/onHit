@@ -24,6 +24,7 @@ import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import mba.vm.onhit.Constant
 import mba.vm.onhit.R
+import mba.vm.onhit.service.Service
 import mba.vm.onhit.ui.config.ConfigManager
 import mba.vm.onhit.utils.HexUtils
 
@@ -202,7 +203,7 @@ object DialogHelper {
                 context.getString(R.string.dialog_title_confirm_restart_nfc),
                 context.getString(R.string.confirm_restart_nfc_hint)
             ) {
-                context.sendBroadcast(Intent(Constant.BROADCAST_RESTART_NFC_SERVICE))
+                Service.restartNfcService()
                 dialog.dismiss()
             }
         }
