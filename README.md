@@ -45,6 +45,7 @@ onHit 是一个用于在系统层面模拟 NFC 标签事件的 Xposed 模块。�
 ## Demonstration Videos / 演示视频
 - [［Xposed模块］在无实体卡片的情况下用系统钱包app模拟一张特定UID的卡片](https://www.bilibili.com/video/BV168zDBGEzT/)
 - [onHit TagRecorder 标签记录器使用方式案例](https://www.bilibili.com/video/BV1os3M67EHS/)
+- [［Xposed模块］在无标签的情况下触发NFC/NDEF事件 - onHit](https://www.bilibili.com/video/av117005613008304)
 
 ## Core Features / 核心功能
 
