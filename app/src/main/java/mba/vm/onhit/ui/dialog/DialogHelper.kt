@@ -152,8 +152,8 @@ object DialogHelper {
         }
 
         btnOk.setOnClickListener {
-            val name = etName.text.toString()
-            if (name.isNotEmpty()) {
+            val name = etName.text.toString().trim()
+            if (name.isNotBlank()) {
                 onConfirm(name)
                 dialog.dismiss()
             }
