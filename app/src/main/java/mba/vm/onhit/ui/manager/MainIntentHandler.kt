@@ -42,11 +42,18 @@ class MainIntentHandler(
 
     private fun handleBroadcastIntent(uri: Uri) {
         try {
-            activity.contentResolver.openInputStream(uri)?.use { input ->
-                val bytes = input.readBytes()
-                val detectedType = FileUtils.detectTagType(bytes)
-                tagEmulatorManager.sendEmulateBroadcast(bytes, detectedType)
+            val inputStream = activity.contentResolver.openInputStream(uri)
+            if (inputStream == null) {
+                Toast.makeText(activity, R.string.toast_file_not_found, Toast.LENGTH_SHORT).show()
+            } else {
+                inputStream.use { input ->
+                    val bytes = input.readBytes()
+                    val detectedType = FileUtils.detectTagType(bytes)
+                    tagEmulatorManager.sendEmulateBroadcast(bytes, detectedType)
+                }
             }
+        } catch (_: java.io.FileNotFoundException) {
+            Toast.makeText(activity, R.string.toast_file_not_found, Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Toast.makeText(activity, activity.getString(R.string.toast_send_broadcast_failed, e.message), Toast.LENGTH_SHORT).show()
         } finally {

@@ -154,4 +154,12 @@
     <string name="trace_no_resp">No Response</string>
     <string name="trace_extra_info">raw: %1$b, status: %2$s</string>
     <string name="ssid">SSID</string>
+    <string name="menu_create_shortcut">Create Shortcut</string>
+    <string name="dialog_title_create_shortcut">Create Shortcut</string>
+    <string name="hint_shortcut_name">Shortcut Name</string>
+    <string name="hint_click_to_change_icon">Click to change icon</string>
+    <string name="toast_file_not_found">File does not exist</string>
+    <string name="toast_shortcut_created">Shortcut creation requested</string>
+    <string name="toast_shortcut_unsupported">Launcher does not support creating shortcuts</string>
+    <string name="shortcut_icon">Shortcut Icon</string>
 </resources>

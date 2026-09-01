@@ -133,6 +133,36 @@ object DialogHelper {
         dialog.show()
     }
 
+    fun showShortcutBottomSheet(
+        activity: Activity,
+        defaultName: String,
+        onChangeIcon: () -> Unit,
+        onConfirm: (name: String) -> Unit
+    ): Dialog {
+        val dialog = createBottomDialog(activity, R.layout.bottom_dialog_shortcut)
+        val etName = dialog.findViewById<EditText>(R.id.et_shortcut_name)
+        val ivIcon = dialog.findViewById<android.widget.ImageView>(R.id.iv_shortcut_icon)
+        val btnOk = dialog.findViewById<Button>(R.id.btn_ok)
+        val btnCancel = dialog.findViewById<Button>(R.id.btn_cancel)
+
+        etName.setText(defaultName)
+
+        ivIcon.setOnClickListener {
+            onChangeIcon()
+        }
+
+        btnOk.setOnClickListener {
+            val name = etName.text.toString()
+            if (name.isNotEmpty()) {
+                onConfirm(name)
+                dialog.dismiss()
+            }
+        }
+        btnCancel.setOnClickListener { dialog.dismiss() }
+        dialog.show()
+        return dialog
+    }
+
     fun showNfcDialog(context: Context, title: String? = null, message: String? = null, onCancel: () -> Unit): Dialog {
         val dialog = createBottomDialog(context, R.layout.bottom_dialog_nfc)
         title?.let { dialog.findViewById<TextView>(R.id.tv_title)?.text = it }

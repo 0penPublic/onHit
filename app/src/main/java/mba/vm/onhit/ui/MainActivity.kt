@@ -1,8 +1,10 @@
 package mba.vm.onhit.ui
 
 import android.app.Activity
+import android.app.Dialog
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -43,6 +45,7 @@ import mba.vm.onhit.utils.FileUtils
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.core.graphics.scale
 
 class MainActivity : Activity() {
     private lateinit var binding: ActivityMainBinding
@@ -59,6 +62,8 @@ class MainActivity : Activity() {
     private lateinit var importController: ImportController
 
     private var activeNdefDialog: NdefEditorDialog? = null
+    private var activeShortcutDialog: Dialog? = null
+    private var shortcutIconUri: Uri? = null
     private var fileToEdit: DocumentFile? = null
     private val responseBroadcastReceiver = ResponseBroadcastReceiver()
     private var recorderState: String? = null
@@ -341,6 +346,9 @@ class MainActivity : Activity() {
         if (fileData.type == FileType.NDEF && nfcHandler.isEnabled() && !importController.isImportMode()) popup.menu.add(0, 3, 2, R.string.menu_write_to_tag)
         if (fileData.type == FileType.NDEF) popup.menu.add(0, 4, 3, R.string.menu_edit_ndef)
         if (fileData.type == FileType.TagTrace) popup.menu.add(0, 5, 4, R.string.menu_view_trace)
+        if (fileData.type == FileType.NDEF || fileData.type == FileType.MifareClassic || fileData.type == FileType.TagTrace) {
+            popup.menu.add(0, 6, 5, R.string.menu_create_shortcut)
+        }
 
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
@@ -385,10 +393,115 @@ class MainActivity : Activity() {
                         }
                     }
                 }
+                6 -> {
+                    shortcutIconUri = null
+                    val defaultName = fileData.name
+                    activeShortcutDialog = DialogHelper.showShortcutBottomSheet(
+                        this,
+                        defaultName,
+                        onChangeIcon = {
+                            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                                addCategory(Intent.CATEGORY_OPENABLE)
+                                type = "image/*"
+                            }
+                            startActivityForResult(intent, Constant.REQUEST_SELECT_SHORTCUT_ICON)
+                        },
+                        onConfirm = { name ->
+                            requestCreateShortcut(fileData, name)
+                        }
+                    )
+                    activeShortcutDialog?.setOnDismissListener { activeShortcutDialog = null }
+                }
             }
             true
         }
         popup.show()
+    }
+
+    private fun startCropShortcutIcon(sourceUri: Uri) {
+        val outputFile = java.io.File(filesDir, "shortcut_icon_cropped.png")
+        if (!outputFile.exists()) {
+            outputFile.createNewFile()
+        }
+        val outputUri = androidx.core.content.FileProvider.getUriForFile(this, "$packageName.fileprovider", outputFile)
+        shortcutIconUri = outputUri
+
+        val cropIntent = Intent("com.android.camera.action.CROP").apply {
+            setDataAndType(sourceUri, "image/*")
+            putExtra("crop", "true")
+            putExtra("aspectX", 1)
+            putExtra("aspectY", 1)
+            putExtra("scale", true)
+            putExtra("return-data", false)
+            putExtra(android.provider.MediaStore.EXTRA_OUTPUT, outputUri)
+            putExtra("outputFormat", android.graphics.Bitmap.CompressFormat.PNG.toString())
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            clipData = android.content.ClipData.newRawUri("cropped_icon", outputUri)
+        }
+
+        val resInfoList = packageManager.queryIntentActivities(cropIntent, android.content.pm.PackageManager.MATCH_DEFAULT_ONLY)
+        for (resolveInfo in resInfoList) {
+            val pName = resolveInfo.activityInfo.packageName
+            grantUriPermission(pName, sourceUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            grantUriPermission(pName, outputUri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+        }
+
+        try {
+            startActivityForResult(cropIntent, Constant.REQUEST_CROP_SHORTCUT_ICON)
+        } catch (_: Exception) {
+            Toast.makeText(this, R.string.unknown_error, Toast.LENGTH_SHORT).show()
+            activeShortcutDialog?.findViewById<android.widget.ImageView>(R.id.iv_shortcut_icon)?.setImageURI(sourceUri)
+            shortcutIconUri = sourceUri
+        }
+    }
+
+    private fun requestCreateShortcut(fileData: FileData, name: String) {
+        val fileUri = fileData.documentFile?.uri ?: return
+        val tagType = when(fileData.type) {
+            FileType.NDEF -> mba.vm.onhit.hook.core.tag.TagType.NDEF.value
+            FileType.MifareClassic -> mba.vm.onhit.hook.core.tag.TagType.MFC.value
+            FileType.TagTrace -> mba.vm.onhit.hook.core.tag.TagType.TRACE.value
+            else -> return
+        }
+
+        val intent = Intent(this, ShortcutHandleActivity::class.java).apply {
+            action = Intent.ACTION_VIEW
+            putExtra("file_uri", fileUri.toString())
+            putExtra("tag_type", tagType.toInt())
+        }
+
+        var iconCompat: androidx.core.graphics.drawable.IconCompat? = null
+        if (shortcutIconUri != null) {
+            try {
+                contentResolver.openInputStream(shortcutIconUri!!)?.use { input ->
+                    val bitmap = android.graphics.BitmapFactory.decodeStream(input)
+                    if (bitmap != null) {
+                        val scaledBitmap = bitmap.scale(192, 192)
+                        iconCompat = androidx.core.graphics.drawable.IconCompat.createWithBitmap(scaledBitmap)
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        if (iconCompat == null) {
+            iconCompat = androidx.core.graphics.drawable.IconCompat.createWithResource(this, R.mipmap.ic_launcher)
+        }
+
+        val shortcutId = "shortcut_${System.currentTimeMillis()}"
+        val shortcut = androidx.core.content.pm.ShortcutInfoCompat.Builder(this, shortcutId)
+            .setShortLabel(name)
+            .setIcon(iconCompat)
+            .setIntent(intent)
+            .build()
+
+        if (androidx.core.content.pm.ShortcutManagerCompat.isRequestPinShortcutSupported(this)) {
+            androidx.core.content.pm.ShortcutManagerCompat.requestPinShortcut(this, shortcut, null)
+            Toast.makeText(this, R.string.toast_shortcut_created, Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, R.string.toast_shortcut_unsupported, Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onResume() {
@@ -424,6 +537,20 @@ class MainActivity : Activity() {
             Constant.REQUEST_SELECT_NDEF_FILE -> {
                 data?.data?.let { uri ->
                     activeNdefDialog?.handleFilePickResult(uri)
+                }
+            }
+            Constant.REQUEST_SELECT_SHORTCUT_ICON -> {
+                data?.data?.let { uri ->
+                    try {
+                        contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    } catch (_: Exception) {}
+                    startCropShortcutIcon(uri)
+                }
+            }
+            Constant.REQUEST_CROP_SHORTCUT_ICON -> {
+                shortcutIconUri?.let {
+                    activeShortcutDialog?.findViewById<android.widget.ImageView>(R.id.iv_shortcut_icon)?.setImageURI(null)
+                    activeShortcutDialog?.findViewById<android.widget.ImageView>(R.id.iv_shortcut_icon)?.setImageURI(it)
                 }
             }
         }
