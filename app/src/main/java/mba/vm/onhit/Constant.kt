@@ -30,6 +30,8 @@ class Constant {
         const val REQUEST_SELECT_NDEF_FILE = 1004
         const val REQUEST_SAVE_FILE = 1005
         const val REQUEST_EDIT_NDEF = 1006
+        const val REQUEST_SELECT_SHORTCUT_ICON = 1007
+        const val REQUEST_CROP_SHORTCUT_ICON = 1008
 
         const val MIFARE_CLASSICAL_BLOCK_SIZE = 16
         val PACKAGE_MANAGER_SYSTEM_NFC_FEATURES = setOf(PackageManager.FEATURE_NFC, PACKAGE_MANAGER_FEATURE_NFC_ANY)

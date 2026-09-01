@@ -151,4 +151,12 @@
     <string name="trace_no_resp">无响应</string>
     <string name="trace_extra_info">原始数据: %1$b, 状态: %2$s</string>
     <string name="ssid">SSID</string>
+    <string name="menu_create_shortcut">创建桌面快捷方式</string>
+    <string name="dialog_title_create_shortcut">创建快捷方式</string>
+    <string name="hint_shortcut_name">快捷方式名称</string>
+    <string name="hint_click_to_change_icon">点击更换图标</string>
+    <string name="toast_file_not_found">文件不存在</string>
+    <string name="toast_shortcut_created">已请求创建快捷方式</string>
+    <string name="toast_shortcut_unsupported">当前桌面不支持创建快捷方式</string>
+    <string name="shortcut_icon">快捷方式图标</string>
 </resources>
