@@ -94,7 +94,9 @@ object NfcServiceHook : BaseHook() {
                             TagRecorder.onTagEndpointDispatch(param.args[0])
                         }
                     }
-                    if (BuildConfig.DEBUG) nfcService.objectHelper().setObject("DBG", true)
+                    // ART rejects reflective writes to static-final constants (Android 14+),
+                    // and this module's DBG flag is not worth an init abort: guard it.
+                    if (BuildConfig.DEBUG) runCatching { nfcService.objectHelper().setObject("DBG", true) }
                     ContextCompat.registerReceiver(nfcApplication, receiver, IntentFilter().apply {
                         addAction(Constant.BROADCAST_TAG_EMULATOR_REQUEST)
                         addAction(Constant.BROADCAST_TOGGLE_TAG_RECORDER_REQUEST)
