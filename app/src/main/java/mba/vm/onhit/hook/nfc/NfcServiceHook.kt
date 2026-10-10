@@ -6,6 +6,7 @@ import android.content.IntentFilter
 import android.os.Handler
 import androidx.core.content.ContextCompat
 import de.robv.android.xposed.XposedHelpers.findClass
+import de.robv.android.xposed.XposedHelpers.getStaticObjectField
 import io.github.kyuubiran.ezxhelper.core.finder.MethodFinder
 import io.github.kyuubiran.ezxhelper.core.helper.ObjectHelper.`-Static`.objectHelper
 import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createHook
@@ -65,10 +66,19 @@ object NfcServiceHook : BaseHook() {
                         logE("Failed to get NfcApplication, hook Failed.")
                         return@after
                     }
-                    nfcService = nfcApplication.objectHelper().getObjectOrNull("mNfcService") ?: run {
-                        logE("Cannot get NFC Service now, Hook Failed. Is NFC Service Working?")
-                        return@after
-                    }
+                    val nfcServiceClass = findAvailableClass(
+                        nfcClassLoader,
+                        "${packageName}.NfcService",
+                        "${NFC_SERVICE_PACKAGE_NAME}.NfcService"
+                    )
+                    nfcService = nfcApplication.objectHelper().getObjectOrNull("mNfcService")
+                        // HyperOS 4 (XMNfcNci): NfcApplication no longer stores the service in an
+                        // instance field; it is published as the static NfcService.sService.
+                        ?: nfcServiceClass?.runCatching { getStaticObjectField(this, "sService") }?.getOrNull()
+                        ?: run {
+                            logE("Cannot get NFC Service now, Hook Failed. Is NFC Service Working?")
+                            return@after
+                        }
                     nfcServiceHandler = nfcService.objectHelper().getObjectOrNull("mHandler") as? Handler?: run {
                         logE("Cannot get NFC Service Handler, Hook Failed.")
                         return@after
@@ -84,7 +94,9 @@ object NfcServiceHook : BaseHook() {
                             TagRecorder.onTagEndpointDispatch(param.args[0])
                         }
                     }
-                    if (BuildConfig.DEBUG) nfcService.objectHelper().setObject("DBG", true)
+                    // ART rejects reflective writes to static-final constants (Android 14+),
+                    // and this module's DBG flag is not worth an init abort: guard it.
+                    if (BuildConfig.DEBUG) runCatching { nfcService.objectHelper().setObject("DBG", true) }
                     ContextCompat.registerReceiver(nfcApplication, receiver, IntentFilter().apply {
                         addAction(Constant.BROADCAST_TAG_EMULATOR_REQUEST)
                         addAction(Constant.BROADCAST_TOGGLE_TAG_RECORDER_REQUEST)
