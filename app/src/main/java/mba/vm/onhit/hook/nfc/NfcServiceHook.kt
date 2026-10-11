@@ -6,16 +6,17 @@ import android.content.IntentFilter
 import android.os.Handler
 import androidx.core.content.ContextCompat
 import de.robv.android.xposed.XposedHelpers.findClass
+import de.robv.android.xposed.XposedHelpers.getStaticObjectField
 import io.github.kyuubiran.ezxhelper.core.finder.MethodFinder
 import io.github.kyuubiran.ezxhelper.core.helper.ObjectHelper.`-Static`.objectHelper
 import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createHook
 import mba.vm.onhit.BuildConfig
 import mba.vm.onhit.Constant
 import mba.vm.onhit.Constant.Companion.NFC_SERVICE_PACKAGE_NAME
+import mba.vm.onhit.broadcast.NfcHookBroadcastReceiver
+import mba.vm.onhit.hook.BaseHook
 import mba.vm.onhit.hook.core.recorder.TagRecorder
 import mba.vm.onhit.hook.core.tag.BaseFakeTag
-import mba.vm.onhit.hook.BaseHook
-import mba.vm.onhit.broadcast.NfcHookBroadcastReceiver
 import mba.vm.onhit.utils.LogUtils.logE
 import mba.vm.onhit.utils.LogUtils.logI
 import java.lang.reflect.Method
@@ -42,20 +43,18 @@ object NfcServiceHook : BaseHook() {
         return null
     }
 
+
     @Synchronized
     override fun init(classLoader: ClassLoader, packageName: String) {
+        fun resolveNfcClass(targetName: String) = findAvailableClass(
+            classLoader,
+            "$packageName.$targetName",
+            "$NFC_SERVICE_PACKAGE_NAME.$targetName",
+        )
         if (isInitialized) return else isInitialized = true
         nfcClassLoader = classLoader
-        tagEndpointInterface = findAvailableClass(
-            nfcClassLoader,
-            $$"$${packageName}.DeviceHost$TagEndpoint",
-            $$"$${NFC_SERVICE_PACKAGE_NAME}.DeviceHost$TagEndpoint",
-        ) ?: return
-        val nfcApplicationClass = findAvailableClass(
-            nfcClassLoader,
-            "${packageName}.NfcApplication",
-            "${NFC_SERVICE_PACKAGE_NAME}.NfcApplication"
-        ) ?: return
+        tagEndpointInterface = resolveNfcClass($$"DeviceHost$TagEndpoint") ?: return
+        val nfcApplicationClass = resolveNfcClass("NfcApplication") ?: return
         MethodFinder.fromClass(nfcApplicationClass)
             .filterByName("onCreate")
             .first()
@@ -65,10 +64,13 @@ object NfcServiceHook : BaseHook() {
                         logE("Failed to get NfcApplication, hook Failed.")
                         return@after
                     }
-                    nfcService = nfcApplication.objectHelper().getObjectOrNull("mNfcService") ?: run {
-                        logE("Cannot get NFC Service now, Hook Failed. Is NFC Service Working?")
-                        return@after
-                    }
+                    nfcService = nfcApplication.objectHelper().getObjectOrNull("mNfcService")
+                        ?: resolveNfcClass("NfcService")
+                            ?.runCatching { getStaticObjectField(this, "sService") }?.getOrNull()
+                        ?: run {
+                            logE("Cannot get NFC Service now, Hook Failed. Is NFC Service Working?")
+                            return@after
+                        }
                     nfcServiceHandler = nfcService.objectHelper().getObjectOrNull("mHandler") as? Handler?: run {
                         logE("Cannot get NFC Service Handler, Hook Failed.")
                         return@after
@@ -84,7 +86,7 @@ object NfcServiceHook : BaseHook() {
                             TagRecorder.onTagEndpointDispatch(param.args[0])
                         }
                     }
-                    if (BuildConfig.DEBUG) nfcService.objectHelper().setObject("DBG", true)
+                    if (BuildConfig.DEBUG) runCatching { nfcService.objectHelper().setObject("DBG", true) }
                     ContextCompat.registerReceiver(nfcApplication, receiver, IntentFilter().apply {
                         addAction(Constant.BROADCAST_TAG_EMULATOR_REQUEST)
                         addAction(Constant.BROADCAST_TOGGLE_TAG_RECORDER_REQUEST)
@@ -108,7 +110,7 @@ object NfcServiceHook : BaseHook() {
         val targetClassLoader = tagEndpointInterface.classLoader ?: nfcClassLoader
         logI("Try to dispatch { uid=${fakeTag.uid.toHexString()}, techList=${fakeTag.techList.contentToString()} }...")
         NfcDispatchManagerHook.databaseManager ?.let {
-            logI("Oplus Database Manager find, try to delete tag cache...")
+            logI("Oplus Database Manager found, try to delete tag cache...")
             NfcDispatchManagerHook.deleteTagCache(fakeTag.uid)
         }
         val tag = fakeTag.makeEndpoint(targetClassLoader, tagEndpointInterface)
