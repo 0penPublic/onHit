@@ -98,6 +98,8 @@ class WidgetConfigActivity : Activity() {
                 shortcutDialog = DialogHelper.showShortcutBottomSheet(
                     this,
                     defaultName,
+                    title = getString(R.string.dialog_title_create_widget),
+                    nameHint = getString(R.string.hint_widget_name),
                     onChangeIcon = { pickIcon() },
                     onConfirm = { name -> confirm(name) }
                 )
