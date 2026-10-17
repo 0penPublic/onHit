@@ -164,4 +164,6 @@
     <string name="toast_shortcut_created">Shortcut creation requested</string>
     <string name="toast_shortcut_unsupported">Launcher does not support creating shortcuts</string>
     <string name="shortcut_icon">Shortcut Icon</string>
+    <string name="widget_tag_unavailable">File access lost, tap to reselect</string>
+    <string name="toast_icon_load_failed">Could not load image</string>
 </resources>

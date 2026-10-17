@@ -161,4 +161,6 @@
     <string name="toast_shortcut_created">已请求创建快捷方式</string>
     <string name="toast_shortcut_unsupported">当前桌面不支持创建快捷方式</string>
     <string name="shortcut_icon">快捷方式图标</string>
+    <string name="widget_tag_unavailable">文件访问已失效，点按重新选择</string>
+    <string name="toast_icon_load_failed">无法读取图片</string>
 </resources>
