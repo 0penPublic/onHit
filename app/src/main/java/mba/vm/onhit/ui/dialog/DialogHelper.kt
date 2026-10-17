@@ -136,6 +136,8 @@ object DialogHelper {
     fun showShortcutBottomSheet(
         activity: Activity,
         defaultName: String,
+        title: String? = null,
+        nameHint: String? = null,
         onChangeIcon: () -> Unit,
         onConfirm: (name: String) -> Unit
     ): Dialog {
@@ -145,6 +147,8 @@ object DialogHelper {
         val btnOk = dialog.findViewById<Button>(R.id.btn_ok)
         val btnCancel = dialog.findViewById<Button>(R.id.btn_cancel)
 
+        title?.let { dialog.findViewById<TextView>(R.id.tv_title)?.text = it }
+        nameHint?.let { etName.hint = it }
         etName.setText(defaultName)
 
         ivIcon.setOnClickListener {

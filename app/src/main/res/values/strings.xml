@@ -156,10 +156,14 @@
     <string name="ssid">SSID</string>
     <string name="menu_create_shortcut">Create Shortcut</string>
     <string name="dialog_title_create_shortcut">Create Shortcut</string>
+    <string name="dialog_title_create_widget">Create Widget</string>
     <string name="hint_shortcut_name">Shortcut Name</string>
+    <string name="hint_widget_name">Name</string>
     <string name="hint_click_to_change_icon">Click to change icon</string>
     <string name="toast_file_not_found">File does not exist</string>
     <string name="toast_shortcut_created">Shortcut creation requested</string>
     <string name="toast_shortcut_unsupported">Launcher does not support creating shortcuts</string>
     <string name="shortcut_icon">Shortcut Icon</string>
+    <string name="widget_tag_unavailable">File access lost, tap to reselect</string>
+    <string name="toast_icon_load_failed">Could not load image</string>
 </resources>
