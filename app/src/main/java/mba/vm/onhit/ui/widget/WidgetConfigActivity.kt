@@ -110,7 +110,9 @@ class WidgetConfigActivity : Activity() {
                     nameHint = getString(R.string.hint_widget_name),
                     onChangeIcon = { pickIcon() },
                     onConfirm = { name -> confirm(name) }
-                )
+                ).also { dialog ->
+                    dialog.setOnDismissListener { if (!isFinishing) finish() }
+                }
             }
 
             REQUEST_PICK_ICON -> {

@@ -1,11 +1,18 @@
 package mba.vm.onhit.utils
 
+import android.util.Log
 import io.github.kyuubiran.ezxhelper.android.logging.Logger
 import mba.vm.onhit.BuildConfig
 
 @Suppress("unused")
 object LogUtils {
     private const val TAG_WIDTH = 20
+    private var isNfcServiceProcess = false
+
+    fun setNfcServiceProcess(isNfcService: Boolean) {
+        isNfcServiceProcess = isNfcService
+    }
+
     private fun String.center(width: Int): String {
         if (this.length >= width) return this.take(width)
         val totalPadding = width - this.length
@@ -34,7 +41,18 @@ object LogUtils {
 
     private fun printLog(tag: String, msg: String, thr: Throwable?, action: (String, Throwable?) -> Unit) {
         if (!BuildConfig.DEBUG) return
-        action("[ onHit ] [ $currentCallerClassName ] [$tag] $msg", thr)
+        if (isNfcServiceProcess) {
+            action("[ onHit ] [ $currentCallerClassName ] [$tag] $msg", thr)
+        } else {
+            val formattedMessage = "[ $currentCallerClassName ] [$tag] $msg"
+            when (tag) {
+                "V" -> Log.v("onHit", formattedMessage, thr)
+                "D" -> Log.d("onHit", formattedMessage, thr)
+                "I" -> Log.i("onHit", formattedMessage, thr)
+                "W" -> Log.w("onHit", formattedMessage, thr)
+                "E" -> Log.e("onHit", formattedMessage, thr)
+            }
+        }
     }
 
     fun logI(msg: String, thr: Throwable? = null) = printLog("I", msg, thr, Logger::i)
