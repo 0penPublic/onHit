@@ -83,7 +83,15 @@ class WidgetConfigActivity : Activity() {
                 } catch (_: Exception) {
                 }
                 val tagType = try {
-                    contentResolver.openInputStream(uri)?.use { FileUtils.detectTagType(it.readBytes()) }
+                    contentResolver.openInputStream(uri)?.use {
+                        val bytes = it.readBytes()
+                        when {
+                            FileUtils.isTraceFile(bytes) -> TagType.TRACE
+                            FileUtils.isMfcData(bytes) -> TagType.MFC
+                            FileUtils.isNdefFile(bytes) -> TagType.NDEF
+                            else -> null
+                        }
+                    }
                 } catch (_: Exception) {
                     null
                 }
