@@ -159,4 +159,19 @@
     <string name="toast_shortcut_created">已请求创建快捷方式</string>
     <string name="toast_shortcut_unsupported">当前桌面不支持创建快捷方式</string>
     <string name="shortcut_icon">快捷方式图标</string>
+
+    <string name="widget_name">onHit 标签</string>
+    <string name="widget_description">点按即可模拟已保存的 NFC 标签。</string>
+    <string name="widget_icon">小组件图标</string>
+    <string name="widget_pick_file_label">标签文件</string>
+    <string name="widget_select_file">选择标签文件</string>
+    <string name="widget_file_summary">%1$s · %2$s</string>
+    <string name="dialog_title_create_widget">创建小组件</string>
+    <string name="dialog_title_edit_widget">编辑小组件</string>
+    <string name="hint_widget_name">小组件名称</string>
+    <string name="widget_unavailable">文件不可用，点按重新配置</string>
+    <string name="widget_unavailable_label">重新配置</string>
+    <string name="toast_unsupported_tag_file">不支持的标签文件（NDEF / MIFARE Classic / Tag Trace）。</string>
+    <string name="toast_icon_load_failed">无法读取图片。</string>
+    <string name="toast_widget_name_required">名称不能为空。</string>
 </resources>
