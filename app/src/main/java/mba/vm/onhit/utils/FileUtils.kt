@@ -11,6 +11,7 @@ import mba.vm.onhit.model.trace.TagTraceCodec
 import mba.vm.onhit.model.FileData
 import mba.vm.onhit.hook.core.tag.TagType
 import mba.vm.onhit.model.FileType
+import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -84,6 +85,40 @@ object FileUtils {
             else -> TagType.NDEF
         }
     }
+
+    fun detectTagTypeOrNull(bytes: ByteArray?): TagType? {
+        return when {
+            isTraceFile(bytes) -> TagType.TRACE
+            isMfcData(bytes) -> TagType.MFC
+            isNdefFile(bytes) -> TagType.NDEF
+            else -> null
+        }
+    }
+
+    /**
+     * Reads at most [maxBytes] from [uri]. Returns null when the document cannot be opened, read
+     * fails, or the content exceeds the limit, so callers never allocate an unbounded buffer.
+     */
+    fun readBytesLimited(context: Context, uri: Uri, maxBytes: Int = MAX_OF_BROADCAST_SIZE): ByteArray? {
+        return try {
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                val output = ByteArrayOutputStream()
+                val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                var total = 0
+                while (true) {
+                    val read = input.read(buffer)
+                    if (read < 0) break
+                    total += read
+                    if (total > maxBytes) return null
+                    output.write(buffer, 0, read)
+                }
+                output.toByteArray()
+            }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     private fun readBytesFromDocumentFile(context: Context, file: DocumentFile): ByteArray? {
         return try {
             context.contentResolver.openInputStream(file.uri)?.use { input ->

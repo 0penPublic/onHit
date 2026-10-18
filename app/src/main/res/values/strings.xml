@@ -162,4 +162,19 @@
     <string name="toast_shortcut_created">Shortcut creation requested</string>
     <string name="toast_shortcut_unsupported">Launcher does not support creating shortcuts</string>
     <string name="shortcut_icon">Shortcut Icon</string>
+
+    <string name="widget_name">onHit Tag</string>
+    <string name="widget_description">Tap to emulate a saved NFC tag.</string>
+    <string name="widget_icon">Widget icon</string>
+    <string name="widget_pick_file_label">Tag file</string>
+    <string name="widget_select_file">Select tag file</string>
+    <string name="widget_file_summary">%1$s · %2$s</string>
+    <string name="dialog_title_create_widget">Create Widget</string>
+    <string name="dialog_title_edit_widget">Edit Widget</string>
+    <string name="hint_widget_name">Widget name</string>
+    <string name="widget_unavailable">File unavailable, tap to reconfigure</string>
+    <string name="widget_unavailable_label">Reconfigure</string>
+    <string name="toast_unsupported_tag_file">Not a supported tag file (NDEF / MIFARE Classic / Tag Trace).</string>
+    <string name="toast_icon_load_failed">Could not load image.</string>
+    <string name="toast_widget_name_required">Name cannot be empty.</string>
 </resources>
